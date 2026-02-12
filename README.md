@@ -1,2 +1,5 @@
 # TrumpInvestitions
-ITMO Mobile Developing course
+
+Install Obsidian
+
+Obsidian Git (plugin) - open folder docs as vault
