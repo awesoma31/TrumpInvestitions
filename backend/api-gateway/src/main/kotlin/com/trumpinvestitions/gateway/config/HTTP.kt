@@ -1,0 +1,30 @@
+package com.trumpinvestitions.gateway.config
+
+import io.ktor.server.application.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.request.*
+import org.slf4j.event.Level
+
+fun Application.configureHTTP() {
+    install(CallLogging) {
+        level = Level.INFO
+        filter { call -> call.request.path().startsWith("/") }
+        format { call ->
+            val status = call.response.status()
+            val httpMethod = call.request.httpMethod.value
+            val userAgent = call.request.headers["User-Agent"]
+            "Status: $status, HTTP method: $httpMethod, User agent: $userAgent"
+        }
+    }
+    
+    install(RequestValidation) {
+        validate<String> { body ->
+            if (body.isEmpty()) {
+                ValidationResult.Invalid("Body cannot be empty")
+            } else {
+                ValidationResult.Valid
+            }
+        }
+    }
+}
