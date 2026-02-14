@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00_Index.md.md",
-                "mode": "preview",
+                "file": "02_Architecture/Main Structure.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00_Index.md"
+              "title": "Main Structure"
             }
           }
         ],
@@ -197,7 +197,7 @@
       "mermaid-tools:Open Mermaid Toolbar": false
     }
   },
-  "active": "9290077fd8594a05",
+  "active": "f50d93e3596174a1",
   "lastOpenFiles": [
     "00_Index.md.md",
     "Untitled.md",
