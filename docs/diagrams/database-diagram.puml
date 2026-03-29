@@ -1,0 +1,157 @@
+@startuml database-diagram
+
+!theme plain
+title Диаграмма базы данных — Экосистема для инвестиций
+
+package "PostgreSQL" <<Database>> #EAF2F8 {
+
+    entity "users" as User {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * username : VARCHAR(64) <<UNIQUE>>
+        * email : VARCHAR(255) <<UNIQUE>>
+        * password_hash : VARCHAR(255)
+        * balance : DECIMAL(18,2)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "companies" as Company {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * name : VARCHAR(255)
+        * description : TEXT
+        * logo_url : VARCHAR(256)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "tickets" as Ticket {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **company_id** : BIGINT <<FK>>
+        * symbol : VARCHAR(16) <<UNIQUE>>
+        * avg_buy_price : DECIMAL(18,6)
+        * avg_sell_price : DECIMAL(18,6)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "stock_portfolios" as StockPortfolio {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **user_id** : BIGINT <<FK>> <<UNIQUE>>
+        * total_value : DECIMAL(18,2)
+        * realized_pnl : DECIMAL(18,2)
+        * unrealized_pnl : DECIMAL(18,2)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "portfolio_positions" as PortfolioPosition {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **portfolio_id** : BIGINT <<FK>>
+        * **ticket_id** : BIGINT <<FK>>
+        * quantity : INT
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "orders" as Order {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **user_id** : BIGINT <<FK>>
+        * **ticket_id** : BIGINT <<FK>>
+        * type : VARCHAR(8)
+        .. BUY / SELL ..
+        * quantity : INT
+        * filled_quantity : INT
+        * price : DECIMAL(18,6)
+        * status : VARCHAR(16)
+        * created_at : TIMESTAMPTZ
+        * updated_at : TIMESTAMPTZ
+    }
+
+    entity "trades" as Trade {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **order_id** : BIGINT <<FK>>
+        * **user_id** : BIGINT <<FK>>
+        * **ticket_id** : BIGINT <<FK>>
+        * type : VARCHAR(8)
+        .. BUY / SELL ..
+        * quantity : INT
+        * price : DECIMAL(18,6)
+        * total : DECIMAL(18,2)
+        * executed_at : TIMESTAMPTZ
+    }
+
+    entity "portfolio_snapshots" as PortfolioSnapshot {
+        * **id** : BIGSERIAL <<PK>>
+        --
+        * **portfolio_id** : BIGINT <<FK>>
+        * total_value : DECIMAL(18,2)
+        * realized_pnl : DECIMAL(18,2)
+        * unrealized_pnl : DECIMAL(18,2)
+        * snapshot_at : TIMESTAMPTZ
+    }
+
+    ' ---- Relationships ----
+
+    Company ||--o{ Ticket : "выпускает"
+    Ticket ||--o{ Order : "по тикеру"
+    Ticket ||--o{ Trade : "по тикеру"
+    Ticket ||--o{ PortfolioPosition : "актив"
+
+    User ||--|| StockPortfolio : "владеет"
+    User ||--o{ Order : "создаёт"
+    User ||--o{ Trade : "совершает"
+
+    StockPortfolio ||--o{ PortfolioPosition : "содержит"
+    StockPortfolio ||--o{ PortfolioSnapshot : "история PnL"
+
+    Order ||--o{ Trade : "исполняется"
+}
+
+package "ClickHouse" <<Database>> #FEF9E7 {
+
+    entity "market_quotes" as MarketQuote {
+        * **symbol** : String
+        * **timestamp** : DateTime64(3)
+        --
+        * bid_price : Float64
+        * ask_price : Float64
+        * bid_volume : UInt64
+        * ask_volume : UInt64
+    }
+
+    entity "market_trades" as MarketTrade {
+        * **symbol** : String
+        * **timestamp** : DateTime64(3)
+        --
+        * trade_id : UInt64
+        * price : Float64
+        * volume : UInt64
+        * type : String
+    }
+
+    entity "portfolio_history" as PortfolioHistory {
+        * **user_id** : UInt64
+        * **portfolio_id** : UInt64
+        * **timestamp** : DateTime64(3)
+        --
+        * total_value : Float64
+        * realized_pnl : Float64
+        * unrealized_pnl : Float64
+        * positions_count : UInt32
+    }
+}
+
+' ---- Cross-DB logical links (dashed) ----
+
+Ticket ..> MarketQuote : "symbol -> symbol"
+Ticket ..> MarketTrade : "symbol -> symbol"
+StockPortfolio ..> PortfolioHistory : "portfolio_id -> portfolio_id"
+
+@enduml
