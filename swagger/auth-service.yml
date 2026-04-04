@@ -1,0 +1,480 @@
+openapi: 3.1.0
+info:
+  title: Auth Service API
+  version: 1.0.0
+  description: |
+    Сервис аутентификации и управления пользовательскими сессиями
+    для платформы "Экосистема для инвестиций".
+
+    Назначение:
+    - регистрация пользователя
+    - вход по username/email + password
+    - выдача access/refresh JWT
+    - обновление access token
+    - отзыв refresh token
+    - introspection / валидация токена для API Gateway
+
+servers:
+  - url: http://auth-service.internal/api/v1
+    description: Internal environment
+  - url: https://auth.internal.example.com/api/v1
+    description: Production example
+
+tags:
+  - name: Auth
+    description: Аутентификация и токены
+  - name: Users
+    description: Работа с профилем текущего пользователя
+  - name: Internal
+    description: Внутренние методы для API Gateway / сервисов
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация нового пользователя
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              default:
+                value:
+                  username: investor_01
+                  email: investor01@example.com
+                  password: StrongPass123!
+      responses:
+        '201':
+          description: Пользователь зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                created:
+                  value:
+                    accessToken: eyJhbGciOi...
+                    refreshToken: eyJhbGciOi...
+                    tokenType: Bearer
+                    expiresIn: 900
+                    refreshExpiresIn: 2592000
+                    user:
+                      id: 101
+                      username: investor_01
+                      email: investor01@example.com
+                      balance: "0.00"
+                      createdAt: "2026-04-04T12:00:00Z"
+                      updatedAt: "2026-04-04T12:00:00Z"
+        '400':
+          description: Ошибка валидации входных данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username или email уже заняты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Вход пользователя
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              byUsername:
+                value:
+                  login: investor_01
+                  password: StrongPass123!
+              byEmail:
+                value:
+                  login: investor01@example.com
+                  password: StrongPass123!
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверный логин или пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновление access token по refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+            examples:
+              default:
+                value:
+                  refreshToken: eyJhbGciOi...
+      responses:
+        '200':
+          description: Токены обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Refresh token недействителен или отозван
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход пользователя и отзыв refresh token
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Выход выполнен
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/introspect:
+    post:
+      tags: [Internal]
+      summary: Проверка токена для API Gateway
+      description: |
+        Внутренний endpoint. Используется gateway для проверки JWT,
+        если валидация не выполняется полностью локально.
+      operationId: introspectToken
+      security:
+        - internalServiceKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntrospectRequest'
+      responses:
+        '200':
+          description: Результат проверки токена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntrospectResponse'
+        '401':
+          description: Неверный service key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Users]
+      summary: Получить профиль текущего пользователя
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/change-password:
+    post:
+      tags: [Users]
+      summary: Смена пароля
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Пароль изменён
+        '400':
+          description: Новый пароль не прошёл валидацию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Текущий пароль неверен или пользователь неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    internalServiceKey:
+      type: apiKey
+      in: header
+      name: X-Internal-Service-Key
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 64
+          pattern: '^[a-zA-Z0-9._-]+$'
+          description: Уникальный username
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: Пароль в открытом виде, на сервере хэшируется bcrypt
+
+    LoginRequest:
+      type: object
+      required:
+        - login
+        - password
+      additionalProperties: false
+      properties:
+        login:
+          type: string
+          description: Username или email
+          minLength: 3
+          maxLength: 255
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      additionalProperties: false
+      properties:
+        refreshToken:
+          type: string
+          minLength: 16
+
+    LogoutRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        refreshToken:
+          type: string
+          description: |
+            Опционально. Если передан — отзывается конкретный refresh token.
+            Если не передан — можно отзывать текущую сессию по access token + server-side session binding.
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      additionalProperties: false
+      properties:
+        currentPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    IntrospectRequest:
+      type: object
+      required:
+        - token
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+
+    IntrospectResponse:
+      type: object
+      required:
+        - active
+      additionalProperties: false
+      properties:
+        active:
+          type: boolean
+        sub:
+          type: string
+          description: Subject / user id
+        username:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        exp:
+          type: integer
+          format: int64
+          description: Unix timestamp
+        iat:
+          type: integer
+          format: int64
+        tokenType:
+          type: string
+          example: access
+
+    AuthResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - refreshExpiresIn
+        - user
+      additionalProperties: false
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: TTL access token в секундах
+          example: 900
+        refreshExpiresIn:
+          type: integer
+          description: TTL refresh token в секундах
+          example: 2592000
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - balance
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        balance:
+          type: string
+          description: Денежный баланс пользователя в формате decimal string
+          example: "150000.50"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          examples:
+            - VALIDATION_ERROR
+            - INVALID_CREDENTIALS
+            - TOKEN_EXPIRED
+            - TOKEN_REVOKED
+            - USERNAME_ALREADY_EXISTS
+            - EMAIL_ALREADY_EXISTS
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - INTERNAL_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+          description: Идентификатор трассировки OpenTelemetry
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - issue
+      additionalProperties: false
+      properties:
+        field:
+          type: string
+        issue:
+          type: string

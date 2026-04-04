@@ -1,0 +1,885 @@
+openapi: 3.1.0
+info:
+  title: Market Data Service API
+  version: 1.0.0
+  description: |
+    Внутренний сервис рыночных данных.
+
+    Ответственность сервиса:
+    - прием и обработка потока котировок от exchange emulator
+    - хранение последних котировок в Redis
+    - хранение исторических данных в ClickHouse
+    - выдача актуальных котировок, истории цен и стакана заявок
+    - предоставление данных для gateway, portfolio service и realtime-доставки
+
+servers:
+  - url: http://market-data-service.internal/api/v1
+    description: Internal environment
+
+tags:
+  - name: Instruments
+  - name: Quotes
+  - name: History
+  - name: OrderBook
+  - name: Internal
+  - name: System
+
+paths:
+  /instruments:
+    get:
+      tags: [Instruments]
+      summary: Получить список торговых инструментов
+      operationId: listInstruments
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Поиск по ticker или названию инструмента
+        - in: query
+          name: activeOnly
+          schema:
+            type: boolean
+            default: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список инструментов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+
+  /instruments/{symbol}:
+    get:
+      tags: [Instruments]
+      summary: Получить инструмент по тикеру
+      operationId: getInstrumentBySymbol
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Данные инструмента
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instrument'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /quotes:
+    get:
+      tags: [Quotes]
+      summary: Получить текущие котировки по нескольким инструментам
+      operationId: getQuotes
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: symbols
+          required: true
+          description: Список тикеров через запятую
+          schema:
+            type: string
+            example: AAPL,MSFT,GOOG
+      responses:
+        '200':
+          description: Текущие котировки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+
+  /quotes/{symbol}:
+    get:
+      tags: [Quotes]
+      summary: Получить текущую котировку по одному инструменту
+      operationId: getQuoteBySymbol
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Текущая котировка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /order-book/{symbol}:
+    get:
+      tags: [OrderBook]
+      summary: Получить стакан по инструменту
+      description: |
+        Возвращает агрегированные bid/ask уровни по выбранному инструменту.
+
+        Для простого MVP стакан используется:
+        - для отображения рыночной информации пользователю
+        - как источник данных для оценки лучших bid/ask
+
+        Пользователь не выбирает конкретную заявку для исполнения.
+        Покупка/продажа в MVP идет через MARKET order в Order Service.
+      operationId: getOrderBook
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: depth
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Стакан инструмента
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBookResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /history/candles:
+    get:
+      tags: [History]
+      summary: Получить исторические свечи по инструменту
+      description: |
+        Исторические данные из ClickHouse для построения графиков.
+      operationId: getCandleHistory
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: interval
+          required: true
+          schema:
+            $ref: '#/components/schemas/CandleInterval'
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 1000
+      responses:
+        '200':
+          description: История свечей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandleListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+
+  /history/trades:
+    get:
+      tags: [History]
+      summary: Получить историю тиков/сделок по инструменту
+      description: |
+        Используется для более детальной аналитики или тонких графиков.
+        В простом MVP может использоваться реже, чем candles.
+      operationId: getTradeHistory
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 1000
+      responses:
+        '200':
+          description: История тиков/сделок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketTradeListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+
+  /snapshot:
+    get:
+      tags: [Quotes]
+      summary: Получить market snapshot по инструменту
+      description: |
+        Компактный агрегированный ответ для экрана инструмента:
+        текущая котировка + best bid/ask + короткая статистика.
+      operationId: getMarketSnapshot
+      security:
+        - internalGatewayAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+        - $ref: '#/components/parameters/XTraceId'
+      responses:
+        '200':
+          description: Снимок текущего рыночного состояния
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketSnapshotResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedInternal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /internal/ingest/quote:
+    post:
+      tags: [Internal]
+      summary: Принять обновление котировки от exchange emulator
+      description: |
+        Внутренний endpoint для драйвера биржи / ingestion pipeline.
+        Принимает одно обновление котировки.
+      operationId: ingestQuote
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestQuoteRequest'
+      responses:
+        '202':
+          description: Обновление принято в обработку
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedService'
+
+  /internal/ingest/order-book:
+    post:
+      tags: [Internal]
+      summary: Принять снимок стакана от exchange emulator
+      description: |
+        Внутренний endpoint для поставки данных стакана.
+        Может вызываться периодически или на каждое изменение.
+      operationId: ingestOrderBook
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestOrderBookRequest'
+      responses:
+        '202':
+          description: Снимок стакана принят в обработку
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedService'
+
+  /internal/prices/latest:
+    get:
+      tags: [Internal]
+      summary: Получить последние цены по символам для внутренних сервисов
+      description: |
+        Внутренний endpoint, например для Portfolio Service,
+        когда нужно быстро посчитать market value / unrealized PnL.
+      operationId: getLatestPricesInternal
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTraceId'
+        - in: query
+          name: symbols
+          required: true
+          schema:
+            type: string
+            example: AAPL,MSFT,GOOG
+      responses:
+        '200':
+          description: Последние цены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestPriceListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedService'
+
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint
+      operationId: health
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint
+      operationId: ready
+      responses:
+        '200':
+          description: Сервис готов принимать трафик
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Сервис не готов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  securitySchemes:
+    internalGatewayAuth:
+      type: apiKey
+      in: header
+      name: X-Gateway-Key
+
+    internalServiceAuth:
+      type: apiKey
+      in: header
+      name: X-Internal-Service-Key
+
+  parameters:
+    XTraceId:
+      in: header
+      name: X-Trace-Id
+      required: false
+      schema:
+        type: string
+
+    Symbol:
+      in: path
+      name: symbol
+      required: true
+      schema:
+        type: string
+        example: AAPL
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnauthorizedInternal:
+      description: Запрос не прошел внутреннюю авторизацию gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnauthorizedService:
+      description: Запрос не прошел внутреннюю сервисную авторизацию
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    Instrument:
+      type: object
+      required:
+        - symbol
+        - name
+        - currency
+        - lotSize
+        - priceScale
+        - active
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        name:
+          type: string
+          example: Apple Inc.
+        currency:
+          type: string
+          example: USD
+        lotSize:
+          type: integer
+          minimum: 1
+          example: 1
+        priceScale:
+          type: integer
+          minimum: 0
+          example: 2
+        active:
+          type: boolean
+        exchange:
+          type: string
+          nullable: true
+          example: SIM_EXCHANGE
+
+    InstrumentListResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instrument'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    Quote:
+      type: object
+      required:
+        - symbol
+        - bid
+        - ask
+        - last
+        - open
+        - high
+        - low
+        - close
+        - volume
+        - timestamp
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bid:
+          type: string
+          example: "190.12"
+        ask:
+          type: string
+          example: "190.15"
+        last:
+          type: string
+          example: "190.13"
+        open:
+          type: string
+          example: "188.90"
+        high:
+          type: string
+          example: "191.20"
+        low:
+          type: string
+          example: "188.40"
+        close:
+          type: string
+          example: "189.50"
+        change:
+          type: string
+          nullable: true
+          example: "0.63"
+        changePercent:
+          type: string
+          nullable: true
+          example: "0.33"
+        volume:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+
+    QuoteListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+
+    OrderBookLevel:
+      type: object
+      required: [price, quantity]
+      properties:
+        price:
+          type: string
+          example: "190.10"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 25
+
+    OrderBookResponse:
+      type: object
+      required:
+        - symbol
+        - bids
+        - asks
+        - bestBid
+        - bestAsk
+        - spread
+        - timestamp
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        bestBid:
+          type: string
+          nullable: true
+          example: "190.12"
+        bestAsk:
+          type: string
+          nullable: true
+          example: "190.15"
+        spread:
+          type: string
+          nullable: true
+          example: "0.03"
+        timestamp:
+          type: string
+          format: date-time
+
+    CandleInterval:
+      type: string
+      enum: [1m, 5m, 15m, 1h, 1d]
+
+    Candle:
+      type: object
+      required: [timestamp, open, high, low, close, volume]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        volume:
+          type: integer
+          format: int64
+
+    CandleListResponse:
+      type: object
+      required: [symbol, interval, items]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        interval:
+          $ref: '#/components/schemas/CandleInterval'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candle'
+
+    MarketTrade:
+      type: object
+      required: [symbol, price, quantity, side, executedAt]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        price:
+          type: string
+          example: "190.13"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 10
+        side:
+          type: string
+          enum: [BUY, SELL, UNKNOWN]
+        executedAt:
+          type: string
+          format: date-time
+
+    MarketTradeListResponse:
+      type: object
+      required: [symbol, items]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketTrade'
+
+    MarketSnapshotResponse:
+      type: object
+      required:
+        - instrument
+        - quote
+        - orderBook
+      properties:
+        instrument:
+          $ref: '#/components/schemas/Instrument'
+        quote:
+          $ref: '#/components/schemas/Quote'
+        orderBook:
+          $ref: '#/components/schemas/OrderBookResponse'
+
+    IngestQuoteRequest:
+      type: object
+      required:
+        - symbol
+        - bid
+        - ask
+        - last
+        - open
+        - high
+        - low
+        - close
+        - volume
+        - timestamp
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bid:
+          type: string
+          example: "190.12"
+        ask:
+          type: string
+          example: "190.15"
+        last:
+          type: string
+          example: "190.13"
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        volume:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+
+    IngestOrderBookLevel:
+      type: object
+      required: [price, quantity]
+      properties:
+        price:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+
+    IngestOrderBookRequest:
+      type: object
+      required: [symbol, bids, asks, timestamp]
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestOrderBookLevel'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestOrderBookLevel'
+        timestamp:
+          type: string
+          format: date-time
+
+    LatestPrice:
+      type: object
+      required: [symbol, price, timestamp]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        price:
+          type: string
+          example: "190.13"
+        timestamp:
+          type: string
+          format: date-time
+
+    LatestPriceListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LatestPrice'
+
+    HealthResponse:
+      type: object
+      required: [status, service, timestamp]
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: market-data-service
+        timestamp:
+          type: string
+          format: date-time
+
+    DependencyStatus:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+          example: clickhouse
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required: [status, service, dependencies, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: market-data-service
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required: [field, issue]
+      properties:
+        field:
+          type: string
+        issue:
+          type: string
