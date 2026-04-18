@@ -1,16 +1,15 @@
 # pricing_engine
 
 Минимальный pricing engine на C, который:
-
-* загружает детерминированные тестовые сценарии из YAML
-* генерирует события котировок
-* выводит NDJSON в stdout
+- загружает детерминированные тестовые сценарии из YAML
+- генерирует события котировок
+- выводит NDJSON в stdout
 
 ## Сборка
 
 ```bash
 make
-```
+````
 
 ## Запуск
 
@@ -67,4 +66,39 @@ steps:
 
 ## Выходные данные
 
-Каждая строка — это одно JSON-событие котировки.
+Каждая строка — одно JSON-событие котировки.
+
+---
+
+## Интеграция с ClickHouse (локально)
+
+Выход программы — NDJSON, который можно напрямую отправлять в ClickHouse через формат `JSONEachRow`.
+
+### 1. Запуск ClickHouse в Docker
+
+```bash
+docker compose up -d
+```
+
+### 2. Инициализация схемы
+
+```bash
+cat db/init.sql | docker exec -i clickhouse-local clickhouse-client
+```
+
+### 3. Отправка данных в БД
+
+Запуск пайплайна:
+
+```bash
+./pricing_engine --scenario examples/basic_btc.yaml | ./push_input_to_db.sh
+```
+
+---
+
+## Примечания
+
+* NDJSON полностью совместим с форматом ClickHouse `JSONEachRow`
+* схема таблицы должна совпадать с JSON (`init.sql`)
+* при удалении volume (`docker compose down -v`) таблицу нужно создать заново
+
