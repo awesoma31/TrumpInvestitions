@@ -3,30 +3,24 @@ info:
   title: Auth Service API
   version: 1.0.0
   description: |
-    Сервис аутентификации и управления пользовательскими сессиями
-    для платформы "Экосистема для инвестиций".
+    Сервис аутентификации пользователей.
 
-    Назначение:
+    Ответственность сервиса:
     - регистрация пользователя
-    - вход по username/email + password
+    - вход по логину/паролю
     - выдача access/refresh JWT
     - обновление access token
-    - отзыв refresh token
-    - introspection / валидация токена для API Gateway
+    - logout / отзыв refresh token
 
 servers:
   - url: http://auth-service.internal/api/v1
     description: Internal environment
-  - url: https://auth.internal.example.com/api/v1
-    description: Production example
 
 tags:
   - name: Auth
     description: Аутентификация и токены
-  - name: Users
-    description: Работа с профилем текущего пользователя
-  - name: Internal
-    description: Внутренние методы для API Gateway / сервисов
+  - name: System
+    description: Служебные endpoint'ы
 
 paths:
   /auth/register:
@@ -53,27 +47,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
-              examples:
-                created:
-                  value:
-                    accessToken: eyJhbGciOi...
-                    refreshToken: eyJhbGciOi...
-                    tokenType: Bearer
-                    expiresIn: 900
-                    refreshExpiresIn: 2592000
-                    user:
-                      id: 101
-                      username: investor_01
-                      email: investor01@example.com
-                      balance: "0.00"
-                      createdAt: "2026-04-04T12:00:00Z"
-                      updatedAt: "2026-04-04T12:00:00Z"
         '400':
-          description: Ошибка валидации входных данных
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/BadRequest'
         '409':
           description: Username или email уже заняты
           content:
@@ -108,6 +83,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           description: Неверный логин или пароль
           content:
@@ -137,6 +114,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           description: Refresh token недействителен или отозван
           content:
@@ -147,117 +126,70 @@ paths:
   /auth/logout:
     post:
       tags: [Auth]
-      summary: Выход пользователя и отзыв refresh token
+      summary: Выход пользователя
       operationId: logoutUser
-      security:
-        - bearerAuth: []
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LogoutRequest'
+            examples:
+              default:
+                value:
+                  refreshToken: eyJhbGciOi...
       responses:
         '204':
-          description: Выход выполнен
-        '401':
-          description: Неавторизован
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /auth/introspect:
-    post:
-      tags: [Internal]
-      summary: Проверка токена для API Gateway
-      description: |
-        Внутренний endpoint. Используется gateway для проверки JWT,
-        если валидация не выполняется полностью локально.
-      operationId: introspectToken
-      security:
-        - internalServiceKey: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IntrospectRequest'
-      responses:
-        '200':
-          description: Результат проверки токена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IntrospectResponse'
-        '401':
-          description: Неверный service key
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /auth/me:
-    get:
-      tags: [Users]
-      summary: Получить профиль текущего пользователя
-      operationId: getCurrentUser
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Профиль пользователя
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserProfile'
-        '401':
-          description: Неавторизован
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /auth/change-password:
-    post:
-      tags: [Users]
-      summary: Смена пароля
-      operationId: changePassword
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChangePasswordRequest'
-      responses:
-        '204':
-          description: Пароль изменён
+          description: Logout выполнен
         '400':
-          description: Новый пароль не прошёл валидацию
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/BadRequest'
         '401':
-          description: Текущий пароль неверен или пользователь неавторизован
+          description: Refresh token недействителен или уже отозван
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint
+      operationId: health
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint
+      operationId: ready
+      responses:
+        '200':
+          description: Сервис готов принимать запросы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Сервис не готов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-    internalServiceKey:
-      type: apiKey
-      in: header
-      name: X-Internal-Service-Key
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
   schemas:
     RegisterRequest:
@@ -313,70 +245,13 @@ components:
 
     LogoutRequest:
       type: object
+      required:
+        - refreshToken
       additionalProperties: false
       properties:
         refreshToken:
           type: string
-          description: |
-            Опционально. Если передан — отзывается конкретный refresh token.
-            Если не передан — можно отзывать текущую сессию по access token + server-side session binding.
-
-    ChangePasswordRequest:
-      type: object
-      required:
-        - currentPassword
-        - newPassword
-      additionalProperties: false
-      properties:
-        currentPassword:
-          type: string
-          minLength: 8
-          maxLength: 128
-        newPassword:
-          type: string
-          minLength: 8
-          maxLength: 128
-
-    IntrospectRequest:
-      type: object
-      required:
-        - token
-      additionalProperties: false
-      properties:
-        token:
-          type: string
-
-    IntrospectResponse:
-      type: object
-      required:
-        - active
-      additionalProperties: false
-      properties:
-        active:
-          type: boolean
-        sub:
-          type: string
-          description: Subject / user id
-        username:
-          type: string
-        roles:
-          type: array
-          items:
-            type: string
-        scopes:
-          type: array
-          items:
-            type: string
-        exp:
-          type: integer
-          format: int64
-          description: Unix timestamp
-        iat:
-          type: integer
-          format: int64
-        tokenType:
-          type: string
-          example: access
+          minLength: 16
 
     AuthResponse:
       type: object
@@ -413,7 +288,6 @@ components:
         - id
         - username
         - email
-        - balance
         - createdAt
         - updatedAt
       additionalProperties: false
@@ -426,14 +300,62 @@ components:
         email:
           type: string
           format: email
-        balance:
-          type: string
-          description: Денежный баланс пользователя в формате decimal string
-          example: "150000.50"
         createdAt:
           type: string
           format: date-time
         updatedAt:
+          type: string
+          format: date-time
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: auth-service
+        timestamp:
+          type: string
+          format: date-time
+
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          example: postgres
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required:
+        - status
+        - service
+        - dependencies
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: auth-service
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
           type: string
           format: date-time
 
@@ -447,16 +369,7 @@ components:
       properties:
         code:
           type: string
-          examples:
-            - VALIDATION_ERROR
-            - INVALID_CREDENTIALS
-            - TOKEN_EXPIRED
-            - TOKEN_REVOKED
-            - USERNAME_ALREADY_EXISTS
-            - EMAIL_ALREADY_EXISTS
-            - UNAUTHORIZED
-            - FORBIDDEN
-            - INTERNAL_ERROR
+          example: VALIDATION_ERROR
         message:
           type: string
         details:
@@ -465,7 +378,6 @@ components:
             $ref: '#/components/schemas/ErrorDetail'
         traceId:
           type: string
-          description: Идентификатор трассировки OpenTelemetry
 
     ErrorDetail:
       type: object
