@@ -27,3 +27,8 @@ replay_pid*
 .kotlin/
 
 **/.DS_Store
+
+# pricing_engine related
+pricing_engine/src/*.o
+
+pricing_engine/pricing_engine
