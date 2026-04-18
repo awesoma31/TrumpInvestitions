@@ -36,3 +36,5 @@ pricing_engine/pricing_engine
 # db related
 clickhouse_data
 clickhouse_logs
+
+.idea/

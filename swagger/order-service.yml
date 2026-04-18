@@ -1,53 +1,47 @@
 openapi: 3.1.0
 info:
-  title: Order Service API
+  title: Trading / Order Service API
   version: 1.0.0
   description: |
-    Внутренний сервис торговых заявок и сделок.
+    Сервис торговых заявок и сделок.
 
     Ответственность сервиса:
     - создание рыночных заявок на покупку/продажу
-    - отмена заявок
-    - хранение жизненного цикла заявки
-    - фиксация сделок (trades)
-    - публикация событий в Kafka для downstream-сервисов
-      (например, Portfolio Service)
+    - немедленная попытка исполнения заявки
+    - запись заявки и сделки в PostgreSQL
+    - автоматическое отклонение заявки при невозможности исполнения
+    - ручная отмена заявки пользователем
+    - публикация события в Kafka при исполнении заявки
+    - предоставление истории заявок и истории сделок
 
 servers:
-  - url: http://order-service.internal/api/v1
+  - url: http://trading-service.internal/api/v1
     description: Internal environment
 
 tags:
   - name: Orders
+    description: Заявки пользователя
   - name: Trades
-  - name: Internal
+    description: История сделок
+  - name: System
+    description: Служебные endpoint'ы
 
 paths:
   /orders:
     post:
       tags: [Orders]
-      summary: Создать новую заявку
+      summary: Создать рыночную заявку
       description: |
-        Создает рыночную заявку пользователя.
+        Создает заявку на покупку или продажу акций.
 
-        Для MVP:
-        - BUY = купить актив по лучшим доступным предложениям продажи (ask)
-        - SELL = продать актив по лучшим доступным предложениям покупки (bid)
+        Поведение в MVP:
+        - если на рынке достаточно встречного объема — заявка исполняется сразу и получает статус FILLED
+        - если объема недостаточно — заявка автоматически получает статус REJECTED
 
-        Пользователь не выбирает конкретную заявку из стакана.
-        Стакан используется только как источник информации о текущем рынке.
-        Создает новую рыночную заявку пользователя.
-
-        Для MVP поддерживается только тип MARKET.
-        Пользователь передается через заголовки gateway
-        после успешной аутентификации клиента.
+        Частичное исполнение и отложенные заявки не поддерживаются.
       operationId: createOrder
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XUsername'
-        - $ref: '#/components/parameters/XTraceId'
       requestBody:
         required: true
         content:
@@ -69,17 +63,15 @@ paths:
                   quantity: 5
       responses:
         '201':
-          description: Заявка создана
+          description: Заявка создана и обработана
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
         '422':
-          description: Бизнес-ошибка
+          description: Бизнес-ошибка обработки заявки
           content:
             application/json:
               schema:
@@ -95,21 +87,18 @@ paths:
                     code: INSUFFICIENT_ASSETS
                     message: Not enough asset quantity to place SELL market order
                     traceId: 4d1bfc77f42a4d79
-                instrumentUnavailable:
+                insufficientMarketVolume:
                   value:
-                    code: INSTRUMENT_UNAVAILABLE
-                    message: Trading instrument is not active
+                    code: INSUFFICIENT_MARKET_VOLUME
+                    message: Not enough market volume to execute order
                     traceId: 4d1bfc77f42a4d79
 
     get:
       tags: [Orders]
-      summary: Получить список заявок пользователя
+      summary: Получить историю заявок пользователя
       operationId: listOrders
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XTraceId'
         - in: query
           name: status
           schema:
@@ -124,16 +113,6 @@ paths:
           schema:
             $ref: '#/components/schemas/OrderSide'
         - in: query
-          name: from
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: to
-          schema:
-            type: string
-            format: date-time
-        - in: query
           name: limit
           schema:
             type: integer
@@ -148,25 +127,22 @@ paths:
             default: 0
       responses:
         '200':
-          description: Список заявок
+          description: История заявок пользователя
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderListResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
   /orders/{orderId}:
     get:
       tags: [Orders]
       summary: Получить заявку по id
       operationId: getOrderById
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/OrderId'
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XTraceId'
       responses:
         '200':
           description: Данные заявки
@@ -174,31 +150,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
         '404':
           $ref: '#/components/responses/NotFound'
 
   /orders/{orderId}/cancel:
     post:
       tags: [Orders]
-      summary: Отменить заявку
+      summary: Отменить заявку вручную
+      description: |
+        Ручная отмена заявки пользователем.
+
+        В MVP endpoint сохраняется как часть пользовательского сценария.
+        Если заявка уже исполнена или отклонена, отмена невозможна.
       operationId: cancelOrder
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/OrderId'
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XTraceId'
       responses:
         '200':
-          description: Заявка отменена или переведена в CANCELLED
+          description: Заявка отменена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -207,23 +181,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                invalidStatus:
-                  value:
-                    code: ORDER_NOT_CANCELLABLE
-                    message: Order cannot be cancelled in status FILLED
-                    traceId: 4d1bfc77f42a4d79
 
   /trades:
     get:
       tags: [Trades]
       summary: Получить историю сделок пользователя
       operationId: listTrades
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XTraceId'
         - in: query
           name: symbol
           schema:
@@ -234,16 +199,6 @@ paths:
           schema:
             $ref: '#/components/schemas/OrderSide'
         - in: query
-          name: from
-          schema:
-            type: string
-            format: date-time
-        - in: query
-          name: to
-          schema:
-            type: string
-            format: date-time
-        - in: query
           name: limit
           schema:
             type: integer
@@ -258,25 +213,22 @@ paths:
             default: 0
       responses:
         '200':
-          description: Список сделок
+          description: История сделок пользователя
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TradeListResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
   /trades/{tradeId}:
     get:
       tags: [Trades]
       summary: Получить сделку по id
       operationId: getTradeById
-      security:
-        - internalGatewayAuth: []
       parameters:
         - $ref: '#/components/parameters/TradeId'
         - $ref: '#/components/parameters/XUserId'
-        - $ref: '#/components/parameters/XTraceId'
       responses:
         '200':
           description: Данные сделки
@@ -284,122 +236,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TradeResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedInternal'
         '404':
           $ref: '#/components/responses/NotFound'
-
-  /internal/orders/{orderId}/status:
-    post:
-      tags: [Internal]
-      summary: Внутреннее обновление статуса заявки
-      description: |
-        Используется внутренними процессами исполнения заявок,
-        воркерами или matching-логикой.
-      operationId: updateOrderStatusInternal
-      security:
-        - internalServiceAuth: []
-      parameters:
-        - $ref: '#/components/parameters/OrderId'
-        - $ref: '#/components/parameters/XTraceId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOrderStatusRequest'
-      responses:
-        '200':
-          description: Статус обновлен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Неверный внутренний сервисный ключ
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /internal/trades:
-    post:
-      tags: [Internal]
-      summary: Внутреннее создание сделки
-      description: |
-        Используется внутренним процессом исполнения.
-        Обычно вызывается не gateway, а внутренним worker / engine.
-      operationId: createTradeInternal
-      security:
-        - internalServiceAuth: []
-      parameters:
-        - $ref: '#/components/parameters/XTraceId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateTradeRequest'
-      responses:
-        '201':
-          description: Сделка создана
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TradeResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Неверный внутренний сервисный ключ
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          description: Сделка не может быть создана в текущем состоянии заявки
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /internal/events/order-created:
-    post:
-      tags: [Internal]
-      summary: Зафиксировать факт публикации события order_created
-      description: |
-        Технический endpoint для outbox / delivery confirmation,
-        если нужна явная синхронизация между процессами.
-        В простом варианте может отсутствовать в реализации.
-      operationId: markOrderCreatedEventPublished
-      security:
-        - internalServiceAuth: []
-      parameters:
-        - $ref: '#/components/parameters/XTraceId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublishedEventRequest'
-      responses:
-        '204':
-          description: Событие отмечено как опубликованное
-        '401':
-          description: Неверный внутренний сервисный ключ
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /system/health:
     get:
-      tags: [Internal]
+      tags: [System]
       summary: Health endpoint
       operationId: health
       responses:
@@ -412,12 +254,12 @@ paths:
 
   /system/ready:
     get:
-      tags: [Internal]
+      tags: [System]
       summary: Readiness endpoint
       operationId: ready
       responses:
         '200':
-          description: Сервис готов принимать трафик
+          description: Сервис готов принимать запросы
           content:
             application/json:
               schema:
@@ -430,17 +272,6 @@ paths:
                 $ref: '#/components/schemas/ReadinessResponse'
 
 components:
-  securitySchemes:
-    internalGatewayAuth:
-      type: apiKey
-      in: header
-      name: X-Gateway-Key
-
-    internalServiceAuth:
-      type: apiKey
-      in: header
-      name: X-Internal-Service-Key
-
   parameters:
     XUserId:
       in: header
@@ -449,22 +280,6 @@ components:
       schema:
         type: integer
         format: int64
-      description: Идентификатор пользователя, проставленный gateway
-
-    XUsername:
-      in: header
-      name: X-Username
-      required: false
-      schema:
-        type: string
-      description: Username пользователя, проставленный gateway
-
-    XTraceId:
-      in: header
-      name: X-Trace-Id
-      required: false
-      schema:
-        type: string
 
     OrderId:
       in: path
@@ -490,13 +305,6 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
 
-    UnauthorizedInternal:
-      description: Запрос не прошел внутреннюю авторизацию
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-
     NotFound:
       description: Ресурс не найден
       content:
@@ -515,11 +323,15 @@ components:
 
     OrderStatus:
       type: string
-      enum: [NEW, ACCEPTED, FILLED, CANCELLED, REJECTED]
+      enum: [NEW, FILLED, REJECTED, CANCELLED]
 
     CreateOrderRequest:
       type: object
-      required: [symbol, side, type, quantity]
+      required:
+        - symbol
+        - side
+        - type
+        - quantity
       additionalProperties: false
       properties:
         symbol:
@@ -536,58 +348,6 @@ components:
           minimum: 1
           example: 10
 
-    UpdateOrderStatusRequest:
-      type: object
-      required: [status]
-      additionalProperties: false
-      properties:
-        status:
-          $ref: '#/components/schemas/OrderStatus'
-        rejectionReason:
-          type: string
-          nullable: true
-        filledQuantity:
-          type: integer
-          minimum: 0
-          nullable: true
-        avgFillPrice:
-          type: string
-          nullable: true
-          example: "190.14"
-
-    CreateTradeRequest:
-      type: object
-      required:
-        - orderId
-        - userId
-        - symbol
-        - side
-        - quantity
-        - price
-        - executedAt
-      additionalProperties: false
-      properties:
-        orderId:
-          type: string
-          format: uuid
-        userId:
-          type: integer
-          format: int64
-        symbol:
-          type: string
-          example: AAPL
-        side:
-          $ref: '#/components/schemas/OrderSide'
-        quantity:
-          type: integer
-          minimum: 1
-        price:
-          type: string
-          example: "190.14"
-        executedAt:
-          type: string
-          format: date-time
-
     OrderResponse:
       type: object
       required:
@@ -597,10 +357,10 @@ components:
         - side
         - type
         - quantity
-        - filledQuantity
         - status
         - createdAt
         - updatedAt
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -618,25 +378,21 @@ components:
           type: integer
         filledQuantity:
           type: integer
-        requestedAtPrice:
-          type: string
           nullable: true
-          description: Для MARKET заявки обычно null
+          example: 10
         avgFillPrice:
           type: string
           nullable: true
+          example: "190.14"
         status:
           $ref: '#/components/schemas/OrderStatus'
         rejectionReason:
           type: string
           nullable: true
+          example: INSUFFICIENT_MARKET_VOLUME
         createdAt:
           type: string
           format: date-time
-        acceptedAt:
-          type: string
-          format: date-time
-          nullable: true
         filledAt:
           type: string
           format: date-time
@@ -651,7 +407,12 @@ components:
 
     OrderListResponse:
       type: object
-      required: [items, total, limit, offset]
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      additionalProperties: false
       properties:
         items:
           type: array
@@ -677,6 +438,7 @@ components:
         - grossAmount
         - executedAt
         - createdAt
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -712,7 +474,12 @@ components:
 
     TradeListResponse:
       type: object
-      required: [items, total, limit, offset]
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      additionalProperties: false
       properties:
         items:
           type: array
@@ -725,38 +492,30 @@ components:
         offset:
           type: integer
 
-    PublishedEventRequest:
-      type: object
-      required: [aggregateId, eventType, publishedAt]
-      additionalProperties: false
-      properties:
-        aggregateId:
-          type: string
-          format: uuid
-        eventType:
-          type: string
-          example: order_created
-        publishedAt:
-          type: string
-          format: date-time
-
     HealthResponse:
       type: object
-      required: [status, service, timestamp]
+      required:
+        - status
+        - service
+        - timestamp
+      additionalProperties: false
       properties:
         status:
           type: string
           example: UP
         service:
           type: string
-          example: order-service
+          example: trading-service
         timestamp:
           type: string
           format: date-time
 
     DependencyStatus:
       type: object
-      required: [name, status]
+      required:
+        - name
+        - status
+      additionalProperties: false
       properties:
         name:
           type: string
@@ -767,14 +526,19 @@ components:
 
     ReadinessResponse:
       type: object
-      required: [status, service, dependencies, timestamp]
+      required:
+        - status
+        - service
+        - dependencies
+        - timestamp
+      additionalProperties: false
       properties:
         status:
           type: string
           enum: [READY, NOT_READY, DEGRADED]
         service:
           type: string
-          example: order-service
+          example: trading-service
         dependencies:
           type: array
           items:
@@ -785,7 +549,11 @@ components:
 
     ErrorResponse:
       type: object
-      required: [code, message, traceId]
+      required:
+        - code
+        - message
+        - traceId
+      additionalProperties: false
       properties:
         code:
           type: string
@@ -801,7 +569,10 @@ components:
 
     ErrorDetail:
       type: object
-      required: [field, issue]
+      required:
+        - field
+        - issue
+      additionalProperties: false
       properties:
         field:
           type: string
