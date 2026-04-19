@@ -1,0 +1,67 @@
+.price-chart {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+.price-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.price-chart-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.price-chart-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.period-button {
+  padding: 8px 16px;
+  background: #0a0a0a;
+  color: #999;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.period-button:hover {
+  background: #1a1a1a;
+  border-color: #667eea;
+  color: #fff;
+}
+
+.period-button.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: #fff;
+}
+
+.price-chart-container {
+  height: 300px;
+}
+
+.price-chart-loading,
+.price-chart-error {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
+}
+
+.price-chart-error {
+  color: #f87171;
+}
