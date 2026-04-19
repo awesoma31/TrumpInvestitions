@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">TrumpInvestitions</string>
+    <string name="trading_title">Торговля</string>
+    <string name="quotes_title">Котировки</string>
+    <string name="create_order_title">Создание заявки</string>
+    <string name="ticker_hint">Тикер</string>
+    <string name="quantity_hint">Количество</string>
+    <string name="price_hint">Цена</string>
+    <string name="buy_button">Купить</string>
+    <string name="sell_button">Продать</string>
+    <string name="market_order">Рыночный</string>
+    <string name="limit_order">Лимитный</string>
+    <string name="volume_label">Объем: %s</string>
+    <string name="price_label">$%s</string>
+    <string name="change_label">%s (%s%%)</string>
+    <string name="error_network">Ошибка сети</string>
+    <string name="error_generic">Произошла ошибка</string>
+    <string name="order_created_success">Заявка создана успешно</string>
+</resources>
