@@ -80,6 +80,24 @@ class AuthService {
     }
   }
 
+  async logout(): Promise<void> {
+    const token = this.getToken();
+    if (token) {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      } catch {
+        // Игнорируем ошибки при инвалидации токена
+      }
+    }
+    this.removeToken();
+    localStorage.removeItem('user_data');
+  }
+
   setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
