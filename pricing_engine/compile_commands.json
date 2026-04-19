@@ -1,0 +1,92 @@
+[
+  {
+    "file": "src/main.c",
+    "arguments": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "src/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/theodor/my-coding/school/TrumpInvestitions/pricing_engine",
+    "output": "src/main.o"
+  },
+  {
+    "file": "src/scenario.c",
+    "arguments": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "src/scenario.o",
+      "src/scenario.c"
+    ],
+    "directory": "/home/theodor/my-coding/school/TrumpInvestitions/pricing_engine",
+    "output": "src/scenario.o"
+  },
+  {
+    "file": "src/generator.c",
+    "arguments": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "src/generator.o",
+      "src/generator.c"
+    ],
+    "directory": "/home/theodor/my-coding/school/TrumpInvestitions/pricing_engine",
+    "output": "src/generator.o"
+  },
+  {
+    "file": "src/rng.c",
+    "arguments": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "src/rng.o",
+      "src/rng.c"
+    ],
+    "directory": "/home/theodor/my-coding/school/TrumpInvestitions/pricing_engine",
+    "output": "src/rng.o"
+  },
+  {
+    "file": "src/json_writer.c",
+    "arguments": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pedantic",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "src/json_writer.o",
+      "src/json_writer.c"
+    ],
+    "directory": "/home/theodor/my-coding/school/TrumpInvestitions/pricing_engine",
+    "output": "src/json_writer.o"
+  }
+]

@@ -27,4 +27,12 @@ replay_pid*
 .kotlin/
 
 **/.DS_Store
-.idea/
+
+# pricing_engine related
+pricing_engine/.cache
+pricing_engine/src/*.o
+pricing_engine/pricing_engine
+
+# db related
+clickhouse_data
+clickhouse_logs
