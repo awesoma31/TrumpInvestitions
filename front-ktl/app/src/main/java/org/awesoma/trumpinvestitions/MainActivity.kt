@@ -4,10 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -15,11 +12,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import org.awesoma.trumpinvestitions.navigation.Screen
+import org.awesoma.trumpinvestitions.ui.screens.auth.LoginScreen
+import org.awesoma.trumpinvestitions.ui.screens.auth.RegisterScreen
+import org.awesoma.trumpinvestitions.ui.screens.market.StockDetailScreen
+import org.awesoma.trumpinvestitions.ui.screens.market.StocksScreen
+import org.awesoma.trumpinvestitions.ui.screens.portfolio.PortfolioScreen
+import org.awesoma.trumpinvestitions.ui.screens.profile.ProfileScreen
 import org.awesoma.trumpinvestitions.ui.theme.TrumpInvestitionsTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,58 +42,95 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@PreviewScreenSizes
+private data class BottomNavItem(val route: String, val label: String, val iconRes: Int)
+
+private val bottomNavItems = listOf(
+    BottomNavItem(Screen.StockList.route, "Рынок", R.drawable.ic_home),
+    BottomNavItem(Screen.Portfolio.route, "Портфель", R.drawable.ic_favorite),
+    BottomNavItem(Screen.Profile.route, "Профиль", R.drawable.ic_account_box),
+)
+
 @Composable
 fun TrumpInvestitionsApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var isLoggedIn by rememberSaveable { mutableStateOf(false) }
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            painterResource(it.icon),
-                            contentDescription = it.label
-                        )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
-            }
+    if (!isLoggedIn) {
+        AuthFlow(onLoginSuccess = { isLoggedIn = true })
+    } else {
+        MainApp(onLogout = { isLoggedIn = false })
+    }
+}
+
+@Composable
+fun AuthFlow(onLoginSuccess: () -> Unit) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Screen.Login.route) {
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = onLoginSuccess,
+                onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+            )
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                onRegisterSuccess = onLoginSuccess,
+                onNavigateToLogin = { navController.popBackStack() }
             )
         }
     }
 }
 
-enum class AppDestinations(
-    val label: String,
-    val icon: Int,
-) {
-    HOME("Home", R.drawable.ic_home),
-    FAVORITES("Favorites", R.drawable.ic_favorite),
-    PROFILE("Profile", R.drawable.ic_account_box),
+@Composable
+fun MainApp(onLogout: () -> Unit) {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            bottomNavItems.forEach { item ->
+                val isSelected = currentRoute == item.route
+                this.item(
+                    icon = { Icon(painterResource(item.iconRes), contentDescription = item.label) },
+                    label = { Text(item.label) },
+                    selected = isSelected,
+                    onClick = {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    ) {
+        MainNavHost(navController = navController, onLogout = onLogout)
+    }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TrumpInvestitionsTheme {
-        Greeting("Android")
+fun MainNavHost(navController: NavHostController, onLogout: () -> Unit) {
+    NavHost(navController = navController, startDestination = Screen.StockList.route) {
+        composable(Screen.StockList.route) {
+            StocksScreen(onStockClick = { symbol ->
+                navController.navigate(Screen.StockDetail.createRoute(symbol))
+            })
+        }
+        composable(
+            route = Screen.StockDetail.route,
+            arguments = listOf(navArgument("symbol") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val symbol = backStackEntry.arguments?.getString("symbol") ?: return@composable
+            StockDetailScreen(symbol = symbol, onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Portfolio.route) {
+            PortfolioScreen()
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(onLogout = onLogout)
+        }
     }
 }
