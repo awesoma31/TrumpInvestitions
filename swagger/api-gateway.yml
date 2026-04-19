@@ -1,0 +1,1144 @@
+openapi: 3.1.0
+info:
+  title: API Gateway
+  version: 1.0.0
+  description: |
+    Единая внешняя точка входа для клиентских приложений инвестиционной платформы.
+
+    Gateway отвечает за:
+    - прием HTTP-запросов от web/mobile клиентов
+    - проверку JWT access token
+    - маршрутизацию запросов к backend-сервисам
+    - агрегацию клиентского API
+    - rate limiting и базовые access policies
+    - websocket/realtime delivery событий клиентам
+
+servers:
+  - url: https://api.example.com
+    description: Public production endpoint
+  - url: http://localhost:8080
+    description: Local development endpoint
+
+tags:
+  - name: Auth
+  - name: Market
+  - name: Orders
+  - name: Portfolio
+  - name: Realtime
+  - name: System
+
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация пользователя
+      description: Проксирует запрос в Auth Service.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Вход пользователя
+      description: Проксирует запрос в Auth Service.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Обновление access token
+      description: Проксирует запрос в Auth Service.
+      operationId: refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Токен обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход пользователя
+      operationId: logout
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Выход выполнен
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Получить профиль текущего пользователя
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Данные текущего пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/market/instruments:
+    get:
+      tags: [Market]
+      summary: Получить список торговых инструментов
+      description: |
+        Возвращает список доступных акций/инструментов для клиента.
+        Может быть доступен без авторизации.
+      operationId: listInstruments
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Поиск по ticker/name
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список инструментов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+
+  /api/v1/market/quotes:
+    get:
+      tags: [Market]
+      summary: Получить текущие котировки
+      description: |
+        Возвращает текущие bid/ask/last по одному или нескольким инструментам.
+        Может быть доступен без авторизации.
+      operationId: getQuotes
+      parameters:
+        - in: query
+          name: symbols
+          required: true
+          description: Список тикеров через запятую
+          schema:
+            type: string
+            example: AAPL,MSFT,GOOG
+      responses:
+        '200':
+          description: Текущие котировки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/market/order-book:
+    get:
+      tags: [Market]
+      summary: Получить стакан заявок по инструменту
+      description: |
+        Возвращает список bid/ask уровней по выбранному инструменту.
+        Соответствует требованию просмотра всех Bid/Ask в виде списка.
+      operationId: getOrderBook
+      parameters:
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: depth
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Стакан заявок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/market/history:
+    get:
+      tags: [Market]
+      summary: Получить исторические данные по инструменту
+      description: |
+        Используется клиентом для построения графиков.
+        Проксируется в Market Data Service.
+      operationId: getMarketHistory
+      parameters:
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: interval
+          required: true
+          schema:
+            type: string
+            enum: [1m, 5m, 15m, 1h, 1d]
+            example: 1m
+      responses:
+        '200':
+          description: История цен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandleListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/orders:
+    post:
+      tags: [Orders]
+      summary: Создать заявку
+      description: |
+        Создание заявки на покупку или продажу.
+        Требует авторизации.
+
+          В UI операция "Купить" соответствует созданию заявки:
+          - side=BUY
+          - type=MARKET
+
+          В UI операция "Продать" соответствует созданию заявки:
+          - side=SELL
+          - type=MARKET
+      operationId: createOrder
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Заявка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    get:
+      tags: [Orders]
+      summary: Получить список заявок пользователя
+      operationId: listOrders
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список заявок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Получить заявку по id
+      operationId: getOrderById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Данные заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Отменить заявку
+      operationId: cancelOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Обновленный статус заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Заявку нельзя отменить в текущем состоянии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/trades:
+    get:
+      tags: [Orders]
+      summary: Получить историю сделок пользователя
+      operationId: listTrades
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: symbol
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: История сделок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/portfolio:
+    get:
+      tags: [Portfolio]
+      summary: Получить текущее состояние портфеля
+      operationId: getPortfolio
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Текущее состояние портфеля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/portfolio/positions:
+    get:
+      tags: [Portfolio]
+      summary: Получить позиции пользователя
+      operationId: listPositions
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: symbol
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список позиций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/portfolio/pnl:
+    get:
+      tags: [Portfolio]
+      summary: Получить PnL пользователя
+      operationId: getPnl
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Сводка по доходности
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PnlResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/realtime/ws-token:
+    post:
+      tags: [Realtime]
+      summary: Получить краткоживущий токен для WebSocket-подключения
+      description: |
+        Упрощает безопасное подключение к realtime-каналу через Gateway.
+      operationId: issueWebSocketToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Токен для websocket-сессии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebSocketTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ws:
+    get:
+      tags: [Realtime]
+      summary: WebSocket endpoint для realtime-событий
+      description: |
+        WebSocket endpoint Gateway.
+
+        Поддерживаемые события:
+        - price_update
+        - order_updated
+        - order_filled
+        - trade_executed
+        - portfolio_updated
+
+        Типовая схема подключения:
+        1. Клиент получает ws-token через /api/v1/realtime/ws-token
+        2. Открывает websocket: /ws?token=...
+        3. Отправляет subscribe-сообщения на нужные каналы
+      operationId: connectWebSocket
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '101':
+          description: Switching Protocols
+
+  /api/v1/system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint gateway
+      operationId: health
+      responses:
+        '200':
+          description: Gateway работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint gateway
+      operationId: ready
+      responses:
+        '200':
+          description: Gateway готов принимать трафик
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Один или несколько downstream-сервисов недоступны
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    OrderId:
+      in: path
+      name: orderId
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Неавторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Конфликт состояния
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Бизнес-ошибка обработки запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 64
+          pattern: '^[a-zA-Z0-9._-]+$'
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    LoginRequest:
+      type: object
+      required: [login, password]
+      additionalProperties: false
+      properties:
+        login:
+          type: string
+          description: Username или email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      additionalProperties: false
+      properties:
+        refreshToken:
+          type: string
+
+    LogoutRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        refreshToken:
+          type: string
+
+    AuthResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - refreshExpiresIn
+        - user
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          example: 900
+        refreshExpiresIn:
+          type: integer
+          example: 2592000
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      required: [id, username, email, balance, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        balance:
+          type: string
+          example: "125000.50"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Instrument:
+      type: object
+      required: [symbol, name, currency, lotSize, active]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        name:
+          type: string
+          example: Apple Inc.
+        currency:
+          type: string
+          example: USD
+        lotSize:
+          type: integer
+          minimum: 1
+          example: 1
+        active:
+          type: boolean
+
+    InstrumentListResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instrument'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    Quote:
+      type: object
+      required: [symbol, bid, ask, last, timestamp]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bid:
+          type: string
+          example: "190.12"
+        ask:
+          type: string
+          example: "190.15"
+        last:
+          type: string
+          example: "190.13"
+        timestamp:
+          type: string
+          format: date-time
+
+    QuoteListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+
+    OrderBookLevel:
+      type: object
+      required: [price, quantity]
+      properties:
+        price:
+          type: string
+          example: "190.10"
+        quantity:
+          type: integer
+          minimum: 1
+
+    OrderBookResponse:
+      type: object
+      required: [symbol, bids, asks, timestamp]
+      properties:
+        symbol:
+          type: string
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        timestamp:
+          type: string
+          format: date-time
+
+    Candle:
+      type: object
+      required: [timestamp, open, high, low, close, volume]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        volume:
+          type: integer
+          format: int64
+
+    CandleListResponse:
+      type: object
+      required: [symbol, interval, items]
+      properties:
+        symbol:
+          type: string
+        interval:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candle'
+
+    OrderSide:
+      type: string
+      enum: [BUY, SELL]
+
+    OrderType:
+      type: string
+      enum: [MARKET]
+
+    OrderStatus:
+      type: string
+      enum: [NEW, ACCEPTED, FILLED, CANCELLED, REJECTED]
+
+    CreateOrderRequest:
+      type: object
+      required: [symbol, side, type, quantity]
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        quantity:
+          type: integer
+          minimum: 1
+          example: 10
+
+    OrderResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - symbol
+        - side
+        - type
+        - quantity
+        - filledQuantity
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: integer
+          format: int64
+        symbol:
+          type: string
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        quantity:
+          type: integer
+        filledQuantity:
+          type: integer
+        avgFillPrice:
+          type: string
+          nullable: true
+          example: "190.14"
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        rejectionReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderListResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    TradeResponse:
+      type: object
+      required:
+        - id
+        - orderId
+        - symbol
+        - side
+        - quantity
+        - price
+        - executedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        quantity:
+          type: integer
+        price:
+          type: string
+          example: "190.14"
+        executedAt:
+          type: string
+          format: date-time
+
+    TradeListResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeResponse'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    PositionResponse:
+      type: object
+      required:
+        - symbol
+        - quantity
+        - avgPrice
+        - currentPrice
+        - marketValue
+        - unrealizedPnl
+      properties:
+        symbol:
+          type: string
+        quantity:
+          type: integer
+        avgPrice:
+          type: string
+        currentPrice:
+          type: string
+        marketValue:
+          type: string
+        unrealizedPnl:
+          type: string
+
+    PositionListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionResponse'
+
+    PortfolioResponse:
+      type: object
+      required:
+        - userId
+        - cashBalance
+        - totalMarketValue
+        - totalEquity
+        - unrealizedPnl
+        - realizedPnl
+        - positions
+        - updatedAt
+      properties:
+        userId:
+          type: integer
+          format: int64
+        cashBalance:
+          type: string
+        totalMarketValue:
+          type: string
+        totalEquity:
+          type: string
+        unrealizedPnl:
+          type: string
+        realizedPnl:
+          type: string
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionResponse'
+        updatedAt:
+          type: string
+          format: date-time
+
+    PnlResponse:
+      type: object
+      required:
+        - realizedPnl
+        - unrealizedPnl
+        - totalPnl
+        - currency
+      properties:
+        realizedPnl:
+          type: string
+        unrealizedPnl:
+          type: string
+        totalPnl:
+          type: string
+        currency:
+          type: string
+          example: USD
+
+    WebSocketTokenResponse:
+      type: object
+      required: [token, expiresIn]
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: integer
+          example: 60
+
+    HealthResponse:
+      type: object
+      required: [status, service, timestamp]
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: api-gateway
+        timestamp:
+          type: string
+          format: date-time
+
+    DownstreamStatus:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+          example: market-data-service
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required: [status, service, downstreams, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: api-gateway
+        downstreams:
+          type: array
+          items:
+            $ref: '#/components/schemas/DownstreamStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required: [field, issue]
+      properties:
+        field:
+          type: string
+        issue:
+          type: string
