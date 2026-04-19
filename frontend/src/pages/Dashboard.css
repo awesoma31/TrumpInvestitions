@@ -1,0 +1,108 @@
+.dashboard {
+  min-height: 100vh;
+  background: #000000;
+}
+
+.dashboard-header {
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.dashboard-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #cccccc;
+  font-weight: 500;
+}
+
+.logout-button {
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.dashboard-nav {
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding: 12px 24px;
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  top: 73px;
+  z-index: 99;
+}
+
+.nav-button {
+  padding: 10px 20px;
+  background: #0a0a0a;
+  color: #999;
+  border: 1px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background: #1a1a1a;
+  border-color: #667eea;
+  color: #fff;
+}
+
+.nav-button.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: #fff;
+}
+
+.dashboard-content {
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .dashboard-nav {
+    top: auto;
+    position: relative;
+  }
+
+  .dashboard-content {
+    padding: 16px;
+  }
+}

@@ -1,58 +1,75 @@
+import { useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { Auth } from './components/auth';
+import Dashboard from './pages/Dashboard';
+import StockList from './components/market/StockList';
+import PriceChart from './components/market/PriceChart';
+import type { Stock } from './types/market';
+
+// Режим демонстрации - установите в true для просмотра без бэкенда и авторизации
+const DEMO_MODE = true;
 
 function App() {
-  const { login, register, isAuthenticated, user } = useAuth();
+  const { login, register, isAuthenticated, isLoading } = useAuth();
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
 
-  if (isAuthenticated && user) {
+  if (isLoading) {
     return (
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
         minHeight: '100vh',
-        background: '#000000'
+        background: '#000000',
+        color: '#ffffff'
       }}>
-        <div style={{ 
-          background: '#1a1a1a', 
-          border: '1px solid #333',
-          padding: '40px', 
-          borderRadius: '12px',
-          textAlign: 'center',
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)'
-        }}>
-          <h1 style={{ color: '#ffffff', marginBottom: '10px' }}>
-            Добро пожаловать, {user.name}!
-          </h1>
-          <p style={{ color: '#cccccc', marginBottom: '20px' }}>
-            Email: {user.email}
-          </p>
-          <button 
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '12px 24px',
-              background: '#667eea',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: '600',
-              marginTop: '20px'
-            }}
-          >
-            Выйти
-          </button>
-        </div>
+        Загрузка...
       </div>
     );
   }
 
+  // Режим демонстрации - показываем Dashboard без авторизации
+  if (DEMO_MODE) {
+    return (
+      <div style={{ background: '#000000', minHeight: '100vh' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: '10px', 
+          right: '10px', 
+          background: '#667eea', 
+          color: '#fff', 
+          padding: '8px 16px', 
+          borderRadius: '6px', 
+          fontSize: '12px',
+          zIndex: 1000
+        }}>
+          РЕЖИМ ДЕМОНСТРАЦИИ
+        </div>
+        <Dashboard />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
   return (
-    <Auth 
-      onLogin={login}
-      onRegister={register}
-    />
+    <div style={{ background: '#000000', minHeight: '100vh' }}>
+      <Auth 
+        onLogin={login}
+        onRegister={register}
+      />
+      <div style={{ padding: '24px' }}>
+        <h2 style={{ color: '#ffffff', marginBottom: '20px', textAlign: 'center' }}>
+          Рынок акций (только просмотр)
+        </h2>
+        <StockList onStockSelect={setSelectedStock} />
+        {selectedStock && (
+          <PriceChart stockId={selectedStock.id} stockSymbol={selectedStock.symbol} />
+        )}
+      </div>
+    </div>
   );
 }
 
