@@ -12,3 +12,17 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+
+  market-data-service:
+    build:
+      context: ./market-data-service
+    container_name: market-data-service
+    depends_on:
+      - clickhouse
+    environment:
+      HTTP_PORT: 8080
+      HTTP_BASE_PATH: /api/v1
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DATABASE: default
+    ports:
+      - "8080:8080"
