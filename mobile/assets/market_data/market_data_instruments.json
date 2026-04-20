@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "active": true,
+      "currency": "USD",
+      "lotSize": 1
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft Corporation",
+      "active": true,
+      "currency": "USD",
+      "lotSize": 1
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet Inc.",
+      "active": true,
+      "currency": "USD",
+      "lotSize": 1
+    },
+    {
+      "symbol": "BTCUSDT",
+      "name": "Bitcoin / Tether",
+      "active": true,
+      "currency": "USDT",
+      "lotSize": 1
+    },
+    {
+      "symbol": "ETHUSDT",
+      "name": "Ethereum / Tether",
+      "active": true,
+      "currency": "USDT",
+      "lotSize": 1
+    },
+    {
+      "symbol": "TSLA",
+      "name": "Tesla Inc.",
+      "active": true,
+      "currency": "USD",
+      "lotSize": 1
+    }
+  ],
+  "limit": 50,
+  "offset": 0,
+  "total": 6
+}
