@@ -78,6 +78,60 @@ unrealizedPnl = (currentPrice - avgPrice) * qty
 
 Портфель создаётся автоматически при первом обращении (`GetOrCreatePortfolio`).
 
+## Запуск
+
+Требуется: **Docker** и **Docker Compose**.
+
+Из корня репозитория:
+
+```bash
+docker compose up --build portfolio-service postgres kafka
+```
+
+Сервис поднимется на `http://localhost:8081`. Postgres и Kafka стартуют автоматически как зависимости.
+
+Чтобы остановить и удалить контейнеры:
+
+```bash
+docker compose down
+```
+
+## Тестирование
+
+В папке сервиса есть скрипт интеграционных тестов `test_endpoints.py`. Он проверяет все эндпоинты — ~30 сценариев.
+
+```bash
+pip install requests
+python portfolio-service/test_endpoints.py --base-url http://localhost:8081/api/v1
+```
+
+Пример вывода:
+
+```
+── System ──
+  ✓ GET /system/health → 200
+  ✓   status=UP
+  ✓   service=portfolio-service
+
+── Balance: Deposit ──
+  ✓ POST /balance/deposit → 200
+  ✓   balance=10000.00
+  ...
+
+========================================
+  Passed: 30
+  Failed: 0
+  Total:  30
+========================================
+```
+
+Юнит-тесты сервисного и handler слоёв:
+
+```bash
+cd portfolio-service
+go test ./...
+```
+
 ## Конфигурация
 
 Все параметры передаются через переменные окружения:
