@@ -38,3 +38,7 @@ clickhouse_data
 clickhouse_logs
 
 .idea/
+front-ktl/.idea
+front-ktl/app/build
+front-ktl/local.properties
+front-ktl/.gradle
