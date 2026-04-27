@@ -7,6 +7,7 @@ type Config struct {
 	KafkaBrokers []string
 	KafkaTopic   string
 	ServerPort   string
+	PortfolioURL string
 }
 
 func Load() *Config {
@@ -15,6 +16,7 @@ func Load() *Config {
 		KafkaBrokers: []string{getEnv("KAFKA_BROKER", "localhost:9092")},
 		KafkaTopic:   getEnv("KAFKA_TOPIC", "trading-events"),
 		ServerPort:   getEnv("SERVER_PORT", "8080"),
+		PortfolioURL: getEnv("PORTFOLIO_URL", "http://portfolio-service:8080"),
 	}
 }
 

@@ -174,6 +174,123 @@ def test_portfolio_read(base: str, user_id: int):
 
 # ─── Trading Service ────────────────────────────────────────────────────────
 
+def test_portfolio_cash_balance(base: str, user_id: int):
+    """Тесты GET /balance/cash"""
+    print(f"\n── Portfolio: GetCashBalance (user={user_id}) ──")
+
+    # Для нового пользователя — баланс 0
+    fresh_id = user_id + 1000
+    r = requests.get(f"{base}/balance/cash", headers={"X-User-Id": str(fresh_id)})
+    check("GET /balance/cash новый пользователь → 200", r.status_code == 200)
+    data = r.json()
+    check("  balance=0.00", data.get("balance") == "0.00")
+    check("  currency=USD", data.get("currency") == "USD")
+    check("  userId совпадает", data.get("userId") == fresh_id)
+
+    # После депозита — баланс отражает сумму
+    r = requests.get(f"{base}/balance/cash", headers={"X-User-Id": str(user_id)})
+    check("GET /balance/cash после депозита → 200", r.status_code == 200)
+    data = r.json()
+    balance = float(data.get("balance", "0"))
+    check("  balance > 0", balance > 0, f"balance={data.get('balance')}")
+    check("  userId совпадает", data.get("userId") == user_id)
+
+    # Без X-User-Id → 400
+    r = requests.get(f"{base}/balance/cash")
+    check("GET /balance/cash без X-User-Id → 400", r.status_code == 400)
+
+    # Невалидный X-User-Id → 400
+    r = requests.get(f"{base}/balance/cash", headers={"X-User-Id": "abc"})
+    check("GET /balance/cash невалидный X-User-Id → 400", r.status_code == 400)
+
+
+def test_portfolio_asset_quantity(base: str, trading_base: str, user_id: int, kafka_wait: int):
+    """Тесты GET /assets/{symbol}/quantity"""
+    print(f"\n── Portfolio: GetAssetQuantity (user={user_id}) ──")
+
+    # Нет позиции — quantity=0
+    r = requests.get(
+        f"{base}/assets/NONEXISTENT/quantity",
+        headers={"X-User-Id": str(user_id)},
+    )
+    check("GET /assets/NONEXISTENT/quantity → 200", r.status_code == 200)
+    data = r.json()
+    check("  quantity=0", data.get("quantity") == 0)
+    check("  symbol=NONEXISTENT", data.get("symbol") == "NONEXISTENT")
+    check("  userId совпадает", data.get("userId") == user_id)
+
+    # Без X-User-Id → 400
+    r = requests.get(f"{base}/assets/AAPL/quantity")
+    check("GET /assets/AAPL/quantity без X-User-Id → 400", r.status_code == 400)
+
+    # Покупаем через trading-service и проверяем, что quantity обновился
+    # Сначала пополняем баланс
+    requests.post(
+        f"{base}/balance/deposit",
+        headers={"X-User-Id": str(user_id)},
+        json={"amount": "500000.00"},
+    )
+
+    r = requests.get(
+        f"{base}/assets/MSFT/quantity",
+        headers={"X-User-Id": str(user_id)},
+    )
+    qty_before = r.json().get("quantity", 0)
+
+    r = requests.post(
+        f"{trading_base}/orders",
+        headers={"X-User-Id": str(user_id)},
+        json={"symbol": "MSFT", "side": "BUY", "type": "MARKET", "quantity": 15},
+    )
+    check("BUY MSFT 15 шт. → FILLED", r.status_code == 201 and r.json().get("status") == "FILLED")
+
+    print(f"  {YELLOW}⏳ ждём {kafka_wait}с пока Kafka доставит событие...{RESET}")
+    time.sleep(kafka_wait)
+
+    r = requests.get(
+        f"{base}/assets/MSFT/quantity",
+        headers={"X-User-Id": str(user_id)},
+    )
+    check("GET /assets/MSFT/quantity после BUY → 200", r.status_code == 200)
+    data = r.json()
+    qty_after = data.get("quantity", 0)
+    check(
+        f"  quantity: {qty_before} → {qty_after} (ожидаем +15)",
+        qty_after == qty_before + 15,
+        f"quantity={qty_after}, ожидали {qty_before + 15}",
+    )
+
+    # Проверяем, что нельзя продать больше, чем есть (SELL > quantity)
+    r = requests.post(
+        f"{trading_base}/orders",
+        headers={"X-User-Id": str(user_id)},
+        json={"symbol": "MSFT", "side": "SELL", "type": "MARKET", "quantity": qty_after + 100},
+    )
+    check(
+        f"SELL MSFT {qty_after + 100} шт. (больше чем есть) → не 201",
+        r.status_code != 201,
+        f"status={r.status_code}, тело={r.text[:200]}",
+    )
+
+
+def test_cash_balance_consistency(base: str, user_id: int):
+    """Проверяет, что /balance/cash и /portfolio возвращают одинаковый баланс"""
+    print(f"\n── Portfolio: Cash balance consistency (user={user_id}) ──")
+
+    r1 = requests.get(f"{base}/balance/cash", headers={"X-User-Id": str(user_id)})
+    r2 = requests.get(f"{base}/portfolio", headers={"X-User-Id": str(user_id)})
+    check("GET /balance/cash → 200", r1.status_code == 200)
+    check("GET /portfolio → 200", r2.status_code == 200)
+
+    cash_from_endpoint = r1.json().get("balance")
+    cash_from_portfolio = r2.json().get("cashBalance")
+    check(
+        f"  /balance/cash == /portfolio.cashBalance ({cash_from_endpoint})",
+        cash_from_endpoint == cash_from_portfolio,
+        f"cash={cash_from_endpoint}, portfolio.cashBalance={cash_from_portfolio}",
+    )
+
+
 def test_trading_health(base: str):
     print(f"\n── Trading: Health ──")
     r = requests.get(f"{base}/system/health")
@@ -368,10 +485,25 @@ def main():
     test_portfolio_withdraw(pbase, user_id=u_withdraw)
     test_portfolio_read(pbase, user_id=u_portfolio)
 
-    # Trading tests
+    # Новые эндпоинты
+    test_portfolio_cash_balance(pbase, user_id=u_portfolio)
+    test_cash_balance_consistency(pbase, user_id=u_portfolio)
+    test_portfolio_asset_quantity(pbase, tbase, user_id=u_e2e + 1, kafka_wait=args.kafka_wait)
+
+    # Trading tests — сначала пополняем баланс через portfolio-service
+    requests.post(
+        f"{pbase}/balance/deposit",
+        headers={"X-User-Id": str(u_trading)},
+        json={"amount": "500000.00"},
+    )
     test_trading_health(tbase)
     test_trading_validation(tbase, user_id=u_trading)
     buy_order = test_trading_buy_order(tbase, user_id=u_trading)
+
+    # Ждём пока Kafka доставит позицию в portfolio-service
+    print(f"\n  {YELLOW}⏳ ждём {args.kafka_wait}с пока Kafka синхронизирует позицию...{RESET}")
+    time.sleep(args.kafka_wait)
+
     test_trading_sell_order(tbase, user_id=u_trading)
     if buy_order:
         test_trading_get_order(tbase, user_id=u_trading, order_id=buy_order["id"])
