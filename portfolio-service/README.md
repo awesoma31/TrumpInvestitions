@@ -119,9 +119,9 @@ python portfolio-service/test_endpoints.py --base-url http://localhost:8081/api/
   ...
 
 ========================================
-  Passed: 30
+  Passed: 44
   Failed: 0
-  Total:  30
+  Total:  44
 ========================================
 ```
 
