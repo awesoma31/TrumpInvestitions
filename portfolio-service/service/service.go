@@ -254,6 +254,21 @@ func (s *PortfolioService) handleTradeExecuted(ctx context.Context, event *model
 
 	ts, _ := time.Parse(time.RFC3339, event.Timestamp)
 
+	// Upsert order so it exists in portfolio's order history
+	avgFill := event.AvgFillPrice
+	now := time.Now()
+	_ = s.repo.InsertOrder(ctx, &models.Order{
+		ID:           orderID,
+		UserID:       event.UserID,
+		Symbol:       event.Symbol,
+		Side:         models.OrderSide(event.Side),
+		Quantity:     event.Quantity,
+		Status:       models.OrderStatusFilled,
+		AvgFillPrice: &avgFill,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	})
+
 	trade := &models.Trade{
 		ID:          tradeID,
 		OrderID:     orderID,

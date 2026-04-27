@@ -50,7 +50,6 @@ func main() {
 	// Router
 	r := chi.NewRouter()
 	r.Use(api.CORSMiddleware)
-	r.Use(api.UserIDMiddleware)
 	api.RegisterRoutes(r, orderService)
 
 	// Server

@@ -15,16 +15,23 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: portfolio-postgres
+    container_name: postgres
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portfolio
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./portfolio-service/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+      - ./db/postgres-init.sql:/docker-entrypoint-initdb.d/00_create_trading_db.sql
+      - ./portfolio-service/migrations/001_init.sql:/docker-entrypoint-initdb.d/01_portfolio_schema.sql
+      - ./portfolio-service/migrations/002_drop_trade_fk.sql:/docker-entrypoint-initdb.d/02_drop_trade_fk.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -55,8 +62,42 @@ services:
       KAFKA_TOPIC: trading-events
       KAFKA_GROUP_ID: portfolio-service
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  trading-service:
+    build: ./trading-service
+    container_name: trading-service
+    ports:
+      - "8082:8080"
+    environment:
+      DATABASE_URL: postgres://trading:trading@postgres:5432/trading?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: trading-events
+      SERVER_PORT: "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger-ui
+    ports:
+      - "8090:8080"
+    environment:
+      URLS: >
+        [
+          {"url":"/swagger/auth-gateway.yml","name":"Auth Gateway"},
+          {"url":"/swagger/order-service.yml","name":"Order Service"},
+          {"url":"/swagger/portfolio-service.yml","name":"Portfolio Service"},
+          {"url":"/swagger/market-data-service.yml","name":"Market Data Service"}
+        ]
+    volumes:
+      - ./swagger:/swagger:ro
 
 volumes:
   pgdata:

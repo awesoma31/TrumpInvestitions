@@ -198,6 +198,12 @@ func (s *OrderService) publishEvent(ctx context.Context, order *domain.OrderReco
 		ev.RejectionReason = *order.RejectionReason
 	}
 	_ = s.kafkaProducer.ProduceTradingEvent(context.Background(), ev)
+
+	if order.Status == domain.OrderStatusFilled {
+		tradeEv := *ev
+		tradeEv.EventType = "TRADE_EXECUTED"
+		_ = s.kafkaProducer.ProduceTradingEvent(context.Background(), &tradeEv)
+	}
 }
 
 func mapEventType(status domain.OrderStatus) string {

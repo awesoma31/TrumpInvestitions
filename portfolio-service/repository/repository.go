@@ -182,7 +182,7 @@ func (r *PostgresRepository) ListOrders(ctx context.Context, userID int64, statu
 
 func (r *PostgresRepository) InsertOrder(ctx context.Context, order *models.Order) error {
 	_, err := r.db.ExecContext(ctx,
-		"INSERT INTO orders (id, user_id, symbol, side, quantity, status, avg_fill_price, rejection_reason, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+		"INSERT INTO orders (id, user_id, symbol, side, quantity, status, avg_fill_price, rejection_reason, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING",
 		order.ID, order.UserID, order.Symbol, order.Side, order.Quantity, order.Status, order.AvgFillPrice, order.RejectionReason, order.CreatedAt, order.UpdatedAt,
 	)
 	return err

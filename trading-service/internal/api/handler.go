@@ -12,14 +12,18 @@ import (
 
 func RegisterRoutes(r chi.Router, svc *app.OrderService) {
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Post("/orders", createOrderHandler(svc))
-		r.Get("/orders", listOrdersHandler(svc))
-		r.Get("/orders/{orderId}", getOrderHandler(svc))
-		r.Post("/orders/{orderId}/cancel", cancelOrderHandler(svc))
-		r.Get("/trades", listTradesHandler(svc))
-		r.Get("/trades/{tradeId}", getTradeHandler(svc))
 		r.Get("/system/health", healthHandler())
 		r.Get("/system/ready", readyHandler())
+
+		r.Group(func(r chi.Router) {
+			r.Use(UserIDMiddleware)
+			r.Post("/orders", createOrderHandler(svc))
+			r.Get("/orders", listOrdersHandler(svc))
+			r.Get("/orders/{orderId}", getOrderHandler(svc))
+			r.Post("/orders/{orderId}/cancel", cancelOrderHandler(svc))
+			r.Get("/trades", listTradesHandler(svc))
+			r.Get("/trades/{tradeId}", getTradeHandler(svc))
+		})
 	})
 }
 
