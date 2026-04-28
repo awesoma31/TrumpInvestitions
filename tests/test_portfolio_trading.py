@@ -15,6 +15,20 @@ import sys
 import time
 import requests
 
+
+def safe_json(r: requests.Response) -> dict:
+    """Parse JSON response, showing raw body on failure."""
+    try:
+        return r.json()
+    except Exception:
+        body = r.text[:500]
+        raise AssertionError(
+            f"Ответ не является валидным JSON.\n"
+            f"  URL:    {r.request.method} {r.url}\n"
+            f"  Status: {r.status_code}\n"
+            f"  Body:   {body!r}"
+        )
+
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
@@ -57,19 +71,19 @@ def wait_for(url: str, timeout: int = 30):
     return False
 
 
-# ─── Portfolio Service ──────────────────────────────────────────────────────
+# ─── Portfolio Service ──────────────────────────────────────────
 
 def test_portfolio_health(base: str):
     print(f"\n── Portfolio: Health ──")
     r = requests.get(f"{base}/system/health")
     check("GET /system/health → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  status=UP", data.get("status") == "UP")
     check("  service=portfolio-service", data.get("service") == "portfolio-service")
 
     r = requests.get(f"{base}/system/ready")
     check("GET /system/ready → 200", r.status_code == 200)
-    check("  status=READY", r.json().get("status") == "READY")
+    check("  status=READY", safe_json(r).get("status") == "READY")
 
 
 def test_portfolio_validation(base: str):
@@ -89,7 +103,7 @@ def test_portfolio_deposit(base: str, user_id: int) -> str:
         json={"amount": "50000.00"},
     )
     check("POST /balance/deposit → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  balance=50000.00", data.get("balance") == "50000.00")
     check("  currency=USD", data.get("currency") == "USD")
     check("  userId совпадает", data.get("userId") == user_id)
@@ -101,7 +115,7 @@ def test_portfolio_deposit(base: str, user_id: int) -> str:
         json={"amount": "10000.00"},
     )
     check("POST /balance/deposit (добавление) → 200", r.status_code == 200)
-    check("  balance=60000.00", r.json().get("balance") == "60000.00")
+    check("  balance=60000.00", safe_json(r).get("balance") == "60000.00")
 
     # Невалидные суммы
     r = requests.post(
@@ -128,7 +142,7 @@ def test_portfolio_withdraw(base: str, user_id: int):
         json={"amount": "2000.00"},
     )
     check("POST /balance/withdraw → 200", r.status_code == 200)
-    check("  balance=3000.00", r.json().get("balance") == "3000.00")
+    check("  balance=3000.00", safe_json(r).get("balance") == "3000.00")
 
     r = requests.post(
         f"{base}/balance/withdraw",
@@ -136,14 +150,14 @@ def test_portfolio_withdraw(base: str, user_id: int):
         json={"amount": "99999.00"},
     )
     check("POST /balance/withdraw нехватка средств → 422", r.status_code == 422)
-    check("  code=INSUFFICIENT_BALANCE", r.json().get("code") == "INSUFFICIENT_BALANCE")
+    check("  code=INSUFFICIENT_BALANCE", safe_json(r).get("code") == "INSUFFICIENT_BALANCE")
 
 
 def test_portfolio_read(base: str, user_id: int):
     print(f"\n── Portfolio: Read (user={user_id}) ──")
     r = requests.get(f"{base}/portfolio", headers={"X-User-Id": str(user_id)})
     check("GET /portfolio → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  userId присутствует", data.get("userId") == user_id)
     check("  cashBalance — строка", isinstance(data.get("cashBalance"), str))
     check("  positions — список", isinstance(data.get("positions"), list))
@@ -151,28 +165,28 @@ def test_portfolio_read(base: str, user_id: int):
 
     r = requests.get(f"{base}/positions", headers={"X-User-Id": str(user_id)})
     check("GET /positions → 200", r.status_code == 200)
-    check("  items — список", isinstance(r.json().get("items"), list))
+    check("  items — список", isinstance(safe_json(r).get("items"), list))
 
     r = requests.get(f"{base}/positions/NONEXISTENT", headers={"X-User-Id": str(user_id)})
     check("GET /positions/NONEXISTENT → 404", r.status_code == 404)
 
     r = requests.get(f"{base}/pnl", headers={"X-User-Id": str(user_id)})
     check("GET /pnl → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  realizedPnl присутствует", "realizedPnl" in data)
     check("  unrealizedPnl присутствует", "unrealizedPnl" in data)
     check("  currency=USD", data.get("currency") == "USD")
 
     r = requests.get(f"{base}/orders", headers={"X-User-Id": str(user_id)})
     check("GET /orders → 200", r.status_code == 200)
-    check("  items — список", isinstance(r.json().get("items"), list))
+    check("  items — список", isinstance(safe_json(r).get("items"), list))
 
     r = requests.get(f"{base}/trades", headers={"X-User-Id": str(user_id)})
     check("GET /trades → 200", r.status_code == 200)
-    check("  items — список", isinstance(r.json().get("items"), list))
+    check("  items — список", isinstance(safe_json(r).get("items"), list))
 
 
-# ─── Trading Service ────────────────────────────────────────────────────────
+# ─── Trading Service ────────────────────────────────────────────
 
 def test_portfolio_cash_balance(base: str, user_id: int):
     """Тесты GET /balance/cash"""
@@ -182,7 +196,7 @@ def test_portfolio_cash_balance(base: str, user_id: int):
     fresh_id = user_id + 1000
     r = requests.get(f"{base}/balance/cash", headers={"X-User-Id": str(fresh_id)})
     check("GET /balance/cash новый пользователь → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  balance=0.00", data.get("balance") == "0.00")
     check("  currency=USD", data.get("currency") == "USD")
     check("  userId совпадает", data.get("userId") == fresh_id)
@@ -190,7 +204,7 @@ def test_portfolio_cash_balance(base: str, user_id: int):
     # После депозита — баланс отражает сумму
     r = requests.get(f"{base}/balance/cash", headers={"X-User-Id": str(user_id)})
     check("GET /balance/cash после депозита → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     balance = float(data.get("balance", "0"))
     check("  balance > 0", balance > 0, f"balance={data.get('balance')}")
     check("  userId совпадает", data.get("userId") == user_id)
@@ -214,7 +228,7 @@ def test_portfolio_asset_quantity(base: str, trading_base: str, user_id: int, ka
         headers={"X-User-Id": str(user_id)},
     )
     check("GET /assets/NONEXISTENT/quantity → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  quantity=0", data.get("quantity") == 0)
     check("  symbol=NONEXISTENT", data.get("symbol") == "NONEXISTENT")
     check("  userId совпадает", data.get("userId") == user_id)
@@ -235,14 +249,14 @@ def test_portfolio_asset_quantity(base: str, trading_base: str, user_id: int, ka
         f"{base}/assets/MSFT/quantity",
         headers={"X-User-Id": str(user_id)},
     )
-    qty_before = r.json().get("quantity", 0)
+    qty_before = safe_json(r).get("quantity", 0)
 
     r = requests.post(
         f"{trading_base}/orders",
         headers={"X-User-Id": str(user_id)},
         json={"symbol": "MSFT", "side": "BUY", "type": "MARKET", "quantity": 15},
     )
-    check("BUY MSFT 15 шт. → FILLED", r.status_code == 201 and r.json().get("status") == "FILLED")
+    check("BUY MSFT 15 шт. → FILLED", r.status_code == 201 and safe_json(r).get("status") == "FILLED")
 
     print(f"  {YELLOW}⏳ ждём {kafka_wait}с пока Kafka доставит событие...{RESET}")
     time.sleep(kafka_wait)
@@ -252,7 +266,7 @@ def test_portfolio_asset_quantity(base: str, trading_base: str, user_id: int, ka
         headers={"X-User-Id": str(user_id)},
     )
     check("GET /assets/MSFT/quantity после BUY → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     qty_after = data.get("quantity", 0)
     check(
         f"  quantity: {qty_before} → {qty_after} (ожидаем +15)",
@@ -282,8 +296,8 @@ def test_cash_balance_consistency(base: str, user_id: int):
     check("GET /balance/cash → 200", r1.status_code == 200)
     check("GET /portfolio → 200", r2.status_code == 200)
 
-    cash_from_endpoint = r1.json().get("balance")
-    cash_from_portfolio = r2.json().get("cashBalance")
+    cash_from_endpoint = safe_json(r1).get("balance")
+    cash_from_portfolio = safe_json(r2).get("cashBalance")
     check(
         f"  /balance/cash == /portfolio.cashBalance ({cash_from_endpoint})",
         cash_from_endpoint == cash_from_portfolio,
@@ -295,7 +309,7 @@ def test_trading_health(base: str):
     print(f"\n── Trading: Health ──")
     r = requests.get(f"{base}/system/health")
     check("GET /system/health → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  status=UP", data.get("status") == "UP")
     check("  service=trading-service", data.get("service") == "trading-service")
 
@@ -325,7 +339,7 @@ def test_trading_buy_order(base: str, user_id: int) -> dict:
         json={"symbol": "AAPL", "side": "BUY", "type": "MARKET", "quantity": 10},
     )
     check("POST /orders BUY → 201", r.status_code == 201)
-    data = r.json()
+    data = safe_json(r)
     check("  status=FILLED", data.get("status") == "FILLED")
     check("  symbol=AAPL", data.get("symbol") == "AAPL")
     check("  side=BUY", data.get("side") == "BUY")
@@ -343,7 +357,7 @@ def test_trading_sell_order(base: str, user_id: int) -> dict:
         json={"symbol": "AAPL", "side": "SELL", "type": "MARKET", "quantity": 5},
     )
     check("POST /orders SELL → 201", r.status_code == 201)
-    data = r.json()
+    data = safe_json(r)
     check("  status=FILLED", data.get("status") == "FILLED")
     check("  side=SELL", data.get("side") == "SELL")
     return data
@@ -353,7 +367,7 @@ def test_trading_get_order(base: str, user_id: int, order_id: str):
     print(f"\n── Trading: Get order ──")
     r = requests.get(f"{base}/orders/{order_id}", headers={"X-User-Id": str(user_id)})
     check("GET /orders/{id} → 200", r.status_code == 200)
-    check("  id совпадает", r.json().get("id") == order_id)
+    check("  id совпадает", safe_json(r).get("id") == order_id)
 
     r = requests.get(f"{base}/orders/00000000-0000-0000-0000-000000000000", headers={"X-User-Id": str(user_id)})
     check("GET /orders/несуществующий → 404", r.status_code == 404)
@@ -363,14 +377,14 @@ def test_trading_cancel_filled(base: str, user_id: int, order_id: str):
     print(f"\n── Trading: Cancel filled order ──")
     r = requests.post(f"{base}/orders/{order_id}/cancel", headers={"X-User-Id": str(user_id)})
     check("POST /orders/{id}/cancel на FILLED → 409", r.status_code == 409)
-    check("  code=CONFLICT", r.json().get("code") == "CONFLICT")
+    check("  code=CONFLICT", safe_json(r).get("code") == "CONFLICT")
 
 
 def test_trading_list(base: str, user_id: int):
     print(f"\n── Trading: Lists ──")
     r = requests.get(f"{base}/orders", headers={"X-User-Id": str(user_id)})
     check("GET /orders → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  items — список", isinstance(data.get("items"), list))
     check("  total >= 1", data.get("total", 0) >= 1)
     check("  limit присутствует", "limit" in data)
@@ -384,7 +398,7 @@ def test_trading_list(base: str, user_id: int):
 
     r = requests.get(f"{base}/trades", headers={"X-User-Id": str(user_id)})
     check("GET /trades → 200", r.status_code == 200)
-    data = r.json()
+    data = safe_json(r)
     check("  items — список", isinstance(data.get("items"), list))
     check("  total >= 1", data.get("total", 0) >= 1)
 
@@ -393,10 +407,10 @@ def test_trading_list(base: str, user_id: int):
         trade_id = trade["id"]
         r = requests.get(f"{base}/trades/{trade_id}", headers={"X-User-Id": str(user_id)})
         check("GET /trades/{id} → 200", r.status_code == 200)
-        check("  id совпадает", r.json().get("id") == trade_id)
+        check("  id совпадает", safe_json(r).get("id") == trade_id)
 
 
-# ─── End-to-end: Trading → Kafka → Portfolio ───────────────────────────────
+# ─── End-to-end: Trading → Kafka → Portfolio ───────────────────
 
 def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: int):
     print(f"\n── E2E: order → kafka → portfolio (user={user_id}, ожидание {kafka_wait}с) ──")
@@ -410,7 +424,7 @@ def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: i
 
     # Позиций до сделки
     r = requests.get(f"{portfolio_base}/positions", headers={"X-User-Id": str(user_id)})
-    positions_before = {p["symbol"]: p for p in r.json().get("items", [])}
+    positions_before = {p["symbol"]: p for p in safe_json(r).get("items", [])}
     qty_before = positions_before.get("TSLA", {}).get("quantity", 0)
 
     # Покупаем через trading-service
@@ -419,7 +433,7 @@ def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: i
         headers={"X-User-Id": str(user_id)},
         json={"symbol": "TSLA", "side": "BUY", "type": "MARKET", "quantity": 7},
     )
-    check("BUY TSLA 7 шт. → FILLED", r.status_code == 201 and r.json().get("status") == "FILLED")
+    check("BUY TSLA 7 шт. → FILLED", r.status_code == 201 and safe_json(r).get("status") == "FILLED")
 
     # Ждём Kafka
     print(f"  {YELLOW}⏳ ждём {kafka_wait}с пока Kafka доставит событие...{RESET}")
@@ -428,7 +442,7 @@ def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: i
     # Проверяем позицию в portfolio-service
     r = requests.get(f"{portfolio_base}/positions/TSLA", headers={"X-User-Id": str(user_id)})
     if r.status_code == 200:
-        qty_after = r.json().get("quantity", 0)
+        qty_after = safe_json(r).get("quantity", 0)
         check(
             f"  позиция TSLA в портфеле: {qty_before} → {qty_after} (ожидаем +7)",
             qty_after == qty_before + 7,
@@ -443,10 +457,10 @@ def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: i
         headers={"X-User-Id": str(user_id)},
         params={"symbol": "TSLA"},
     )
-    check("  ордер TSLA виден в portfolio-service", r.status_code == 200 and r.json().get("total", 0) >= 1)
+    check("  ордер TSLA виден в portfolio-service", r.status_code == 200 and safe_json(r).get("total", 0) >= 1)
 
 
-# ─── Main ───────────────────────────────────────────────────────────────────
+# ─── Main ───────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Integration tests: portfolio-service + trading-service")
