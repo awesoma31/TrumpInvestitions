@@ -38,3 +38,5 @@ clickhouse_data
 clickhouse_logs
 
 .idea/
+
+.vscode/

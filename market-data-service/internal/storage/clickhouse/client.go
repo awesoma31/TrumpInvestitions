@@ -128,7 +128,7 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 			argMax(bid_price, tuple(event_time_ns, sequence)) AS bid,
 			argMax(ask_price, tuple(event_time_ns, sequence)) AS ask,
 			argMax(last_price, tuple(event_time_ns, sequence)) AS last,
-			max(event_time_ns) AS event_time_ns,
+			argMax(event_time_ns, tuple(event_time_ns, sequence)) AS latest_event_time_ns,
 			argMin(last_price, tuple(event_time_ns, sequence)) AS open,
 			max(last_price) AS high,
 			min(last_price) AS low,
@@ -146,7 +146,7 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 		Bid         float64 `json:"bid"`
 		Ask         float64 `json:"ask"`
 		Last        float64 `json:"last"`
-		EventTimeNS uint64  `json:"event_time_ns"`
+		EventTimeNS uint64  `json:"latest_event_time_ns"`
 		Open        float64 `json:"open"`
 		High        float64 `json:"high"`
 		Low         float64 `json:"low"`

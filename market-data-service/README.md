@@ -46,6 +46,35 @@ go run ./cmd/market-data-service
 
 По умолчанию сервис поднимается на `http://localhost:8080/api/v1`.
 
+## Smoke test вместе с pricing_engine
+
+Есть готовый скрипт:
+
+```bash
+./scripts/smoke-test-market-data.sh
+```
+
+Он делает следующее:
+
+- поднимает `clickhouse` и `market-data-service` через `docker compose`
+- инициализирует таблицу `quotes`
+- по умолчанию очищает `quotes` через `TRUNCATE TABLE`
+- собирает `pricing_engine`
+- прогоняет сценарий `pricing_engine/examples/basic_btc.yaml`
+- вызывает основные endpoint'ы из swagger и печатает ответы
+
+Если нужен другой сценарий:
+
+```bash
+./scripts/smoke-test-market-data.sh pricing_engine/examples/basic_btc.yaml
+```
+
+Если не хочешь очищать таблицу перед тестом:
+
+```bash
+RESET_DB=0 ./scripts/smoke-test-market-data.sh
+```
+
 ## Переменные окружения
 
 - `HTTP_PORT` - порт HTTP-сервера, по умолчанию `8080`

@@ -181,8 +181,8 @@ func (s *MarketDataService) GetOrderBook(ctx context.Context, symbol string, dep
 		value := response.Asks[0].Price
 		response.BestAsk = &value
 	}
-	if response.BestBid != nil && response.BestAsk != nil {
-		response.Spread = domain.FormatSpread(snapshots[0].Bid, snapshots[0].Ask)
+	if len(bids) > 0 && len(asks) > 0 {
+		response.Spread = domain.FormatSpread(bids[0].Price, asks[0].Price)
 	}
 
 	return response, nil
