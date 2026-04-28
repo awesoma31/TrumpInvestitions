@@ -13,6 +13,42 @@ services:
         soft: 262144
         hard: 262144
 
+  auth-gateway:
+    build:
+      context: ./auth-gateway
+    container_name: auth-gateway
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DATABASE_URL: jdbc:postgresql://auth-postgres:5432/auth_gateway
+      DATABASE_USER: auth
+      DATABASE_PASSWORD: auth
+      JWT_SECRET: change-me-in-production
+      MARKET_SERVICE_URL: http://market-data-service:8080/api/v1
+      ORDER_SERVICE_URL: http://trading-service:8080/api/v1
+      PORTFOLIO_SERVICE_URL: http://portfolio-service:8080/api/v1
+    ports:
+      - "8080:8080"
+
+  auth-postgres:
+    image: postgres:16-alpine
+    container_name: auth-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+      POSTGRES_DB: auth_gateway
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth_gateway"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   postgres:
     image: postgres:16-alpine
     container_name: postgres
@@ -100,4 +136,5 @@ services:
       - ./swagger:/swagger:ro
 
 volumes:
+  auth_pgdata:
   pgdata:
