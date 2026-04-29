@@ -222,3 +222,57 @@ func TestWithdrawSuccess(t *testing.T) {
 	_ = decimal.RequireFromString(resp.Balance)
 	assert.Equal(t, "7000.00", resp.Balance)
 }
+
+func TestGetCashBalanceEndpoint(t *testing.T) {
+	_, r := setupHandler()
+
+	// deposit first
+	body, _ := json.Marshal(models.BalanceOperationRequest{Amount: "8000.00"})
+	req := httptest.NewRequest("POST", "/api/v1/balance/deposit", bytes.NewReader(body))
+	req.Header.Set("X-User-Id", "1")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	// get cash balance
+	req = httptest.NewRequest("GET", "/api/v1/balance/cash", nil)
+	req.Header.Set("X-User-Id", "1")
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var data map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &data)
+	assert.Equal(t, "8000.00", data["balance"])
+	assert.Equal(t, "USD", data["currency"])
+}
+
+func TestGetCashBalanceMissingUser(t *testing.T) {
+	_, r := setupHandler()
+	req := httptest.NewRequest("GET", "/api/v1/balance/cash", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestGetAssetQuantityEndpoint(t *testing.T) {
+	_, r := setupHandler()
+	req := httptest.NewRequest("GET", "/api/v1/assets/AAPL/quantity", nil)
+	req.Header.Set("X-User-Id", "1")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var data map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &data)
+	assert.Equal(t, float64(0), data["quantity"]) // no position yet
+	assert.Equal(t, "AAPL", data["symbol"])
+}
+
+func TestGetAssetQuantityMissingUser(t *testing.T) {
+	_, r := setupHandler()
+	req := httptest.NewRequest("GET", "/api/v1/assets/AAPL/quantity", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}

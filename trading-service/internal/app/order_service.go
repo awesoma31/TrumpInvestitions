@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -197,12 +198,20 @@ func (s *OrderService) publishEvent(ctx context.Context, order *domain.OrderReco
 	if order.RejectionReason != nil {
 		ev.RejectionReason = *order.RejectionReason
 	}
-	_ = s.kafkaProducer.ProduceTradingEvent(context.Background(), ev)
+	if err := s.kafkaProducer.ProduceTradingEvent(context.Background(), ev); err != nil {
+		log.Printf("ERROR publishing kafka event %s: %v", ev.EventType, err)
+	} else {
+		log.Printf("Published kafka event: %s for order %s", ev.EventType, ev.OrderID)
+	}
 
 	if order.Status == domain.OrderStatusFilled {
 		tradeEv := *ev
 		tradeEv.EventType = "TRADE_EXECUTED"
-		_ = s.kafkaProducer.ProduceTradingEvent(context.Background(), &tradeEv)
+		if err := s.kafkaProducer.ProduceTradingEvent(context.Background(), &tradeEv); err != nil {
+			log.Printf("ERROR publishing kafka TRADE_EXECUTED: %v", err)
+		} else {
+			log.Printf("Published kafka event: TRADE_EXECUTED for order %s", ev.OrderID)
+		}
 	}
 }
 

@@ -17,5 +17,15 @@ func NewMarketClientMock() *MarketClientMock {
 }
 
 func (m *MarketClientMock) GetMarketData(ctx context.Context, symbol string) (decimal.Decimal, int, error) {
-	return decimal.Zero, 1000000, nil
+	prices := map[string]float64{
+		"AAPL": 190.0,
+		"GOOG": 140.0,
+		"TSLA": 250.0,
+		"MSFT": 420.0,
+	}
+	p, ok := prices[symbol]
+	if !ok {
+		p = 100.0
+	}
+	return decimal.NewFromFloat(p), 1000000, nil
 }

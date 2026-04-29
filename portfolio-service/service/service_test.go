@@ -123,10 +123,10 @@ func TestGetPositionBySymbol(t *testing.T) {
 	assert.Equal(t, "GOOG", resp.Symbol)
 	assert.Equal(t, 5, resp.Quantity)
 	assert.Equal(t, "140.00", resp.CurrentPrice)
-	assert.Equal(t, "700.00", resp.MarketValue)        // 5 * 140
-	assert.Equal(t, "50.00", resp.UnrealizedPnl)       // (140-130)*5
+	assert.Equal(t, "700.00", resp.MarketValue)  // 5 * 140
+	assert.Equal(t, "50.00", resp.UnrealizedPnl) // (140-130)*5
 	assert.Equal(t, "20.00", resp.RealizedPnl)
-	assert.Equal(t, "70.00", resp.TotalPnl)            // 20 + 50
+	assert.Equal(t, "70.00", resp.TotalPnl) // 20 + 50
 }
 
 func TestGetPositionBySymbolNotFound(t *testing.T) {
@@ -158,16 +158,16 @@ func TestProcessTradeExecutedBuy(t *testing.T) {
 	ctx := context.Background()
 
 	event := &models.TradingEvent{
-		EventType: "TRADE_EXECUTED",
-		UserID:    1,
-		OrderID:   "00000000-0000-0000-0000-000000000001",
-		TradeID:   "00000000-0000-0000-0000-000000000002",
-		Symbol:    "AAPL",
-		Side:      "BUY",
-		Quantity:  10,
-		Price:     "185.00",
+		EventType:   "TRADE_EXECUTED",
+		UserID:      1,
+		OrderID:     "00000000-0000-0000-0000-000000000001",
+		TradeID:     "00000000-0000-0000-0000-000000000002",
+		Symbol:      "AAPL",
+		Side:        "BUY",
+		Quantity:    10,
+		Price:       "185.00",
 		GrossAmount: "1850.00",
-		Timestamp: "2024-01-01T00:00:00Z",
+		Timestamp:   "2024-01-01T00:00:00Z",
 	}
 
 	// Insert the order first so trade references it
@@ -189,16 +189,16 @@ func TestProcessTradeExecutedSell(t *testing.T) {
 	repo.UpsertPosition(ctx, 1, "AAPL", 10, decimal.NewFromFloat(185.0), decimal.Zero)
 
 	event := &models.TradingEvent{
-		EventType: "TRADE_EXECUTED",
-		UserID:    1,
-		OrderID:   "00000000-0000-0000-0000-000000000001",
-		TradeID:   "00000000-0000-0000-0000-000000000003",
-		Symbol:    "AAPL",
-		Side:      "SELL",
-		Quantity:  5,
-		Price:     "195.00",
+		EventType:   "TRADE_EXECUTED",
+		UserID:      1,
+		OrderID:     "00000000-0000-0000-0000-000000000001",
+		TradeID:     "00000000-0000-0000-0000-000000000003",
+		Symbol:      "AAPL",
+		Side:        "SELL",
+		Quantity:    5,
+		Price:       "195.00",
 		GrossAmount: "975.00",
-		Timestamp: "2024-01-01T00:00:00Z",
+		Timestamp:   "2024-01-01T00:00:00Z",
 	}
 
 	err := svc.ProcessTradingEvent(ctx, event)
@@ -238,4 +238,42 @@ func TestListTradesEmpty(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 0, resp.Total)
 	assert.Empty(t, resp.Items)
+}
+
+func TestGetCashBalanceNewUser(t *testing.T) {
+	svc, _ := newTestService()
+	ctx := context.Background()
+
+	balance, err := svc.GetCashBalance(ctx, 99)
+	require.NoError(t, err)
+	assert.True(t, balance.Equal(decimal.Zero))
+}
+
+func TestGetCashBalanceAfterDeposit(t *testing.T) {
+	svc, _ := newTestService()
+	ctx := context.Background()
+
+	svc.Deposit(ctx, 1, decimal.NewFromFloat(5000))
+	balance, err := svc.GetCashBalance(ctx, 1)
+	require.NoError(t, err)
+	assert.True(t, balance.Equal(decimal.NewFromFloat(5000)))
+}
+
+func TestGetAssetQuantityNoPosition(t *testing.T) {
+	svc, _ := newTestService()
+	ctx := context.Background()
+
+	qty, err := svc.GetAssetQuantity(ctx, 1, "AAPL")
+	require.NoError(t, err)
+	assert.Equal(t, 0, qty)
+}
+
+func TestGetAssetQuantityWithPosition(t *testing.T) {
+	svc, repo := newTestService()
+	ctx := context.Background()
+
+	repo.UpsertPosition(ctx, 1, "AAPL", 25, decimal.NewFromFloat(185.0), decimal.Zero)
+	qty, err := svc.GetAssetQuantity(ctx, 1, "AAPL")
+	require.NoError(t, err)
+	assert.Equal(t, 25, qty)
 }

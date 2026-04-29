@@ -17,7 +17,7 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -49,6 +49,23 @@ services:
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic trading-events --partitions 1 --replication-factor 1 && echo 'Topic trading-events created'"
+    restart: "no"
 
   portfolio-service:
     build: ./portfolio-service
@@ -65,7 +82,7 @@ services:
       postgres:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
 
   trading-service:
     build: ./trading-service
@@ -77,11 +94,12 @@ services:
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: trading-events
       SERVER_PORT: "8080"
+      PORTFOLIO_URL: http://portfolio-service:8080
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
 
   swagger-ui:
     image: swaggerapi/swagger-ui:latest

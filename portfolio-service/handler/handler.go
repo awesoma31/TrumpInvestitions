@@ -35,6 +35,9 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	api.HandleFunc("/orders", h.ListOrders).Methods("GET")
 	api.HandleFunc("/trades", h.ListTrades).Methods("GET")
 
+	api.HandleFunc("/balance/cash", h.GetCashBalance).Methods("GET")
+	api.HandleFunc("/assets/{symbol}/quantity", h.GetAssetQuantity).Methods("GET")
+
 	api.HandleFunc("/system/health", h.Health).Methods("GET")
 	api.HandleFunc("/system/ready", h.Ready).Methods("GET")
 }
@@ -204,6 +207,47 @@ func (h *Handler) ListTrades(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, resp)
+}
+
+func (h *Handler) GetCashBalance(w http.ResponseWriter, r *http.Request) {
+	userID, ok := getUserID(r)
+	if !ok {
+		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Missing or invalid X-User-Id header")
+		return
+	}
+	balance, err := h.svc.GetCashBalance(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"userId":   userID,
+		"balance":  balance.StringFixed(2),
+		"currency": "USD",
+	})
+}
+
+func (h *Handler) GetAssetQuantity(w http.ResponseWriter, r *http.Request) {
+	userID, ok := getUserID(r)
+	if !ok {
+		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Missing or invalid X-User-Id header")
+		return
+	}
+	symbol := mux.Vars(r)["symbol"]
+	if symbol == "" {
+		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Missing symbol")
+		return
+	}
+	qty, err := h.svc.GetAssetQuantity(r.Context(), userID, symbol)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"userId":   userID,
+		"symbol":   symbol,
+		"quantity": qty,
+	})
 }
 
 func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {

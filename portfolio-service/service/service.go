@@ -198,7 +198,7 @@ func (s *PortfolioService) ListTrades(ctx context.Context, userID int64, symbol,
 			OrderID:     t.OrderID.String(),
 			Symbol:      t.Symbol,
 			Side:        string(t.Side),
-			Quantity:     t.Quantity,
+			Quantity:    t.Quantity,
 			Price:       t.Price.StringFixed(2),
 			GrossAmount: t.GrossAmount.StringFixed(2),
 			FeeAmount:   t.FeeAmount,
@@ -206,6 +206,25 @@ func (s *PortfolioService) ListTrades(ctx context.Context, userID int64, symbol,
 		})
 	}
 	return &models.TradeHistoryListResponse{Items: items, Total: total, Limit: limit, Offset: offset}, nil
+}
+
+func (s *PortfolioService) GetCashBalance(ctx context.Context, userID int64) (decimal.Decimal, error) {
+	portfolio, err := s.repo.GetOrCreatePortfolio(ctx, userID)
+	if err != nil {
+		return decimal.Zero, err
+	}
+	return portfolio.CashBalance, nil
+}
+
+func (s *PortfolioService) GetAssetQuantity(ctx context.Context, userID int64, symbol string) (int, error) {
+	pos, err := s.repo.GetPosition(ctx, userID, symbol)
+	if err != nil {
+		return 0, err
+	}
+	if pos == nil {
+		return 0, nil
+	}
+	return pos.Quantity, nil
 }
 
 // ProcessTradingEvent handles Kafka events from Trading Service

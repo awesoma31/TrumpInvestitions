@@ -37,9 +37,9 @@ func main() {
 	}
 	defer kafkaProducer.Close()
 
-	// External clients (mocked)
+	// External clients
 	marketClient := external.NewMarketClientMock()
-	portfolioClient := external.NewPortfolioClientMock()
+	portfolioClient := external.NewPortfolioHTTPClient(cfg.PortfolioURL)
 
 	// Repository
 	orderRepo := repository.NewPostgresOrderRepo(db)
