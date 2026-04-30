@@ -40,3 +40,5 @@ clickhouse_logs
 .idea/
 
 .vscode/
+.claude
+mobile/android-native/.gradle
