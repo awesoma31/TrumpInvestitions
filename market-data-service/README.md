@@ -19,30 +19,36 @@ Go-сервис для агрегации рыночных данных из Cli
 
 1. Поднять ClickHouse:
 
-```bash
-docker compose up -d
-./db/clickhouse/init_clickhouse.sh
-```
+   ```bash
+   docker compose up -d
+   ./db/clickhouse/init_clickhouse.sh
+   ```
 
-Или сразу поднять ClickHouse вместе с API:
+   Или сразу поднять ClickHouse вместе с API:
 
-```bash
-docker compose up -d --build
-./db/clickhouse/init_clickhouse.sh
-```
+   ```bash
+   docker compose up -d --build
+   ./db/clickhouse/init_clickhouse.sh
+   ```
 
-2. Загрузить тестовые котировки:
+2. Собрать `pricing_engine`:
 
-```bash
-./pricing_engine --scenario pricing_engine/examples/basic_btc.yaml | ./pricing_engine/push_input_to_db.sh
-```
+   ```bash
+   make -C pricing_engine
+   ```
 
-3. Запустить сервис:
+3. Загрузить тестовые котировки:
 
-```bash
-cd market-data-service
-go run ./cmd/market-data-service
-```
+   ```bash
+   ./pricing_engine/pricing_engine --scenario pricing_engine/examples/basic_btc.yaml | ./pricing_engine/push_input_to_db.sh
+   ```
+
+4. Запустить сервис:
+
+   ```bash
+   cd market-data-service
+   go run ./cmd/market-data-service
+   ```
 
 По умолчанию сервис поднимается на `http://localhost:8080/api/v1`.
 
