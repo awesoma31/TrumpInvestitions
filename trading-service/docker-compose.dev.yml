@@ -1,3 +1,6 @@
+# Изолированный запуск только trading-service для локальной разработки.
+# Для полного стека (portfolio + trading + kafka + postgres) используй
+# docker-compose.yml в корне репозитория.
 version: '3.8'
 services:
   postgres:

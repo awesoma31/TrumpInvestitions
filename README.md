@@ -442,3 +442,73 @@ ClickHouse
   {"timestamp": 1710000600, "price": 100}
 ]
 ```
+
+---
+
+## Запуск тестов
+
+### Быстрый старт
+
+```bash
+# Юнит-тесты (без инфраструктуры)
+make test-unit
+
+# Полный цикл: поднять сервисы → дождаться готовности → все тесты
+make test-all
+```
+
+### Юнит-тесты
+
+Не требуют запущенных сервисов или Docker.
+
+```bash
+make test-unit
+# или напрямую:
+cd trading-service  && go test ./...
+cd portfolio-service && go test ./...
+```
+
+### Интеграционные тесты
+
+Требуют запущенной инфраструктуры. Поднять её:
+
+```bash
+make up          # docker compose up -d --build
+make wait        # дождаться готовности healthcheck'ов
+```
+
+| Команда | Что тестирует |
+| --- | --- |
+| `make test-portfolio` | только `portfolio-service` (изолированно) |
+| `make test-integration` | `portfolio-service` + `trading-service` (e2e) |
+
+Переменные окружения для переопределения URL:
+
+```bash
+make test-integration \
+  PORTFOLIO_URL=http://localhost:8081/api/v1 \
+  TRADING_URL=http://localhost:8082/api/v1 \
+  KAFKA_WAIT=5
+```
+
+### Структура тестов
+
+```text
+tests/
+├── requirements.txt              # pip-зависимости (requests)
+├── test_portfolio.py             # интеграционные тесты portfolio-service
+└── test_portfolio_trading.py     # e2e тесты portfolio + trading
+
+trading-service/internal/app/
+└── order_service_test.go         # юнит-тесты trading-service
+
+portfolio-service/
+├── handler/handler_test.go       # юнит-тесты HTTP-хендлеров
+└── service/service_test.go       # юнит-тесты бизнес-логики
+```
+
+### Зависимости для Python-тестов
+
+```bash
+pip install -r tests/requirements.txt
+```

@@ -1,11 +1,12 @@
 """
-Integration tests for Portfolio Service.
+Integration tests for Portfolio Service (isolated).
 
 Usage:
-    pip install requests
-    python test_endpoints.py [--base-url http://localhost:8080]
+    pip install -r requirements.txt
+    python test_portfolio.py [--base-url http://localhost:8081/api/v1]
 
-The service must be running (e.g. via docker-compose up).
+The service must be running:
+    docker compose up -d portfolio-service postgres kafka
 """
 
 import argparse
@@ -217,8 +218,8 @@ def main():
     parser = argparse.ArgumentParser(description="Portfolio Service integration tests")
     parser.add_argument(
         "--base-url",
-        default="http://localhost:8080/api/v1",
-        help="Base URL of the portfolio service (default: http://localhost:8080/api/v1)",
+        default="http://localhost:8081/api/v1",
+        help="Base URL of the portfolio service (default: http://localhost:8081/api/v1)",
     )
     args = parser.parse_args()
     base = args.base_url.rstrip("/")
