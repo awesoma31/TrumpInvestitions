@@ -1,0 +1,6012 @@
+scenario_id: btcusdt_trend_day_1000
+venue: BINANCE
+symbol: BTCUSDT
+seed: 101
+start_time_ns: 1713439200000000000
+tick_interval_ms: 100
+initial_mid_price: 65000.0
+initial_spread: 0.50
+default_bid_size: 1.20
+default_ask_size: 1.00
+default_last_size: 0.10
+steps:
+  - move_mid_by: 0.0139
+    spread: 0.5480
+    bid_size: 0.98
+    ask_size: 0.96
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: 0.0157
+    spread: 0.5114
+    bid_size: 1.07
+    ask_size: 1.00
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0176
+    spread: 0.5225
+    bid_size: 1.15
+    ask_size: 1.05
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0194
+    spread: 0.5332
+    bid_size: 1.23
+    ask_size: 1.09
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0211
+    spread: 0.5433
+    bid_size: 1.32
+    ask_size: 1.13
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0229
+    spread: 0.5524
+    bid_size: 1.40
+    ask_size: 1.17
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0246
+    spread: 0.5605
+    bid_size: 1.48
+    ask_size: 1.20
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0262
+    spread: 0.5673
+    bid_size: 1.56
+    ask_size: 1.24
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0278
+    spread: 0.5728
+    bid_size: 1.63
+    ask_size: 1.28
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0294
+    spread: 0.6248
+    bid_size: 1.71
+    ask_size: 1.31
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0308
+    spread: 0.5792
+    bid_size: 1.78
+    ask_size: 1.34
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0322
+    spread: 0.5800
+    bid_size: 1.85
+    ask_size: 0.87
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0336
+    spread: 0.5792
+    bid_size: 1.91
+    ask_size: 0.90
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0348
+    spread: 0.5767
+    bid_size: 1.20
+    ask_size: 0.93
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0360
+    spread: 0.5727
+    bid_size: 1.26
+    ask_size: 0.96
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0370
+    spread: 0.5673
+    bid_size: 1.32
+    ask_size: 0.99
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0380
+    spread: 0.5604
+    bid_size: 1.38
+    ask_size: 1.03
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0389
+    spread: 0.5523
+    bid_size: 1.43
+    ask_size: 1.09
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0397
+    spread: 0.5912
+    bid_size: 1.48
+    ask_size: 1.15
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: 0.0404
+    spread: 0.5332
+    bid_size: 1.53
+    ask_size: 1.22
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0409
+    spread: 0.5225
+    bid_size: 1.58
+    ask_size: 1.28
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0414
+    spread: 0.5113
+    bid_size: 1.62
+    ask_size: 1.34
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0418
+    spread: 0.5001
+    bid_size: 1.66
+    ask_size: 0.89
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0420
+    spread: 0.5115
+    bid_size: 1.70
+    ask_size: 0.95
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0422
+    spread: 0.5226
+    bid_size: 1.74
+    ask_size: 1.01
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0422
+    spread: 0.5333
+    bid_size: 1.78
+    ask_size: 1.06
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0421
+    spread: 0.5434
+    bid_size: 1.04
+    ask_size: 1.12
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0419
+    spread: 0.6005
+    bid_size: 1.07
+    ask_size: 1.17
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: 0.0416
+    spread: 0.5605
+    bid_size: 1.11
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0411
+    spread: 0.5674
+    bid_size: 1.18
+    ask_size: 1.27
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0406
+    spread: 0.5728
+    bid_size: 1.27
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0399
+    spread: 0.5768
+    bid_size: 1.35
+    ask_size: 1.37
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0391
+    spread: 0.5792
+    bid_size: 1.43
+    ask_size: 1.41
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0382
+    spread: 0.5800
+    bid_size: 1.51
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0373
+    spread: 0.5792
+    bid_size: 1.59
+    ask_size: 1.00
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0362
+    spread: 0.5767
+    bid_size: 1.67
+    ask_size: 1.04
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0350
+    spread: 0.6207
+    bid_size: 1.75
+    ask_size: 1.08
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0337
+    spread: 0.5672
+    bid_size: 1.82
+    ask_size: 1.12
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0323
+    spread: 0.5603
+    bid_size: 1.89
+    ask_size: 1.15
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0308
+    spread: 0.5523
+    bid_size: 1.18
+    ask_size: 1.19
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0292
+    spread: 0.5431
+    bid_size: 1.25
+    ask_size: 1.22
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0276
+    spread: 0.5331
+    bid_size: 1.32
+    ask_size: 1.26
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0259
+    spread: 0.5224
+    bid_size: 1.38
+    ask_size: 1.29
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0241
+    spread: 0.5112
+    bid_size: 1.44
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0222
+    spread: 0.5002
+    bid_size: 1.50
+    ask_size: 0.85
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0203
+    spread: 0.5596
+    bid_size: 1.55
+    ask_size: 0.88
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0183
+    spread: 0.5227
+    bid_size: 1.60
+    ask_size: 0.91
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0163
+    spread: 0.5334
+    bid_size: 1.65
+    ask_size: 0.94
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0142
+    spread: 0.5434
+    bid_size: 1.70
+    ask_size: 1.00
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0121
+    spread: 0.5526
+    bid_size: 1.74
+    ask_size: 1.06
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0100
+    spread: 0.5606
+    bid_size: 1.79
+    ask_size: 1.12
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0078
+    spread: 0.5674
+    bid_size: 1.83
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0057
+    spread: 0.5729
+    bid_size: 1.09
+    ask_size: 1.24
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0035
+    spread: 0.5768
+    bid_size: 1.13
+    ask_size: 1.30
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0013
+    spread: 0.6272
+    bid_size: 1.16
+    ask_size: 1.36
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0009
+    spread: 0.5800
+    bid_size: 1.20
+    ask_size: 0.91
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0031
+    spread: 0.5791
+    bid_size: 1.24
+    ask_size: 0.97
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0053
+    spread: 0.5767
+    bid_size: 1.29
+    ask_size: 1.02
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0075
+    spread: 0.5727
+    bid_size: 1.38
+    ask_size: 1.08
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0096
+    spread: 0.5672
+    bid_size: 1.46
+    ask_size: 1.13
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0117
+    spread: 0.5603
+    bid_size: 1.54
+    ask_size: 1.18
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0138
+    spread: 0.5522
+    bid_size: 1.63
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0158
+    spread: 0.5430
+    bid_size: 1.71
+    ask_size: 1.28
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0177
+    spread: 0.5810
+    bid_size: 1.79
+    ask_size: 1.32
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: -0.0196
+    spread: 0.5223
+    bid_size: 1.86
+    ask_size: 1.37
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0215
+    spread: 0.5111
+    bid_size: 1.16
+    ask_size: 1.41
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0233
+    spread: 0.5003
+    bid_size: 1.23
+    ask_size: 0.95
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0250
+    spread: 0.5117
+    bid_size: 1.30
+    ask_size: 0.99
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0266
+    spread: 0.5228
+    bid_size: 1.37
+    ask_size: 1.03
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0282
+    spread: 0.5335
+    bid_size: 1.44
+    ask_size: 1.07
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0296
+    spread: 0.5435
+    bid_size: 1.50
+    ask_size: 1.10
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0310
+    spread: 0.5526
+    bid_size: 1.56
+    ask_size: 1.14
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0323
+    spread: 0.6087
+    bid_size: 1.62
+    ask_size: 1.17
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0335
+    spread: 0.5675
+    bid_size: 1.67
+    ask_size: 1.20
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0346
+    spread: 0.5729
+    bid_size: 1.73
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0355
+    spread: 0.5769
+    bid_size: 1.78
+    ask_size: 1.26
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0364
+    spread: 0.5792
+    bid_size: 1.82
+    ask_size: 1.29
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0372
+    spread: 0.5800
+    bid_size: 1.87
+    ask_size: 0.82
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0379
+    spread: 0.5791
+    bid_size: 1.13
+    ask_size: 0.85
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0384
+    spread: 0.5767
+    bid_size: 1.17
+    ask_size: 0.90
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0389
+    spread: 0.5726
+    bid_size: 1.21
+    ask_size: 0.96
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0392
+    spread: 0.6151
+    bid_size: 1.25
+    ask_size: 1.02
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: -0.0395
+    spread: 0.5602
+    bid_size: 1.29
+    ask_size: 1.08
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0396
+    spread: 0.5521
+    bid_size: 1.33
+    ask_size: 1.14
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0396
+    spread: 0.5429
+    bid_size: 1.36
+    ask_size: 1.20
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0395
+    spread: 0.5329
+    bid_size: 1.41
+    ask_size: 1.26
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0393
+    spread: 0.5222
+    bid_size: 1.49
+    ask_size: 1.32
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0390
+    spread: 0.5110
+    bid_size: 1.58
+    ask_size: 1.37
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0386
+    spread: 0.5004
+    bid_size: 1.66
+    ask_size: 0.93
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0381
+    spread: 0.5118
+    bid_size: 1.74
+    ask_size: 0.98
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0375
+    spread: 0.5709
+    bid_size: 1.82
+    ask_size: 1.04
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: -0.0367
+    spread: 0.5336
+    bid_size: 1.12
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0359
+    spread: 0.5436
+    bid_size: 1.20
+    ask_size: 1.14
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0351
+    spread: 0.5527
+    bid_size: 1.27
+    ask_size: 1.19
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0341
+    spread: 0.5607
+    bid_size: 1.35
+    ask_size: 1.23
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0330
+    spread: 0.5675
+    bid_size: 1.42
+    ask_size: 1.28
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0319
+    spread: 0.5730
+    bid_size: 1.49
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0307
+    spread: 0.5769
+    bid_size: 1.55
+    ask_size: 1.36
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0295
+    spread: 0.5792
+    bid_size: 1.62
+    ask_size: 1.40
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0281
+    spread: 0.6280
+    bid_size: 1.68
+    ask_size: 0.94
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0268
+    spread: 0.5791
+    bid_size: 1.74
+    ask_size: 0.98
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0253
+    spread: 0.5766
+    bid_size: 1.79
+    ask_size: 1.02
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0239
+    spread: 0.5726
+    bid_size: 1.85
+    ask_size: 1.05
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0224
+    spread: 0.5670
+    bid_size: 1.90
+    ask_size: 1.08
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0208
+    spread: 0.5601
+    bid_size: 1.17
+    ask_size: 1.12
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0192
+    spread: 0.5520
+    bid_size: 1.21
+    ask_size: 1.15
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0176
+    spread: 0.5428
+    bid_size: 1.26
+    ask_size: 1.18
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0160
+    spread: 0.5328
+    bid_size: 1.30
+    ask_size: 1.21
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0144
+    spread: 0.5701
+    bid_size: 1.34
+    ask_size: 1.24
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0128
+    spread: 0.5109
+    bid_size: 1.38
+    ask_size: 1.27
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0112
+    spread: 0.5005
+    bid_size: 1.42
+    ask_size: 0.80
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0096
+    spread: 0.5119
+    bid_size: 1.45
+    ask_size: 0.86
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0080
+    spread: 0.5230
+    bid_size: 1.49
+    ask_size: 0.92
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0064
+    spread: 0.5337
+    bid_size: 1.53
+    ask_size: 0.98
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0049
+    spread: 0.5437
+    bid_size: 1.61
+    ask_size: 1.04
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0034
+    spread: 0.5528
+    bid_size: 1.69
+    ask_size: 1.10
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0019
+    spread: 0.5608
+    bid_size: 1.77
+    ask_size: 1.16
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0005
+    spread: 0.6156
+    bid_size: 1.07
+    ask_size: 1.22
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0009
+    spread: 0.5730
+    bid_size: 1.16
+    ask_size: 1.28
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0022
+    spread: 0.5769
+    bid_size: 1.24
+    ask_size: 1.33
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0035
+    spread: 0.5793
+    bid_size: 1.31
+    ask_size: 1.39
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0047
+    spread: 0.5800
+    bid_size: 1.39
+    ask_size: 0.94
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0059
+    spread: 0.5791
+    bid_size: 1.46
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0069
+    spread: 0.5766
+    bid_size: 1.54
+    ask_size: 1.05
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0079
+    spread: 0.5725
+    bid_size: 1.61
+    ask_size: 1.09
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0088
+    spread: 0.5670
+    bid_size: 1.67
+    ask_size: 1.14
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0097
+    spread: 0.6081
+    bid_size: 1.74
+    ask_size: 1.19
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: 0.0104
+    spread: 0.5519
+    bid_size: 1.80
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0111
+    spread: 0.5428
+    bid_size: 1.86
+    ask_size: 1.27
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0116
+    spread: 0.5327
+    bid_size: 1.92
+    ask_size: 1.31
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0121
+    spread: 0.5220
+    bid_size: 1.19
+    ask_size: 1.35
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0125
+    spread: 0.5108
+    bid_size: 1.24
+    ask_size: 1.39
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0128
+    spread: 0.5006
+    bid_size: 1.29
+    ask_size: 0.93
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0130
+    spread: 0.5120
+    bid_size: 1.34
+    ask_size: 0.96
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0131
+    spread: 0.5231
+    bid_size: 1.38
+    ask_size: 1.00
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0132
+    spread: 0.5818
+    bid_size: 1.42
+    ask_size: 1.03
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0131
+    spread: 0.5438
+    bid_size: 1.47
+    ask_size: 1.06
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0129
+    spread: 0.5529
+    bid_size: 1.50
+    ask_size: 1.10
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0127
+    spread: 0.5609
+    bid_size: 1.54
+    ask_size: 1.13
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0123
+    spread: 0.5676
+    bid_size: 1.58
+    ask_size: 1.16
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0119
+    spread: 0.5730
+    bid_size: 1.62
+    ask_size: 1.19
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0113
+    spread: 0.5769
+    bid_size: 1.65
+    ask_size: 1.22
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0107
+    spread: 0.5793
+    bid_size: 1.72
+    ask_size: 1.26
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0100
+    spread: 0.5800
+    bid_size: 1.02
+    ask_size: 0.83
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0092
+    spread: 0.6271
+    bid_size: 1.11
+    ask_size: 0.89
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: 0.0084
+    spread: 0.5766
+    bid_size: 1.19
+    ask_size: 0.95
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0075
+    spread: 0.5725
+    bid_size: 1.27
+    ask_size: 1.01
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0065
+    spread: 0.5669
+    bid_size: 1.35
+    ask_size: 1.07
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0054
+    spread: 0.5600
+    bid_size: 1.43
+    ask_size: 1.13
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0043
+    spread: 0.5519
+    bid_size: 1.51
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0032
+    spread: 0.5427
+    bid_size: 1.58
+    ask_size: 1.24
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0019
+    spread: 0.5326
+    bid_size: 1.65
+    ask_size: 1.29
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0007
+    spread: 0.5219
+    bid_size: 1.72
+    ask_size: 1.35
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0006
+    spread: 0.5587
+    bid_size: 1.79
+    ask_size: 1.40
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: -0.0020
+    spread: 0.5007
+    bid_size: 1.86
+    ask_size: 0.95
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0033
+    spread: 0.5121
+    bid_size: 1.92
+    ask_size: 1.00
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0047
+    spread: 0.5232
+    bid_size: 1.20
+    ask_size: 1.05
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0061
+    spread: 0.5339
+    bid_size: 1.26
+    ask_size: 1.10
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0075
+    spread: 0.5439
+    bid_size: 1.31
+    ask_size: 1.14
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0089
+    spread: 0.5529
+    bid_size: 1.36
+    ask_size: 1.18
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0104
+    spread: 0.5609
+    bid_size: 1.41
+    ask_size: 1.23
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0118
+    spread: 0.5677
+    bid_size: 1.46
+    ask_size: 1.27
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0132
+    spread: 0.6211
+    bid_size: 1.51
+    ask_size: 1.30
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0145
+    spread: 0.5770
+    bid_size: 1.55
+    ask_size: 1.34
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0159
+    spread: 0.5793
+    bid_size: 1.59
+    ask_size: 1.38
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0172
+    spread: 0.5800
+    bid_size: 1.63
+    ask_size: 0.91
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0185
+    spread: 0.5791
+    bid_size: 1.67
+    ask_size: 0.95
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0197
+    spread: 0.5765
+    bid_size: 1.71
+    ask_size: 0.98
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0209
+    spread: 0.5724
+    bid_size: 1.74
+    ask_size: 1.01
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0221
+    spread: 0.5669
+    bid_size: 1.00
+    ask_size: 1.04
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0232
+    spread: 0.5599
+    bid_size: 1.05
+    ask_size: 1.07
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0242
+    spread: 0.5998
+    bid_size: 1.14
+    ask_size: 1.10
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0251
+    spread: 0.5426
+    bid_size: 1.22
+    ask_size: 1.13
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0260
+    spread: 0.5325
+    bid_size: 1.30
+    ask_size: 1.17
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0268
+    spread: 0.5218
+    bid_size: 1.38
+    ask_size: 1.23
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0275
+    spread: 0.5106
+    bid_size: 1.47
+    ask_size: 1.29
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0282
+    spread: 0.5008
+    bid_size: 1.54
+    ask_size: 0.85
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0287
+    spread: 0.5122
+    bid_size: 1.62
+    ask_size: 0.91
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0292
+    spread: 0.5233
+    bid_size: 1.70
+    ask_size: 0.97
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0295
+    spread: 0.5340
+    bid_size: 1.77
+    ask_size: 1.03
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0298
+    spread: 0.5919
+    bid_size: 1.84
+    ask_size: 1.09
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0299
+    spread: 0.5530
+    bid_size: 1.91
+    ask_size: 1.14
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0300
+    spread: 0.5610
+    bid_size: 1.20
+    ask_size: 1.20
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0299
+    spread: 0.5678
+    bid_size: 1.26
+    ask_size: 1.25
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0298
+    spread: 0.5731
+    bid_size: 1.32
+    ask_size: 1.31
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0295
+    spread: 0.5770
+    bid_size: 1.38
+    ask_size: 1.36
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0291
+    spread: 0.5793
+    bid_size: 1.43
+    ask_size: 1.41
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0287
+    spread: 0.5800
+    bid_size: 1.49
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0281
+    spread: 0.5791
+    bid_size: 1.54
+    ask_size: 1.01
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0274
+    spread: 0.6245
+    bid_size: 1.58
+    ask_size: 1.05
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: -0.0266
+    spread: 0.5724
+    bid_size: 1.63
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0257
+    spread: 0.5668
+    bid_size: 1.67
+    ask_size: 1.14
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0247
+    spread: 0.5599
+    bid_size: 1.72
+    ask_size: 1.18
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0236
+    spread: 0.5517
+    bid_size: 1.76
+    ask_size: 1.22
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0223
+    spread: 0.5425
+    bid_size: 1.80
+    ask_size: 1.25
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0210
+    spread: 0.5324
+    bid_size: 1.05
+    ask_size: 1.29
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0196
+    spread: 0.5217
+    bid_size: 1.09
+    ask_size: 1.33
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0182
+    spread: 0.5105
+    bid_size: 1.13
+    ask_size: 1.36
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0166
+    spread: 0.5489
+    bid_size: 1.17
+    ask_size: 0.89
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0149
+    spread: 0.5123
+    bid_size: 1.25
+    ask_size: 0.93
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0243
+    spread: 0.5234
+    bid_size: 1.33
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0225
+    spread: 0.5341
+    bid_size: 1.42
+    ask_size: 0.99
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0206
+    spread: 0.5440
+    bid_size: 1.50
+    ask_size: 1.02
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0187
+    spread: 0.5531
+    bid_size: 1.58
+    ask_size: 1.05
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0167
+    spread: 0.5611
+    bid_size: 1.66
+    ask_size: 1.08
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0146
+    spread: 0.5678
+    bid_size: 1.74
+    ask_size: 1.13
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0125
+    spread: 0.5732
+    bid_size: 1.81
+    ask_size: 1.19
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0104
+    spread: 0.6250
+    bid_size: 1.89
+    ask_size: 1.25
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: -0.0082
+    spread: 0.5793
+    bid_size: 1.18
+    ask_size: 1.31
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0060
+    spread: 0.5800
+    bid_size: 1.25
+    ask_size: 0.87
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0037
+    spread: 0.5790
+    bid_size: 1.31
+    ask_size: 0.93
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0015
+    spread: 0.5765
+    bid_size: 1.38
+    ask_size: 0.99
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0008
+    spread: 0.5724
+    bid_size: 1.44
+    ask_size: 1.05
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0031
+    spread: 0.5668
+    bid_size: 1.50
+    ask_size: 1.11
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0053
+    spread: 0.5598
+    bid_size: 1.55
+    ask_size: 1.16
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0076
+    spread: 0.5516
+    bid_size: 1.61
+    ask_size: 1.21
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0098
+    spread: 0.5904
+    bid_size: 1.66
+    ask_size: 1.27
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: 0.0121
+    spread: 0.5323
+    bid_size: 1.71
+    ask_size: 1.32
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0143
+    spread: 0.5216
+    bid_size: 1.75
+    ask_size: 1.37
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0164
+    spread: 0.5104
+    bid_size: 1.80
+    ask_size: 1.41
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0186
+    spread: 0.5010
+    bid_size: 1.84
+    ask_size: 0.96
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0206
+    spread: 0.5124
+    bid_size: 1.10
+    ask_size: 1.00
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0227
+    spread: 0.5235
+    bid_size: 1.14
+    ask_size: 1.05
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0246
+    spread: 0.5342
+    bid_size: 1.18
+    ask_size: 1.09
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0266
+    spread: 0.5441
+    bid_size: 1.22
+    ask_size: 1.13
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0284
+    spread: 0.6012
+    bid_size: 1.25
+    ask_size: 1.17
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0302
+    spread: 0.5611
+    bid_size: 1.29
+    ask_size: 1.20
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0318
+    spread: 0.5679
+    bid_size: 1.36
+    ask_size: 1.24
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0335
+    spread: 0.5732
+    bid_size: 1.45
+    ask_size: 1.27
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0350
+    spread: 0.5770
+    bid_size: 1.53
+    ask_size: 1.31
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0364
+    spread: 0.5793
+    bid_size: 1.61
+    ask_size: 1.34
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0377
+    spread: 0.5800
+    bid_size: 1.69
+    ask_size: 0.87
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0390
+    spread: 0.5790
+    bid_size: 1.77
+    ask_size: 0.90
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0401
+    spread: 0.5765
+    bid_size: 1.85
+    ask_size: 0.93
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0411
+    spread: 0.6203
+    bid_size: 1.15
+    ask_size: 0.96
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0420
+    spread: 0.5667
+    bid_size: 1.22
+    ask_size: 0.99
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0428
+    spread: 0.5597
+    bid_size: 1.30
+    ask_size: 1.03
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0435
+    spread: 0.5516
+    bid_size: 1.37
+    ask_size: 1.09
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0441
+    spread: 0.5423
+    bid_size: 1.43
+    ask_size: 1.16
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0445
+    spread: 0.5322
+    bid_size: 1.50
+    ask_size: 1.22
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0449
+    spread: 0.5215
+    bid_size: 1.56
+    ask_size: 1.28
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0451
+    spread: 0.5103
+    bid_size: 1.62
+    ask_size: 1.34
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0452
+    spread: 0.5011
+    bid_size: 1.68
+    ask_size: 0.90
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0452
+    spread: 0.5605
+    bid_size: 1.73
+    ask_size: 0.95
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0451
+    spread: 0.5236
+    bid_size: 1.78
+    ask_size: 1.01
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0449
+    spread: 0.5343
+    bid_size: 1.83
+    ask_size: 1.07
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0445
+    spread: 0.5442
+    bid_size: 1.88
+    ask_size: 1.12
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0441
+    spread: 0.5532
+    bid_size: 1.14
+    ask_size: 1.17
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0435
+    spread: 0.5612
+    bid_size: 1.19
+    ask_size: 1.22
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0429
+    spread: 0.5679
+    bid_size: 1.23
+    ask_size: 1.27
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0421
+    spread: 0.5732
+    bid_size: 1.27
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0412
+    spread: 0.5771
+    bid_size: 1.31
+    ask_size: 1.37
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0402
+    spread: 0.6273
+    bid_size: 1.34
+    ask_size: 1.41
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: 0.0392
+    spread: 0.5800
+    bid_size: 1.38
+    ask_size: 0.96
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0380
+    spread: 0.5790
+    bid_size: 1.42
+    ask_size: 1.00
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0368
+    spread: 0.5764
+    bid_size: 1.48
+    ask_size: 1.04
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0355
+    spread: 0.5723
+    bid_size: 1.56
+    ask_size: 1.08
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0341
+    spread: 0.5667
+    bid_size: 1.64
+    ask_size: 1.12
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0326
+    spread: 0.5597
+    bid_size: 1.73
+    ask_size: 1.15
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0311
+    spread: 0.5515
+    bid_size: 1.81
+    ask_size: 1.19
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0295
+    spread: 0.5422
+    bid_size: 1.11
+    ask_size: 1.22
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0278
+    spread: 0.5801
+    bid_size: 1.19
+    ask_size: 1.25
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0261
+    spread: 0.5214
+    bid_size: 1.26
+    ask_size: 1.29
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0244
+    spread: 0.5102
+    bid_size: 1.34
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0226
+    spread: 0.5012
+    bid_size: 1.41
+    ask_size: 0.85
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0208
+    spread: 0.5126
+    bid_size: 1.48
+    ask_size: 0.88
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0190
+    spread: 0.5237
+    bid_size: 1.55
+    ask_size: 0.91
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0172
+    spread: 0.5343
+    bid_size: 1.62
+    ask_size: 0.94
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0153
+    spread: 0.5443
+    bid_size: 1.68
+    ask_size: 1.00
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0135
+    spread: 0.5533
+    bid_size: 1.74
+    ask_size: 1.06
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0116
+    spread: 0.6093
+    bid_size: 1.80
+    ask_size: 1.12
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: 0.0097
+    spread: 0.5680
+    bid_size: 1.85
+    ask_size: 1.18
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0079
+    spread: 0.5733
+    bid_size: 1.90
+    ask_size: 1.24
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0061
+    spread: 0.5771
+    bid_size: 1.17
+    ask_size: 1.30
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0043
+    spread: 0.5794
+    bid_size: 1.22
+    ask_size: 1.36
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0025
+    spread: 0.5800
+    bid_size: 1.27
+    ask_size: 0.91
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0008
+    spread: 0.5790
+    bid_size: 1.31
+    ask_size: 0.97
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0009
+    spread: 0.5764
+    bid_size: 1.35
+    ask_size: 1.03
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0025
+    spread: 0.5722
+    bid_size: 1.39
+    ask_size: 1.08
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0041
+    spread: 0.6146
+    bid_size: 1.43
+    ask_size: 1.13
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: -0.0056
+    spread: 0.5596
+    bid_size: 1.47
+    ask_size: 1.18
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0071
+    spread: 0.5514
+    bid_size: 1.51
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0085
+    spread: 0.5422
+    bid_size: 1.54
+    ask_size: 1.28
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0098
+    spread: 0.5320
+    bid_size: 1.59
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0110
+    spread: 0.5213
+    bid_size: 1.67
+    ask_size: 1.37
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0122
+    spread: 0.5101
+    bid_size: 1.76
+    ask_size: 1.41
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0133
+    spread: 0.5013
+    bid_size: 1.06
+    ask_size: 0.95
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0142
+    spread: 0.5127
+    bid_size: 1.14
+    ask_size: 0.99
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0152
+    spread: 0.5718
+    bid_size: 1.22
+    ask_size: 1.03
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0160
+    spread: 0.5344
+    bid_size: 1.30
+    ask_size: 1.07
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0167
+    spread: 0.5444
+    bid_size: 1.38
+    ask_size: 1.10
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0173
+    spread: 0.5534
+    bid_size: 1.46
+    ask_size: 1.14
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0178
+    spread: 0.5613
+    bid_size: 1.53
+    ask_size: 1.17
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0183
+    spread: 0.5680
+    bid_size: 1.60
+    ask_size: 1.20
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0186
+    spread: 0.5733
+    bid_size: 1.67
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0188
+    spread: 0.5771
+    bid_size: 1.74
+    ask_size: 1.26
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0190
+    spread: 0.5794
+    bid_size: 1.80
+    ask_size: 1.29
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0190
+    spread: 0.6280
+    bid_size: 1.86
+    ask_size: 0.82
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0190
+    spread: 0.5790
+    bid_size: 1.92
+    ask_size: 0.85
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0188
+    spread: 0.5764
+    bid_size: 1.19
+    ask_size: 0.90
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0186
+    spread: 0.5722
+    bid_size: 1.25
+    ask_size: 0.96
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0182
+    spread: 0.5665
+    bid_size: 1.30
+    ask_size: 1.02
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0178
+    spread: 0.5595
+    bid_size: 1.35
+    ask_size: 1.08
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0173
+    spread: 0.5513
+    bid_size: 1.39
+    ask_size: 1.14
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0167
+    spread: 0.5421
+    bid_size: 1.44
+    ask_size: 1.20
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0160
+    spread: 0.5320
+    bid_size: 1.48
+    ask_size: 1.26
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0152
+    spread: 0.5692
+    bid_size: 1.52
+    ask_size: 1.32
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0144
+    spread: 0.5100
+    bid_size: 1.56
+    ask_size: 1.38
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0135
+    spread: 0.5014
+    bid_size: 1.60
+    ask_size: 0.93
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0125
+    spread: 0.5128
+    bid_size: 1.63
+    ask_size: 0.98
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0114
+    spread: 0.5239
+    bid_size: 1.67
+    ask_size: 1.04
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0103
+    spread: 0.5345
+    bid_size: 1.70
+    ask_size: 1.09
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0092
+    spread: 0.5445
+    bid_size: 1.01
+    ask_size: 1.14
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0080
+    spread: 0.5535
+    bid_size: 1.09
+    ask_size: 1.19
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0068
+    spread: 0.5614
+    bid_size: 1.17
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0055
+    spread: 0.6161
+    bid_size: 1.26
+    ask_size: 1.28
+    last_size: 0.04
+    trade_side: none
+  - move_mid_by: -0.0042
+    spread: 0.5734
+    bid_size: 1.34
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0028
+    spread: 0.5772
+    bid_size: 1.42
+    ask_size: 1.36
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0015
+    spread: 0.5794
+    bid_size: 1.50
+    ask_size: 1.40
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0001
+    spread: 0.5800
+    bid_size: 1.57
+    ask_size: 0.94
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0013
+    spread: 0.5790
+    bid_size: 1.65
+    ask_size: 0.98
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0026
+    spread: 0.5763
+    bid_size: 1.72
+    ask_size: 1.01
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0040
+    spread: 0.5721
+    bid_size: 1.79
+    ask_size: 1.05
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0054
+    spread: 0.5665
+    bid_size: 1.85
+    ask_size: 1.08
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0067
+    spread: 0.6075
+    bid_size: 1.92
+    ask_size: 1.12
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0081
+    spread: 0.5513
+    bid_size: 1.20
+    ask_size: 1.15
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0094
+    spread: 0.5420
+    bid_size: 1.26
+    ask_size: 1.18
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0106
+    spread: 0.5319
+    bid_size: 1.32
+    ask_size: 1.21
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0119
+    spread: 0.5211
+    bid_size: 1.37
+    ask_size: 1.24
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0131
+    spread: 0.5099
+    bid_size: 1.42
+    ask_size: 1.27
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: 0.0142
+    spread: 0.5015
+    bid_size: 1.47
+    ask_size: 0.80
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0153
+    spread: 0.5129
+    bid_size: 1.52
+    ask_size: 0.86
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0163
+    spread: 0.5240
+    bid_size: 1.56
+    ask_size: 0.92
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0173
+    spread: 0.5826
+    bid_size: 1.60
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: none
+  - move_mid_by: 0.0182
+    spread: 0.5445
+    bid_size: 1.64
+    ask_size: 1.05
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0190
+    spread: 0.5535
+    bid_size: 1.68
+    ask_size: 1.11
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0197
+    spread: 0.5615
+    bid_size: 1.72
+    ask_size: 1.16
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0204
+    spread: 0.5681
+    bid_size: 1.76
+    ask_size: 1.22
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0210
+    spread: 0.5734
+    bid_size: 1.01
+    ask_size: 1.28
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0215
+    spread: 0.5772
+    bid_size: 1.05
+    ask_size: 1.34
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0219
+    spread: 0.5794
+    bid_size: 1.12
+    ask_size: 1.39
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0222
+    spread: 0.5800
+    bid_size: 1.20
+    ask_size: 0.94
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0224
+    spread: 0.6269
+    bid_size: 1.29
+    ask_size: 1.00
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: 0.0225
+    spread: 0.5763
+    bid_size: 1.37
+    ask_size: 1.05
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0225
+    spread: 0.5721
+    bid_size: 1.45
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0225
+    spread: 0.5664
+    bid_size: 1.53
+    ask_size: 1.14
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0223
+    spread: 0.5594
+    bid_size: 1.61
+    ask_size: 1.19
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0220
+    spread: 0.5512
+    bid_size: 1.69
+    ask_size: 1.23
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0217
+    spread: 0.5419
+    bid_size: 1.76
+    ask_size: 1.27
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0212
+    spread: 0.5318
+    bid_size: 1.83
+    ask_size: 1.31
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0206
+    spread: 0.5210
+    bid_size: 1.90
+    ask_size: 1.35
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0200
+    spread: 0.5578
+    bid_size: 1.19
+    ask_size: 1.39
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0192
+    spread: 0.5016
+    bid_size: 1.26
+    ask_size: 0.93
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0184
+    spread: 0.5130
+    bid_size: 1.32
+    ask_size: 0.96
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0174
+    spread: 0.5241
+    bid_size: 1.38
+    ask_size: 1.00
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0164
+    spread: 0.5347
+    bid_size: 1.44
+    ask_size: 1.03
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0153
+    spread: 0.5446
+    bid_size: 1.49
+    ask_size: 1.06
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0141
+    spread: 0.5536
+    bid_size: 1.54
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0128
+    spread: 0.5615
+    bid_size: 1.59
+    ask_size: 1.12
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0114
+    spread: 0.5682
+    bid_size: 1.64
+    ask_size: 1.15
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0100
+    spread: 0.6214
+    bid_size: 1.68
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0085
+    spread: 0.5772
+    bid_size: 1.73
+    ask_size: 1.21
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0070
+    spread: 0.5794
+    bid_size: 1.77
+    ask_size: 1.27
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0053
+    spread: 0.5800
+    bid_size: 1.81
+    ask_size: 0.83
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0037
+    spread: 0.5789
+    bid_size: 1.07
+    ask_size: 0.89
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0020
+    spread: 0.5763
+    bid_size: 1.10
+    ask_size: 0.95
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0002
+    spread: 0.5721
+    bid_size: 1.14
+    ask_size: 1.01
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0016
+    spread: 0.5664
+    bid_size: 1.18
+    ask_size: 1.07
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0034
+    spread: 0.5593
+    bid_size: 1.23
+    ask_size: 1.13
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0053
+    spread: 0.5991
+    bid_size: 1.32
+    ask_size: 1.18
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0072
+    spread: 0.5418
+    bid_size: 1.40
+    ask_size: 1.24
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0090
+    spread: 0.5317
+    bid_size: 1.48
+    ask_size: 1.30
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0109
+    spread: 0.5209
+    bid_size: 1.57
+    ask_size: 1.35
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0128
+    spread: 0.5097
+    bid_size: 1.65
+    ask_size: 1.40
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0147
+    spread: 0.5017
+    bid_size: 1.73
+    ask_size: 0.95
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0166
+    spread: 0.5131
+    bid_size: 1.80
+    ask_size: 1.00
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0185
+    spread: 0.5242
+    bid_size: 1.88
+    ask_size: 1.05
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0203
+    spread: 0.5348
+    bid_size: 1.17
+    ask_size: 1.10
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0221
+    spread: 0.5927
+    bid_size: 1.24
+    ask_size: 1.14
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0239
+    spread: 0.5537
+    bid_size: 1.31
+    ask_size: 1.18
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0256
+    spread: 0.5616
+    bid_size: 1.38
+    ask_size: 1.23
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0273
+    spread: 0.5682
+    bid_size: 1.44
+    ask_size: 1.27
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0289
+    spread: 0.5735
+    bid_size: 1.50
+    ask_size: 1.30
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0304
+    spread: 0.5772
+    bid_size: 1.56
+    ask_size: 1.34
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0319
+    spread: 0.5794
+    bid_size: 1.61
+    ask_size: 1.38
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0333
+    spread: 0.5800
+    bid_size: 1.67
+    ask_size: 0.91
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0347
+    spread: 0.5789
+    bid_size: 1.72
+    ask_size: 0.94
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0360
+    spread: 0.6242
+    bid_size: 1.76
+    ask_size: 0.98
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0371
+    spread: 0.5720
+    bid_size: 1.81
+    ask_size: 1.01
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0382
+    spread: 0.5663
+    bid_size: 1.85
+    ask_size: 1.04
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0392
+    spread: 0.5593
+    bid_size: 1.11
+    ask_size: 1.07
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0401
+    spread: 0.5510
+    bid_size: 1.15
+    ask_size: 1.10
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0409
+    spread: 0.5417
+    bid_size: 1.19
+    ask_size: 1.13
+    last_size: 0.04
+    trade_side: buy
+  - move_mid_by: -0.0416
+    spread: 0.5316
+    bid_size: 1.23
+    ask_size: 1.17
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0422
+    spread: 0.5208
+    bid_size: 1.27
+    ask_size: 1.23
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0427
+    spread: 0.5096
+    bid_size: 1.30
+    ask_size: 1.29
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0430
+    spread: 0.5498
+    bid_size: 1.35
+    ask_size: 0.85
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: -0.0433
+    spread: 0.5132
+    bid_size: 1.43
+    ask_size: 0.91
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0434
+    spread: 0.5243
+    bid_size: 1.52
+    ask_size: 0.97
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0435
+    spread: 0.5349
+    bid_size: 1.60
+    ask_size: 1.03
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0545
+    spread: 0.5448
+    bid_size: 1.68
+    ask_size: 1.09
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0543
+    spread: 0.5538
+    bid_size: 1.76
+    ask_size: 1.15
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0539
+    spread: 0.5617
+    bid_size: 1.84
+    ask_size: 1.20
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0535
+    spread: 0.5683
+    bid_size: 1.14
+    ask_size: 1.26
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0529
+    spread: 0.5735
+    bid_size: 1.21
+    ask_size: 1.31
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0523
+    spread: 0.6253
+    bid_size: 1.29
+    ask_size: 1.36
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: -0.0515
+    spread: 0.5794
+    bid_size: 1.36
+    ask_size: 1.41
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0506
+    spread: 0.5800
+    bid_size: 1.43
+    ask_size: 0.96
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0496
+    spread: 0.5789
+    bid_size: 1.49
+    ask_size: 1.01
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0485
+    spread: 0.5762
+    bid_size: 1.56
+    ask_size: 1.05
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0473
+    spread: 0.5720
+    bid_size: 1.62
+    ask_size: 1.09
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0460
+    spread: 0.5663
+    bid_size: 1.68
+    ask_size: 1.14
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0446
+    spread: 0.5592
+    bid_size: 1.73
+    ask_size: 1.18
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0431
+    spread: 0.5509
+    bid_size: 1.79
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0415
+    spread: 0.5896
+    bid_size: 1.84
+    ask_size: 1.25
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0398
+    spread: 0.5315
+    bid_size: 1.89
+    ask_size: 1.29
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0381
+    spread: 0.5207
+    bid_size: 1.15
+    ask_size: 1.33
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0362
+    spread: 0.5095
+    bid_size: 1.20
+    ask_size: 1.36
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0343
+    spread: 0.5019
+    bid_size: 1.24
+    ask_size: 0.89
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0324
+    spread: 0.5133
+    bid_size: 1.28
+    ask_size: 0.92
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0304
+    spread: 0.5244
+    bid_size: 1.32
+    ask_size: 0.95
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0283
+    spread: 0.5350
+    bid_size: 1.36
+    ask_size: 0.99
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0262
+    spread: 0.5449
+    bid_size: 1.39
+    ask_size: 1.02
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0241
+    spread: 0.6018
+    bid_size: 1.43
+    ask_size: 1.05
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0219
+    spread: 0.5617
+    bid_size: 1.47
+    ask_size: 1.07
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0197
+    spread: 0.5683
+    bid_size: 1.55
+    ask_size: 1.13
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0174
+    spread: 0.5736
+    bid_size: 1.63
+    ask_size: 1.19
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0152
+    spread: 0.5773
+    bid_size: 1.71
+    ask_size: 1.25
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0129
+    spread: 0.5794
+    bid_size: 1.79
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0107
+    spread: 0.5800
+    bid_size: 1.10
+    ask_size: 0.88
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0084
+    spread: 0.5789
+    bid_size: 1.18
+    ask_size: 0.93
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0062
+    spread: 0.5762
+    bid_size: 1.25
+    ask_size: 0.99
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0040
+    spread: 0.6199
+    bid_size: 1.33
+    ask_size: 1.05
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0018
+    spread: 0.5662
+    bid_size: 1.40
+    ask_size: 1.11
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0004
+    spread: 0.5591
+    bid_size: 1.48
+    ask_size: 1.16
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0025
+    spread: 0.5509
+    bid_size: 1.55
+    ask_size: 1.21
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0046
+    spread: 0.5416
+    bid_size: 1.61
+    ask_size: 1.27
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0066
+    spread: 0.5314
+    bid_size: 1.68
+    ask_size: 1.32
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0086
+    spread: 0.5206
+    bid_size: 1.74
+    ask_size: 1.37
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0106
+    spread: 0.5094
+    bid_size: 1.80
+    ask_size: 1.41
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0124
+    spread: 0.5020
+    bid_size: 1.86
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0142
+    spread: 0.5614
+    bid_size: 1.91
+    ask_size: 1.00
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: 0.0159
+    spread: 0.5245
+    bid_size: 1.18
+    ask_size: 1.05
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0176
+    spread: 0.5351
+    bid_size: 1.23
+    ask_size: 1.09
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0191
+    spread: 0.5450
+    bid_size: 1.28
+    ask_size: 1.13
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0206
+    spread: 0.5539
+    bid_size: 1.32
+    ask_size: 1.17
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0220
+    spread: 0.5618
+    bid_size: 1.36
+    ask_size: 1.20
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0233
+    spread: 0.5684
+    bid_size: 1.41
+    ask_size: 1.24
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0245
+    spread: 0.5736
+    bid_size: 1.45
+    ask_size: 1.27
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0256
+    spread: 0.5773
+    bid_size: 1.48
+    ask_size: 1.31
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0266
+    spread: 0.6275
+    bid_size: 1.52
+    ask_size: 1.34
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0275
+    spread: 0.5800
+    bid_size: 1.56
+    ask_size: 0.87
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0282
+    spread: 0.5789
+    bid_size: 1.59
+    ask_size: 0.90
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0289
+    spread: 0.5761
+    bid_size: 1.66
+    ask_size: 0.93
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0295
+    spread: 0.5719
+    bid_size: 1.74
+    ask_size: 0.96
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0300
+    spread: 0.5661
+    bid_size: 1.05
+    ask_size: 0.99
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: 0.0303
+    spread: 0.5591
+    bid_size: 1.13
+    ask_size: 1.03
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0306
+    spread: 0.5508
+    bid_size: 1.21
+    ask_size: 1.10
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0308
+    spread: 0.5415
+    bid_size: 1.29
+    ask_size: 1.16
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0308
+    spread: 0.5793
+    bid_size: 1.37
+    ask_size: 1.22
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: 0.0307
+    spread: 0.5205
+    bid_size: 1.45
+    ask_size: 1.28
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0306
+    spread: 0.5093
+    bid_size: 1.52
+    ask_size: 1.34
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0303
+    spread: 0.5021
+    bid_size: 1.59
+    ask_size: 0.90
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0300
+    spread: 0.5135
+    bid_size: 1.66
+    ask_size: 0.95
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0295
+    spread: 0.5246
+    bid_size: 1.73
+    ask_size: 1.01
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0290
+    spread: 0.5352
+    bid_size: 1.80
+    ask_size: 1.07
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0284
+    spread: 0.5450
+    bid_size: 1.86
+    ask_size: 1.12
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0276
+    spread: 0.5540
+    bid_size: 1.92
+    ask_size: 1.17
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0268
+    spread: 0.6098
+    bid_size: 1.20
+    ask_size: 1.22
+    last_size: 0.12
+    trade_side: none
+  - move_mid_by: 0.0260
+    spread: 0.5684
+    bid_size: 1.25
+    ask_size: 1.27
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0250
+    spread: 0.5736
+    bid_size: 1.30
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0240
+    spread: 0.5773
+    bid_size: 1.35
+    ask_size: 1.37
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0230
+    spread: 0.5795
+    bid_size: 1.40
+    ask_size: 1.41
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0218
+    spread: 0.5800
+    bid_size: 1.45
+    ask_size: 0.96
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0206
+    spread: 0.5788
+    bid_size: 1.49
+    ask_size: 1.00
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0194
+    spread: 0.5761
+    bid_size: 1.53
+    ask_size: 1.04
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0181
+    spread: 0.5718
+    bid_size: 1.57
+    ask_size: 1.08
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0168
+    spread: 0.6141
+    bid_size: 1.61
+    ask_size: 1.12
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0155
+    spread: 0.5590
+    bid_size: 1.65
+    ask_size: 1.15
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0142
+    spread: 0.5507
+    bid_size: 1.68
+    ask_size: 1.19
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0128
+    spread: 0.5414
+    bid_size: 1.72
+    ask_size: 1.22
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0114
+    spread: 0.5312
+    bid_size: 0.99
+    ask_size: 1.25
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0100
+    spread: 0.5204
+    bid_size: 1.08
+    ask_size: 1.29
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0086
+    spread: 0.5092
+    bid_size: 1.16
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0072
+    spread: 0.5022
+    bid_size: 1.24
+    ask_size: 0.85
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0059
+    spread: 0.5136
+    bid_size: 1.32
+    ask_size: 0.88
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0045
+    spread: 0.5727
+    bid_size: 1.40
+    ask_size: 0.91
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0032
+    spread: 0.5353
+    bid_size: 1.48
+    ask_size: 0.94
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0019
+    spread: 0.5451
+    bid_size: 1.56
+    ask_size: 1.00
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0006
+    spread: 0.5541
+    bid_size: 1.64
+    ask_size: 1.06
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0006
+    spread: 0.5619
+    bid_size: 1.71
+    ask_size: 1.12
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0018
+    spread: 0.5685
+    bid_size: 1.78
+    ask_size: 1.18
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0029
+    spread: 0.5737
+    bid_size: 1.85
+    ask_size: 1.24
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0040
+    spread: 0.5774
+    bid_size: 1.92
+    ask_size: 1.30
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0050
+    spread: 0.5795
+    bid_size: 1.20
+    ask_size: 1.36
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0060
+    spread: 0.6280
+    bid_size: 1.26
+    ask_size: 0.92
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0069
+    spread: 0.5788
+    bid_size: 1.32
+    ask_size: 0.97
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0077
+    spread: 0.5761
+    bid_size: 1.37
+    ask_size: 1.03
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0084
+    spread: 0.5718
+    bid_size: 1.43
+    ask_size: 1.08
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0090
+    spread: 0.5660
+    bid_size: 1.48
+    ask_size: 1.13
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0096
+    spread: 0.5589
+    bid_size: 1.52
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0101
+    spread: 0.5506
+    bid_size: 1.57
+    ask_size: 1.23
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0105
+    spread: 0.5413
+    bid_size: 1.61
+    ask_size: 1.28
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0108
+    spread: 0.5311
+    bid_size: 1.66
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0110
+    spread: 0.5683
+    bid_size: 1.70
+    ask_size: 1.37
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0111
+    spread: 0.5091
+    bid_size: 1.74
+    ask_size: 1.41
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0112
+    spread: 0.5023
+    bid_size: 1.77
+    ask_size: 0.95
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0111
+    spread: 0.5137
+    bid_size: 1.03
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0109
+    spread: 0.5248
+    bid_size: 1.07
+    ask_size: 1.03
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0107
+    spread: 0.5353
+    bid_size: 1.11
+    ask_size: 1.07
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0103
+    spread: 0.5452
+    bid_size: 1.19
+    ask_size: 1.10
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0099
+    spread: 0.5541
+    bid_size: 1.27
+    ask_size: 1.13
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0094
+    spread: 0.5620
+    bid_size: 1.36
+    ask_size: 1.17
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0088
+    spread: 0.6165
+    bid_size: 1.44
+    ask_size: 1.20
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0080
+    spread: 0.5737
+    bid_size: 1.52
+    ask_size: 1.23
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0072
+    spread: 0.5774
+    bid_size: 1.60
+    ask_size: 1.26
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0064
+    spread: 0.5795
+    bid_size: 1.68
+    ask_size: 1.29
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0054
+    spread: 0.5800
+    bid_size: 1.75
+    ask_size: 0.82
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0044
+    spread: 0.5788
+    bid_size: 1.83
+    ask_size: 0.85
+    last_size: 0.04
+    trade_side: buy
+  - move_mid_by: -0.0033
+    spread: 0.5761
+    bid_size: 1.90
+    ask_size: 0.90
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0021
+    spread: 0.5717
+    bid_size: 1.19
+    ask_size: 0.96
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0008
+    spread: 0.5660
+    bid_size: 1.25
+    ask_size: 1.02
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0005
+    spread: 0.6069
+    bid_size: 1.32
+    ask_size: 1.08
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: 0.0019
+    spread: 0.5505
+    bid_size: 1.38
+    ask_size: 1.14
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0033
+    spread: 0.5412
+    bid_size: 1.44
+    ask_size: 1.20
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0047
+    spread: 0.5310
+    bid_size: 1.50
+    ask_size: 1.26
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0063
+    spread: 0.5202
+    bid_size: 1.55
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0078
+    spread: 0.5090
+    bid_size: 1.60
+    ask_size: 1.38
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0094
+    spread: 0.5024
+    bid_size: 1.65
+    ask_size: 0.93
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0110
+    spread: 0.5138
+    bid_size: 1.69
+    ask_size: 0.99
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0126
+    spread: 0.5249
+    bid_size: 1.74
+    ask_size: 1.04
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0143
+    spread: 0.5834
+    bid_size: 1.78
+    ask_size: 1.09
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0159
+    spread: 0.5453
+    bid_size: 1.82
+    ask_size: 1.14
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0176
+    spread: 0.5542
+    bid_size: 1.08
+    ask_size: 1.19
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0192
+    spread: 0.5620
+    bid_size: 1.12
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0208
+    spread: 0.5686
+    bid_size: 1.16
+    ask_size: 1.28
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0225
+    spread: 0.5738
+    bid_size: 1.19
+    ask_size: 1.32
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0241
+    spread: 0.5774
+    bid_size: 1.23
+    ask_size: 1.36
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0256
+    spread: 0.5795
+    bid_size: 1.30
+    ask_size: 1.40
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0272
+    spread: 0.5800
+    bid_size: 1.39
+    ask_size: 0.94
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0287
+    spread: 0.6268
+    bid_size: 1.47
+    ask_size: 0.98
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0301
+    spread: 0.5760
+    bid_size: 1.55
+    ask_size: 1.01
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0315
+    spread: 0.5717
+    bid_size: 1.63
+    ask_size: 1.05
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0329
+    spread: 0.5659
+    bid_size: 1.71
+    ask_size: 1.08
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0341
+    spread: 0.5588
+    bid_size: 1.79
+    ask_size: 1.11
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0354
+    spread: 0.5505
+    bid_size: 1.87
+    ask_size: 1.15
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0365
+    spread: 0.5411
+    bid_size: 1.16
+    ask_size: 1.18
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0376
+    spread: 0.5309
+    bid_size: 1.24
+    ask_size: 1.21
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0385
+    spread: 0.5201
+    bid_size: 1.31
+    ask_size: 1.24
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0394
+    spread: 0.5569
+    bid_size: 1.37
+    ask_size: 1.27
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0403
+    spread: 0.5025
+    bid_size: 1.44
+    ask_size: 0.80
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0410
+    spread: 0.5139
+    bid_size: 1.50
+    ask_size: 0.86
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0416
+    spread: 0.5250
+    bid_size: 1.56
+    ask_size: 0.93
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0421
+    spread: 0.5355
+    bid_size: 1.62
+    ask_size: 0.99
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0425
+    spread: 0.5454
+    bid_size: 1.67
+    ask_size: 1.05
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0429
+    spread: 0.5543
+    bid_size: 1.72
+    ask_size: 1.11
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0431
+    spread: 0.5621
+    bid_size: 1.77
+    ask_size: 1.17
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0432
+    spread: 0.5687
+    bid_size: 1.82
+    ask_size: 1.22
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0432
+    spread: 0.6218
+    bid_size: 1.86
+    ask_size: 1.28
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0430
+    spread: 0.5774
+    bid_size: 1.13
+    ask_size: 1.34
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0428
+    spread: 0.5795
+    bid_size: 1.17
+    ask_size: 1.39
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0425
+    spread: 0.5800
+    bid_size: 1.21
+    ask_size: 0.94
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0420
+    spread: 0.5788
+    bid_size: 1.25
+    ask_size: 1.00
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0415
+    spread: 0.5760
+    bid_size: 1.28
+    ask_size: 1.05
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0408
+    spread: 0.5717
+    bid_size: 1.32
+    ask_size: 1.09
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0400
+    spread: 0.5659
+    bid_size: 1.36
+    ask_size: 1.14
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0391
+    spread: 0.5587
+    bid_size: 1.42
+    ask_size: 1.19
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0381
+    spread: 0.5984
+    bid_size: 1.50
+    ask_size: 1.23
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: 0.0371
+    spread: 0.5410
+    bid_size: 1.58
+    ask_size: 1.27
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0359
+    spread: 0.5308
+    bid_size: 1.67
+    ask_size: 1.31
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0346
+    spread: 0.5200
+    bid_size: 1.75
+    ask_size: 1.35
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0332
+    spread: 0.5088
+    bid_size: 1.83
+    ask_size: 1.39
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0317
+    spread: 0.5026
+    bid_size: 1.13
+    ask_size: 0.93
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0302
+    spread: 0.5140
+    bid_size: 1.20
+    ask_size: 0.96
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0285
+    spread: 0.5251
+    bid_size: 1.28
+    ask_size: 1.00
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0268
+    spread: 0.5356
+    bid_size: 1.35
+    ask_size: 1.03
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0250
+    spread: 0.5935
+    bid_size: 1.42
+    ask_size: 1.06
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0232
+    spread: 0.5544
+    bid_size: 1.49
+    ask_size: 1.09
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0213
+    spread: 0.5622
+    bid_size: 1.56
+    ask_size: 1.12
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0193
+    spread: 0.5687
+    bid_size: 1.62
+    ask_size: 1.15
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0173
+    spread: 0.5738
+    bid_size: 1.68
+    ask_size: 1.18
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0152
+    spread: 0.5775
+    bid_size: 1.74
+    ask_size: 1.21
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: 0.0131
+    spread: 0.5795
+    bid_size: 1.79
+    ask_size: 1.27
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0110
+    spread: 0.5800
+    bid_size: 1.84
+    ask_size: 0.83
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0088
+    spread: 0.5788
+    bid_size: 1.89
+    ask_size: 0.89
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0066
+    spread: 0.6240
+    bid_size: 1.16
+    ask_size: 0.95
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: 0.0044
+    spread: 0.5716
+    bid_size: 1.21
+    ask_size: 1.01
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0022
+    spread: 0.5658
+    bid_size: 1.25
+    ask_size: 1.07
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0000
+    spread: 0.5587
+    bid_size: 1.29
+    ask_size: 1.13
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0022
+    spread: 0.5503
+    bid_size: 1.33
+    ask_size: 1.19
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0044
+    spread: 0.5409
+    bid_size: 1.37
+    ask_size: 1.24
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0066
+    spread: 0.5307
+    bid_size: 1.41
+    ask_size: 1.30
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0087
+    spread: 0.5199
+    bid_size: 1.45
+    ask_size: 1.35
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0108
+    spread: 0.5087
+    bid_size: 1.48
+    ask_size: 1.40
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0129
+    spread: 0.5507
+    bid_size: 1.53
+    ask_size: 0.95
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0149
+    spread: 0.5141
+    bid_size: 1.61
+    ask_size: 1.00
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0169
+    spread: 0.5252
+    bid_size: 1.70
+    ask_size: 1.05
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0188
+    spread: 0.5357
+    bid_size: 1.78
+    ask_size: 1.10
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0207
+    spread: 0.5455
+    bid_size: 1.08
+    ask_size: 1.14
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0225
+    spread: 0.5544
+    bid_size: 1.16
+    ask_size: 1.18
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0354
+    spread: 0.5622
+    bid_size: 1.24
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0370
+    spread: 0.5688
+    bid_size: 1.32
+    ask_size: 1.26
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0386
+    spread: 0.5739
+    bid_size: 1.40
+    ask_size: 1.30
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0401
+    spread: 0.6255
+    bid_size: 1.47
+    ask_size: 1.34
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0415
+    spread: 0.5795
+    bid_size: 1.54
+    ask_size: 1.38
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0428
+    spread: 0.5800
+    bid_size: 1.61
+    ask_size: 0.91
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0440
+    spread: 0.5787
+    bid_size: 1.68
+    ask_size: 0.94
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0451
+    spread: 0.5759
+    bid_size: 1.74
+    ask_size: 0.98
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0461
+    spread: 0.5716
+    bid_size: 1.80
+    ask_size: 1.01
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0470
+    spread: 0.5657
+    bid_size: 1.86
+    ask_size: 1.04
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0478
+    spread: 0.5586
+    bid_size: 1.91
+    ask_size: 1.07
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0484
+    spread: 0.5502
+    bid_size: 1.19
+    ask_size: 1.10
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0490
+    spread: 0.5889
+    bid_size: 1.24
+    ask_size: 1.13
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0495
+    spread: 0.5306
+    bid_size: 1.29
+    ask_size: 1.17
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0498
+    spread: 0.5198
+    bid_size: 1.33
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0500
+    spread: 0.5086
+    bid_size: 1.38
+    ask_size: 1.29
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0501
+    spread: 0.5028
+    bid_size: 1.42
+    ask_size: 0.85
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0501
+    spread: 0.5142
+    bid_size: 1.46
+    ask_size: 0.91
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0500
+    spread: 0.5253
+    bid_size: 1.50
+    ask_size: 0.97
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0498
+    spread: 0.5358
+    bid_size: 1.54
+    ask_size: 1.03
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0494
+    spread: 0.5456
+    bid_size: 1.57
+    ask_size: 1.09
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0490
+    spread: 0.6025
+    bid_size: 1.61
+    ask_size: 1.15
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0484
+    spread: 0.5623
+    bid_size: 1.64
+    ask_size: 1.20
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0478
+    spread: 0.5688
+    bid_size: 1.73
+    ask_size: 1.26
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0470
+    spread: 0.5739
+    bid_size: 1.03
+    ask_size: 1.31
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0461
+    spread: 0.5775
+    bid_size: 1.11
+    ask_size: 1.36
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0452
+    spread: 0.5795
+    bid_size: 1.20
+    ask_size: 1.41
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0441
+    spread: 0.5799
+    bid_size: 1.28
+    ask_size: 0.96
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0430
+    spread: 0.5787
+    bid_size: 1.36
+    ask_size: 1.01
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0418
+    spread: 0.5759
+    bid_size: 1.43
+    ask_size: 1.05
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0405
+    spread: 0.6195
+    bid_size: 1.51
+    ask_size: 1.09
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0391
+    spread: 0.5657
+    bid_size: 1.59
+    ask_size: 1.14
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0376
+    spread: 0.5585
+    bid_size: 1.66
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0361
+    spread: 0.5502
+    bid_size: 1.73
+    ask_size: 1.22
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0346
+    spread: 0.5408
+    bid_size: 1.79
+    ask_size: 1.25
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0330
+    spread: 0.5306
+    bid_size: 1.86
+    ask_size: 1.29
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0313
+    spread: 0.5197
+    bid_size: 1.92
+    ask_size: 1.32
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0296
+    spread: 0.5085
+    bid_size: 1.20
+    ask_size: 1.36
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0278
+    spread: 0.5029
+    bid_size: 1.26
+    ask_size: 0.89
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0261
+    spread: 0.5623
+    bid_size: 1.31
+    ask_size: 0.92
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0243
+    spread: 0.5253
+    bid_size: 1.36
+    ask_size: 0.95
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0225
+    spread: 0.5359
+    bid_size: 1.41
+    ask_size: 0.98
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0206
+    spread: 0.5457
+    bid_size: 1.46
+    ask_size: 1.01
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0188
+    spread: 0.5546
+    bid_size: 1.50
+    ask_size: 1.04
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0170
+    spread: 0.5624
+    bid_size: 1.54
+    ask_size: 1.07
+    last_size: 0.04
+    trade_side: buy
+  - move_mid_by: -0.0152
+    spread: 0.5689
+    bid_size: 1.58
+    ask_size: 1.13
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0134
+    spread: 0.5740
+    bid_size: 1.62
+    ask_size: 1.20
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0116
+    spread: 0.5775
+    bid_size: 1.66
+    ask_size: 1.26
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0098
+    spread: 0.6276
+    bid_size: 1.70
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: -0.0081
+    spread: 0.5799
+    bid_size: 1.74
+    ask_size: 0.88
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0064
+    spread: 0.5787
+    bid_size: 0.99
+    ask_size: 0.94
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0048
+    spread: 0.5759
+    bid_size: 1.06
+    ask_size: 0.99
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0032
+    spread: 0.5715
+    bid_size: 1.14
+    ask_size: 1.05
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0016
+    spread: 0.5656
+    bid_size: 1.23
+    ask_size: 1.11
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0001
+    spread: 0.5584
+    bid_size: 1.31
+    ask_size: 1.16
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0013
+    spread: 0.5501
+    bid_size: 1.39
+    ask_size: 1.22
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0027
+    spread: 0.5407
+    bid_size: 1.47
+    ask_size: 1.27
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0039
+    spread: 0.5785
+    bid_size: 1.55
+    ask_size: 1.32
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0052
+    spread: 0.5196
+    bid_size: 1.63
+    ask_size: 1.37
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0063
+    spread: 0.5084
+    bid_size: 1.70
+    ask_size: 1.41
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0074
+    spread: 0.5030
+    bid_size: 1.77
+    ask_size: 0.96
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0083
+    spread: 0.5144
+    bid_size: 1.84
+    ask_size: 1.00
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0092
+    spread: 0.5254
+    bid_size: 1.91
+    ask_size: 1.05
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0100
+    spread: 0.5360
+    bid_size: 1.20
+    ask_size: 1.09
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0107
+    spread: 0.5458
+    bid_size: 1.26
+    ask_size: 1.13
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0113
+    spread: 0.5547
+    bid_size: 1.32
+    ask_size: 1.17
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0118
+    spread: 0.6104
+    bid_size: 1.38
+    ask_size: 1.20
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0122
+    spread: 0.5689
+    bid_size: 1.43
+    ask_size: 1.24
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0126
+    spread: 0.5740
+    bid_size: 1.48
+    ask_size: 1.27
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0128
+    spread: 0.5776
+    bid_size: 1.53
+    ask_size: 1.31
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0129
+    spread: 0.5796
+    bid_size: 1.58
+    ask_size: 1.34
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0129
+    spread: 0.5799
+    bid_size: 1.63
+    ask_size: 0.87
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0129
+    spread: 0.5787
+    bid_size: 1.67
+    ask_size: 0.90
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0127
+    spread: 0.5758
+    bid_size: 1.71
+    ask_size: 0.93
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0125
+    spread: 0.5714
+    bid_size: 1.75
+    ask_size: 0.96
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0122
+    spread: 0.6136
+    bid_size: 1.79
+    ask_size: 0.99
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0117
+    spread: 0.5584
+    bid_size: 1.05
+    ask_size: 1.04
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0112
+    spread: 0.5500
+    bid_size: 1.08
+    ask_size: 1.10
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0106
+    spread: 0.5406
+    bid_size: 1.12
+    ask_size: 1.16
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0100
+    spread: 0.5304
+    bid_size: 1.17
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0092
+    spread: 0.5195
+    bid_size: 1.26
+    ask_size: 1.28
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0084
+    spread: 0.5083
+    bid_size: 1.34
+    ask_size: 1.34
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0075
+    spread: 0.5031
+    bid_size: 1.42
+    ask_size: 0.90
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0066
+    spread: 0.5145
+    bid_size: 1.51
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0056
+    spread: 0.5735
+    bid_size: 1.59
+    ask_size: 1.01
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0045
+    spread: 0.5361
+    bid_size: 1.67
+    ask_size: 1.07
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0034
+    spread: 0.5459
+    bid_size: 1.74
+    ask_size: 1.12
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0023
+    spread: 0.5547
+    bid_size: 1.82
+    ask_size: 1.17
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0011
+    spread: 0.5625
+    bid_size: 1.89
+    ask_size: 1.22
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0001
+    spread: 0.5690
+    bid_size: 1.18
+    ask_size: 1.27
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0014
+    spread: 0.5740
+    bid_size: 1.25
+    ask_size: 1.32
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0026
+    spread: 0.5776
+    bid_size: 1.32
+    ask_size: 1.37
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0039
+    spread: 0.5796
+    bid_size: 1.38
+    ask_size: 1.41
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0052
+    spread: 0.6279
+    bid_size: 1.44
+    ask_size: 0.96
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0065
+    spread: 0.5787
+    bid_size: 1.50
+    ask_size: 1.00
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0078
+    spread: 0.5758
+    bid_size: 1.55
+    ask_size: 1.04
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0091
+    spread: 0.5714
+    bid_size: 1.61
+    ask_size: 1.08
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0104
+    spread: 0.5655
+    bid_size: 1.66
+    ask_size: 1.12
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0116
+    spread: 0.5583
+    bid_size: 1.70
+    ask_size: 1.15
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0128
+    spread: 0.5499
+    bid_size: 1.75
+    ask_size: 1.19
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0140
+    spread: 0.5405
+    bid_size: 1.79
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0152
+    spread: 0.5303
+    bid_size: 1.83
+    ask_size: 1.25
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0163
+    spread: 0.5674
+    bid_size: 1.10
+    ask_size: 1.28
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0174
+    spread: 0.5082
+    bid_size: 1.13
+    ask_size: 1.31
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0184
+    spread: 0.5032
+    bid_size: 1.17
+    ask_size: 0.85
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0193
+    spread: 0.5146
+    bid_size: 1.21
+    ask_size: 0.88
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0202
+    spread: 0.5256
+    bid_size: 1.24
+    ask_size: 0.90
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0211
+    spread: 0.5362
+    bid_size: 1.29
+    ask_size: 0.94
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: -0.0218
+    spread: 0.5460
+    bid_size: 1.37
+    ask_size: 1.00
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0225
+    spread: 0.5548
+    bid_size: 1.45
+    ask_size: 1.06
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0231
+    spread: 0.5625
+    bid_size: 1.54
+    ask_size: 1.12
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0236
+    spread: 0.6170
+    bid_size: 1.62
+    ask_size: 1.18
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: -0.0240
+    spread: 0.5741
+    bid_size: 1.70
+    ask_size: 1.24
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0244
+    spread: 0.5776
+    bid_size: 1.78
+    ask_size: 1.30
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0246
+    spread: 0.5796
+    bid_size: 1.86
+    ask_size: 1.36
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0247
+    spread: 0.5799
+    bid_size: 1.15
+    ask_size: 0.92
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0248
+    spread: 0.5787
+    bid_size: 1.23
+    ask_size: 0.97
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0247
+    spread: 0.5758
+    bid_size: 1.30
+    ask_size: 1.03
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0246
+    spread: 0.5713
+    bid_size: 1.37
+    ask_size: 1.08
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0243
+    spread: 0.5655
+    bid_size: 1.43
+    ask_size: 1.13
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0240
+    spread: 0.6062
+    bid_size: 1.50
+    ask_size: 1.18
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0235
+    spread: 0.5498
+    bid_size: 1.56
+    ask_size: 1.23
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0230
+    spread: 0.5404
+    bid_size: 1.62
+    ask_size: 1.28
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0223
+    spread: 0.5302
+    bid_size: 1.67
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0215
+    spread: 0.5193
+    bid_size: 1.73
+    ask_size: 1.37
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0207
+    spread: 0.5081
+    bid_size: 1.78
+    ask_size: 1.41
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0197
+    spread: 0.5033
+    bid_size: 1.83
+    ask_size: 0.95
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0187
+    spread: 0.5147
+    bid_size: 1.87
+    ask_size: 0.99
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0175
+    spread: 0.5257
+    bid_size: 1.14
+    ask_size: 1.03
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0163
+    spread: 0.5843
+    bid_size: 1.18
+    ask_size: 1.06
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0149
+    spread: 0.5460
+    bid_size: 1.22
+    ask_size: 1.10
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0135
+    spread: 0.5549
+    bid_size: 1.26
+    ask_size: 1.13
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0120
+    spread: 0.5626
+    bid_size: 1.30
+    ask_size: 1.17
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0104
+    spread: 0.5691
+    bid_size: 1.33
+    ask_size: 1.20
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0088
+    spread: 0.5741
+    bid_size: 1.37
+    ask_size: 1.23
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0071
+    spread: 0.5776
+    bid_size: 1.41
+    ask_size: 1.26
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0053
+    spread: 0.5796
+    bid_size: 1.48
+    ask_size: 1.29
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0035
+    spread: 0.5799
+    bid_size: 1.57
+    ask_size: 0.82
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0016
+    spread: 0.6266
+    bid_size: 1.65
+    ask_size: 0.85
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0004
+    spread: 0.5757
+    bid_size: 1.73
+    ask_size: 0.90
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0024
+    spread: 0.5713
+    bid_size: 1.82
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0044
+    spread: 0.5654
+    bid_size: 1.12
+    ask_size: 1.02
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0065
+    spread: 0.5582
+    bid_size: 1.19
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0086
+    spread: 0.5498
+    bid_size: 1.27
+    ask_size: 1.15
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0107
+    spread: 0.5403
+    bid_size: 1.34
+    ask_size: 1.20
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0128
+    spread: 0.5301
+    bid_size: 1.42
+    ask_size: 1.26
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0149
+    spread: 0.5192
+    bid_size: 1.49
+    ask_size: 1.32
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0171
+    spread: 0.5560
+    bid_size: 1.55
+    ask_size: 1.38
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0192
+    spread: 0.5034
+    bid_size: 1.62
+    ask_size: 0.93
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0213
+    spread: 0.5148
+    bid_size: 1.68
+    ask_size: 0.99
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0234
+    spread: 0.5258
+    bid_size: 1.74
+    ask_size: 1.04
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0255
+    spread: 0.5363
+    bid_size: 1.80
+    ask_size: 1.09
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0275
+    spread: 0.5461
+    bid_size: 1.85
+    ask_size: 1.14
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0295
+    spread: 0.5550
+    bid_size: 1.90
+    ask_size: 1.19
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0315
+    spread: 0.5627
+    bid_size: 1.17
+    ask_size: 1.23
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0334
+    spread: 0.5691
+    bid_size: 1.22
+    ask_size: 1.28
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0353
+    spread: 0.6221
+    bid_size: 1.26
+    ask_size: 1.32
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: 0.0371
+    spread: 0.5777
+    bid_size: 1.31
+    ask_size: 1.36
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0388
+    spread: 0.5796
+    bid_size: 1.35
+    ask_size: 1.40
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0405
+    spread: 0.5799
+    bid_size: 1.39
+    ask_size: 0.94
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0421
+    spread: 0.5786
+    bid_size: 1.42
+    ask_size: 0.98
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0436
+    spread: 0.5757
+    bid_size: 1.46
+    ask_size: 1.01
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0450
+    spread: 0.5712
+    bid_size: 1.50
+    ask_size: 1.05
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0463
+    spread: 0.5653
+    bid_size: 1.53
+    ask_size: 1.08
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0476
+    spread: 0.5581
+    bid_size: 1.60
+    ask_size: 1.11
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0487
+    spread: 0.5977
+    bid_size: 1.68
+    ask_size: 1.15
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0497
+    spread: 0.5402
+    bid_size: 1.77
+    ask_size: 1.18
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0507
+    spread: 0.5300
+    bid_size: 1.07
+    ask_size: 1.21
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0515
+    spread: 0.5191
+    bid_size: 1.15
+    ask_size: 1.24
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0522
+    spread: 0.5079
+    bid_size: 1.23
+    ask_size: 1.27
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0528
+    spread: 0.5035
+    bid_size: 1.31
+    ask_size: 0.80
+    last_size: 0.04
+    trade_side: buy
+  - move_mid_by: 0.0533
+    spread: 0.5149
+    bid_size: 1.39
+    ask_size: 0.87
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0537
+    spread: 0.5259
+    bid_size: 1.46
+    ask_size: 0.93
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0540
+    spread: 0.5364
+    bid_size: 1.53
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0541
+    spread: 0.5942
+    bid_size: 1.60
+    ask_size: 1.05
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: 0.0541
+    spread: 0.5550
+    bid_size: 1.67
+    ask_size: 1.11
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0540
+    spread: 0.5627
+    bid_size: 1.74
+    ask_size: 1.17
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0538
+    spread: 0.5692
+    bid_size: 1.80
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0535
+    spread: 0.5742
+    bid_size: 1.86
+    ask_size: 1.28
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0531
+    spread: 0.5777
+    bid_size: 1.92
+    ask_size: 1.34
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0525
+    spread: 0.5796
+    bid_size: 1.19
+    ask_size: 1.39
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0518
+    spread: 0.5799
+    bid_size: 1.24
+    ask_size: 0.94
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0511
+    spread: 0.5786
+    bid_size: 1.29
+    ask_size: 1.00
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0502
+    spread: 0.6237
+    bid_size: 1.34
+    ask_size: 1.05
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0492
+    spread: 0.5712
+    bid_size: 1.39
+    ask_size: 1.09
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0481
+    spread: 0.5653
+    bid_size: 1.43
+    ask_size: 1.14
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0469
+    spread: 0.5580
+    bid_size: 1.47
+    ask_size: 1.19
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0457
+    spread: 0.5496
+    bid_size: 1.51
+    ask_size: 1.23
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0443
+    spread: 0.5402
+    bid_size: 1.55
+    ask_size: 1.27
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0429
+    spread: 0.5299
+    bid_size: 1.59
+    ask_size: 1.31
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0413
+    spread: 0.5190
+    bid_size: 1.62
+    ask_size: 1.35
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0397
+    spread: 0.5078
+    bid_size: 1.66
+    ask_size: 1.39
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0381
+    spread: 0.5516
+    bid_size: 1.71
+    ask_size: 0.93
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0363
+    spread: 0.5150
+    bid_size: 1.02
+    ask_size: 0.96
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0345
+    spread: 0.5260
+    bid_size: 1.10
+    ask_size: 1.00
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0327
+    spread: 0.5365
+    bid_size: 1.18
+    ask_size: 1.03
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0308
+    spread: 0.5463
+    bid_size: 1.26
+    ask_size: 1.06
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0289
+    spread: 0.5551
+    bid_size: 1.34
+    ask_size: 1.09
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0269
+    spread: 0.5628
+    bid_size: 1.42
+    ask_size: 1.12
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0249
+    spread: 0.5692
+    bid_size: 1.50
+    ask_size: 1.15
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0118
+    spread: 0.5742
+    bid_size: 1.58
+    ask_size: 1.18
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0097
+    spread: 0.6257
+    bid_size: 1.65
+    ask_size: 1.21
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0077
+    spread: 0.5796
+    bid_size: 1.72
+    ask_size: 1.27
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0056
+    spread: 0.5799
+    bid_size: 1.79
+    ask_size: 0.83
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0036
+    spread: 0.5786
+    bid_size: 1.86
+    ask_size: 0.89
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0015
+    spread: 0.5756
+    bid_size: 1.92
+    ask_size: 0.95
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0005
+    spread: 0.5712
+    bid_size: 1.20
+    ask_size: 1.01
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0025
+    spread: 0.5652
+    bid_size: 1.26
+    ask_size: 1.07
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0044
+    spread: 0.5580
+    bid_size: 1.31
+    ask_size: 1.13
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0064
+    spread: 0.5495
+    bid_size: 1.37
+    ask_size: 1.19
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0083
+    spread: 0.5881
+    bid_size: 1.42
+    ask_size: 1.24
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0101
+    spread: 0.5298
+    bid_size: 1.47
+    ask_size: 1.30
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0119
+    spread: 0.5189
+    bid_size: 1.51
+    ask_size: 1.35
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0137
+    spread: 0.5077
+    bid_size: 1.55
+    ask_size: 1.40
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0154
+    spread: 0.5037
+    bid_size: 1.60
+    ask_size: 0.95
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0170
+    spread: 0.5151
+    bid_size: 1.64
+    ask_size: 1.00
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0185
+    spread: 0.5261
+    bid_size: 1.68
+    ask_size: 1.05
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0200
+    spread: 0.5366
+    bid_size: 1.71
+    ask_size: 1.10
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0214
+    spread: 0.5464
+    bid_size: 1.75
+    ask_size: 1.14
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0227
+    spread: 0.6032
+    bid_size: 1.01
+    ask_size: 1.18
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0239
+    spread: 0.5629
+    bid_size: 1.05
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0250
+    spread: 0.5693
+    bid_size: 1.13
+    ask_size: 1.26
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0261
+    spread: 0.5743
+    bid_size: 1.21
+    ask_size: 1.30
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0270
+    spread: 0.5777
+    bid_size: 1.30
+    ask_size: 1.34
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0278
+    spread: 0.5796
+    bid_size: 1.38
+    ask_size: 1.37
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0286
+    spread: 0.5799
+    bid_size: 1.46
+    ask_size: 0.91
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0292
+    spread: 0.5786
+    bid_size: 1.54
+    ask_size: 0.94
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0298
+    spread: 0.5756
+    bid_size: 1.62
+    ask_size: 0.97
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0302
+    spread: 0.6191
+    bid_size: 1.69
+    ask_size: 1.01
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0305
+    spread: 0.5652
+    bid_size: 1.77
+    ask_size: 1.04
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0308
+    spread: 0.5579
+    bid_size: 1.84
+    ask_size: 1.07
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0309
+    spread: 0.5494
+    bid_size: 1.91
+    ask_size: 1.10
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0309
+    spread: 0.5400
+    bid_size: 1.19
+    ask_size: 1.13
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0309
+    spread: 0.5297
+    bid_size: 1.26
+    ask_size: 1.17
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: -0.0307
+    spread: 0.5188
+    bid_size: 1.32
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0304
+    spread: 0.5076
+    bid_size: 1.38
+    ask_size: 1.29
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0300
+    spread: 0.5038
+    bid_size: 1.44
+    ask_size: 0.85
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0296
+    spread: 0.5632
+    bid_size: 1.49
+    ask_size: 0.91
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: -0.0290
+    spread: 0.5262
+    bid_size: 1.54
+    ask_size: 0.97
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0284
+    spread: 0.5367
+    bid_size: 1.59
+    ask_size: 1.03
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0277
+    spread: 0.5464
+    bid_size: 1.64
+    ask_size: 1.09
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0269
+    spread: 0.5552
+    bid_size: 1.68
+    ask_size: 1.15
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0260
+    spread: 0.5629
+    bid_size: 1.72
+    ask_size: 1.20
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0250
+    spread: 0.5693
+    bid_size: 1.76
+    ask_size: 1.26
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0240
+    spread: 0.5743
+    bid_size: 1.80
+    ask_size: 1.31
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0229
+    spread: 0.5778
+    bid_size: 1.06
+    ask_size: 1.36
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0218
+    spread: 0.6276
+    bid_size: 1.10
+    ask_size: 1.41
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0206
+    spread: 0.5799
+    bid_size: 1.13
+    ask_size: 0.96
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0194
+    spread: 0.5785
+    bid_size: 1.17
+    ask_size: 1.01
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0181
+    spread: 0.5756
+    bid_size: 1.24
+    ask_size: 1.05
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0168
+    spread: 0.5711
+    bid_size: 1.33
+    ask_size: 1.09
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0154
+    spread: 0.5651
+    bid_size: 1.41
+    ask_size: 1.14
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0140
+    spread: 0.5578
+    bid_size: 1.49
+    ask_size: 1.18
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0126
+    spread: 0.5494
+    bid_size: 1.57
+    ask_size: 1.21
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0112
+    spread: 0.5399
+    bid_size: 1.65
+    ask_size: 1.25
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0098
+    spread: 0.5776
+    bid_size: 1.73
+    ask_size: 1.29
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0084
+    spread: 0.5187
+    bid_size: 1.81
+    ask_size: 1.32
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0070
+    spread: 0.5075
+    bid_size: 1.88
+    ask_size: 1.36
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0055
+    spread: 0.5039
+    bid_size: 1.18
+    ask_size: 0.89
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0042
+    spread: 0.5153
+    bid_size: 1.25
+    ask_size: 0.92
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0028
+    spread: 0.5263
+    bid_size: 1.31
+    ask_size: 0.95
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0014
+    spread: 0.5368
+    bid_size: 1.38
+    ask_size: 0.98
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0001
+    spread: 0.5465
+    bid_size: 1.44
+    ask_size: 1.01
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0011
+    spread: 0.5553
+    bid_size: 1.50
+    ask_size: 1.04
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0024
+    spread: 0.6110
+    bid_size: 1.56
+    ask_size: 1.07
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0035
+    spread: 0.5694
+    bid_size: 1.61
+    ask_size: 1.14
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0047
+    spread: 0.5743
+    bid_size: 1.66
+    ask_size: 1.20
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0057
+    spread: 0.5778
+    bid_size: 1.71
+    ask_size: 1.26
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0067
+    spread: 0.5797
+    bid_size: 1.76
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0077
+    spread: 0.5799
+    bid_size: 1.80
+    ask_size: 0.88
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0085
+    spread: 0.5785
+    bid_size: 1.85
+    ask_size: 0.94
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0093
+    spread: 0.5755
+    bid_size: 1.11
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0100
+    spread: 0.5710
+    bid_size: 1.15
+    ask_size: 1.05
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0107
+    spread: 0.6130
+    bid_size: 1.19
+    ask_size: 1.11
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0112
+    spread: 0.5578
+    bid_size: 1.22
+    ask_size: 1.16
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0117
+    spread: 0.5493
+    bid_size: 1.26
+    ask_size: 1.22
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0120
+    spread: 0.5398
+    bid_size: 1.30
+    ask_size: 1.27
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0123
+    spread: 0.5295
+    bid_size: 1.36
+    ask_size: 1.32
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0125
+    spread: 0.5186
+    bid_size: 1.44
+    ask_size: 1.37
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0126
+    spread: 0.5074
+    bid_size: 1.52
+    ask_size: 1.41
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: 0.0126
+    spread: 0.5040
+    bid_size: 1.61
+    ask_size: 0.96
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0125
+    spread: 0.5154
+    bid_size: 1.69
+    ask_size: 1.00
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0123
+    spread: 0.5744
+    bid_size: 1.77
+    ask_size: 1.05
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: 0.0120
+    spread: 0.5369
+    bid_size: 1.85
+    ask_size: 1.09
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0116
+    spread: 0.5466
+    bid_size: 1.14
+    ask_size: 1.13
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0111
+    spread: 0.5554
+    bid_size: 1.22
+    ask_size: 1.16
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0105
+    spread: 0.5630
+    bid_size: 1.29
+    ask_size: 1.20
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0099
+    spread: 0.5694
+    bid_size: 1.36
+    ask_size: 1.24
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0091
+    spread: 0.5744
+    bid_size: 1.43
+    ask_size: 1.27
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0083
+    spread: 0.5778
+    bid_size: 1.50
+    ask_size: 1.30
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0073
+    spread: 0.5797
+    bid_size: 1.56
+    ask_size: 1.34
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: 0.0063
+    spread: 0.6279
+    bid_size: 1.62
+    ask_size: 0.87
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: 0.0053
+    spread: 0.5785
+    bid_size: 1.68
+    ask_size: 0.90
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0041
+    spread: 0.5755
+    bid_size: 1.73
+    ask_size: 0.93
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0029
+    spread: 0.5710
+    bid_size: 1.79
+    ask_size: 0.96
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0016
+    spread: 0.5650
+    bid_size: 1.84
+    ask_size: 0.99
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0002
+    spread: 0.5577
+    bid_size: 1.88
+    ask_size: 1.04
+    last_size: 0.04
+    trade_side: buy
+  - move_mid_by: -0.0012
+    spread: 0.5492
+    bid_size: 1.15
+    ask_size: 1.10
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0026
+    spread: 0.5397
+    bid_size: 1.19
+    ask_size: 1.16
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0042
+    spread: 0.5294
+    bid_size: 1.23
+    ask_size: 1.22
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0057
+    spread: 0.5665
+    bid_size: 1.27
+    ask_size: 1.28
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: -0.0073
+    spread: 0.5073
+    bid_size: 1.31
+    ask_size: 1.34
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0089
+    spread: 0.5041
+    bid_size: 1.35
+    ask_size: 0.90
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0105
+    spread: 0.5155
+    bid_size: 1.39
+    ask_size: 0.96
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0122
+    spread: 0.5265
+    bid_size: 1.42
+    ask_size: 1.01
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0139
+    spread: 0.5370
+    bid_size: 1.47
+    ask_size: 1.07
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0156
+    spread: 0.5467
+    bid_size: 1.55
+    ask_size: 1.12
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0172
+    spread: 0.5555
+    bid_size: 1.64
+    ask_size: 1.17
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0189
+    spread: 0.5631
+    bid_size: 1.72
+    ask_size: 1.23
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0206
+    spread: 0.6175
+    bid_size: 1.80
+    ask_size: 1.27
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0222
+    spread: 0.5744
+    bid_size: 1.10
+    ask_size: 1.32
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0238
+    spread: 0.5778
+    bid_size: 1.18
+    ask_size: 1.37
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: -0.0254
+    spread: 0.5797
+    bid_size: 1.26
+    ask_size: 1.41
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0270
+    spread: 0.5799
+    bid_size: 1.33
+    ask_size: 0.96
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0285
+    spread: 0.5785
+    bid_size: 1.41
+    ask_size: 1.00
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0299
+    spread: 0.5755
+    bid_size: 1.48
+    ask_size: 1.04
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: -0.0314
+    spread: 0.5709
+    bid_size: 1.55
+    ask_size: 1.08
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0327
+    spread: 0.5649
+    bid_size: 1.62
+    ask_size: 1.11
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0340
+    spread: 0.6056
+    bid_size: 1.68
+    ask_size: 1.15
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0352
+    spread: 0.5491
+    bid_size: 1.74
+    ask_size: 1.18
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0363
+    spread: 0.5396
+    bid_size: 1.80
+    ask_size: 1.22
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0374
+    spread: 0.5293
+    bid_size: 1.85
+    ask_size: 1.25
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0384
+    spread: 0.5184
+    bid_size: 1.91
+    ask_size: 1.28
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0393
+    spread: 0.5072
+    bid_size: 1.18
+    ask_size: 1.31
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0401
+    spread: 0.5042
+    bid_size: 1.23
+    ask_size: 0.84
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: -0.0408
+    spread: 0.5156
+    bid_size: 1.27
+    ask_size: 0.87
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0414
+    spread: 0.5266
+    bid_size: 1.32
+    ask_size: 0.90
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0419
+    spread: 0.5851
+    bid_size: 1.36
+    ask_size: 0.94
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: -0.0423
+    spread: 0.5468
+    bid_size: 1.40
+    ask_size: 1.00
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0426
+    spread: 0.5555
+    bid_size: 1.44
+    ask_size: 1.06
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0427
+    spread: 0.5632
+    bid_size: 1.48
+    ask_size: 1.12
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: -0.0428
+    spread: 0.5695
+    bid_size: 1.51
+    ask_size: 1.18
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: -0.0428
+    spread: 0.5744
+    bid_size: 1.55
+    ask_size: 1.24
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0426
+    spread: 0.5779
+    bid_size: 1.59
+    ask_size: 1.30
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0423
+    spread: 0.5797
+    bid_size: 1.67
+    ask_size: 1.36
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0420
+    spread: 0.5799
+    bid_size: 1.75
+    ask_size: 0.92
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0415
+    spread: 0.6265
+    bid_size: 1.05
+    ask_size: 0.97
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: -0.0409
+    spread: 0.5754
+    bid_size: 1.14
+    ask_size: 1.03
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0401
+    spread: 0.5709
+    bid_size: 1.22
+    ask_size: 1.08
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0393
+    spread: 0.5649
+    bid_size: 1.30
+    ask_size: 1.13
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0384
+    spread: 0.5575
+    bid_size: 1.37
+    ask_size: 1.18
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0373
+    spread: 0.5490
+    bid_size: 1.45
+    ask_size: 1.23
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0361
+    spread: 0.5395
+    bid_size: 1.53
+    ask_size: 1.28
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: -0.0349
+    spread: 0.5292
+    bid_size: 1.60
+    ask_size: 1.32
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: -0.0335
+    spread: 0.5183
+    bid_size: 1.67
+    ask_size: 1.37
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0321
+    spread: 0.5551
+    bid_size: 1.73
+    ask_size: 1.41
+    last_size: 0.05
+    trade_side: none
+  - move_mid_by: -0.0305
+    spread: 0.5043
+    bid_size: 1.80
+    ask_size: 0.95
+    last_size: 0.07
+    trade_side: buy
+  - move_mid_by: -0.0289
+    spread: 0.5157
+    bid_size: 1.86
+    ask_size: 0.99
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0272
+    spread: 0.5267
+    bid_size: 1.92
+    ask_size: 1.03
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0254
+    spread: 0.5372
+    bid_size: 1.20
+    ask_size: 1.06
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0235
+    spread: 0.5469
+    bid_size: 1.25
+    ask_size: 1.10
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: -0.0216
+    spread: 0.5556
+    bid_size: 1.30
+    ask_size: 1.13
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: -0.0196
+    spread: 0.5632
+    bid_size: 1.35
+    ask_size: 1.17
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: -0.0175
+    spread: 0.5696
+    bid_size: 1.40
+    ask_size: 1.20
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: -0.0154
+    spread: 0.6225
+    bid_size: 1.44
+    ask_size: 1.23
+    last_size: 0.08
+    trade_side: none
+  - move_mid_by: -0.0132
+    spread: 0.5779
+    bid_size: 1.48
+    ask_size: 1.26
+    last_size: 0.08
+    trade_side: sell
+  - move_mid_by: -0.0110
+    spread: 0.5797
+    bid_size: 1.52
+    ask_size: 1.29
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: -0.0088
+    spread: 0.5799
+    bid_size: 1.56
+    ask_size: 0.82
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: -0.0065
+    spread: 0.5784
+    bid_size: 1.60
+    ask_size: 0.85
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: -0.0042
+    spread: 0.5754
+    bid_size: 1.64
+    ask_size: 0.90
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: -0.0019
+    spread: 0.5708
+    bid_size: 1.68
+    ask_size: 0.97
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0004
+    spread: 0.5648
+    bid_size: 1.71
+    ask_size: 1.03
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0027
+    spread: 0.5575
+    bid_size: 1.00
+    ask_size: 1.09
+    last_size: 0.09
+    trade_side: buy
+  - move_mid_by: 0.0051
+    spread: 0.5970
+    bid_size: 1.08
+    ask_size: 1.15
+    last_size: 0.10
+    trade_side: none
+  - move_mid_by: 0.0074
+    spread: 0.5395
+    bid_size: 1.17
+    ask_size: 1.21
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0097
+    spread: 0.5291
+    bid_size: 1.25
+    ask_size: 1.26
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0119
+    spread: 0.5182
+    bid_size: 1.33
+    ask_size: 1.32
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0142
+    spread: 0.5070
+    bid_size: 1.41
+    ask_size: 1.38
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0164
+    spread: 0.5044
+    bid_size: 1.49
+    ask_size: 0.93
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0186
+    spread: 0.5158
+    bid_size: 1.57
+    ask_size: 0.99
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0207
+    spread: 0.5268
+    bid_size: 1.64
+    ask_size: 1.04
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0228
+    spread: 0.5372
+    bid_size: 1.71
+    ask_size: 1.09
+    last_size: 0.10
+    trade_side: sell
+  - move_mid_by: 0.0248
+    spread: 0.5949
+    bid_size: 1.78
+    ask_size: 1.14
+    last_size: 0.11
+    trade_side: none
+  - move_mid_by: 0.0267
+    spread: 0.5557
+    bid_size: 1.85
+    ask_size: 1.19
+    last_size: 0.04
+    trade_side: sell
+  - move_mid_by: 0.0286
+    spread: 0.5633
+    bid_size: 1.92
+    ask_size: 1.23
+    last_size: 0.05
+    trade_side: buy
+  - move_mid_by: 0.0304
+    spread: 0.5696
+    bid_size: 1.20
+    ask_size: 1.28
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0321
+    spread: 0.5745
+    bid_size: 1.26
+    ask_size: 1.32
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0338
+    spread: 0.5779
+    bid_size: 1.32
+    ask_size: 1.36
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0353
+    spread: 0.5797
+    bid_size: 1.37
+    ask_size: 1.40
+    last_size: 0.11
+    trade_side: buy
+  - move_mid_by: 0.0368
+    spread: 0.5799
+    bid_size: 1.42
+    ask_size: 0.94
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0381
+    spread: 0.5784
+    bid_size: 1.47
+    ask_size: 0.98
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0394
+    spread: 0.6234
+    bid_size: 1.52
+    ask_size: 1.01
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0406
+    spread: 0.5708
+    bid_size: 1.57
+    ask_size: 1.05
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0417
+    spread: 0.5648
+    bid_size: 1.61
+    ask_size: 1.08
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0426
+    spread: 0.5574
+    bid_size: 1.65
+    ask_size: 1.11
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0435
+    spread: 0.5489
+    bid_size: 1.69
+    ask_size: 1.14
+    last_size: 0.11
+    trade_side: sell
+  - move_mid_by: 0.0442
+    spread: 0.5394
+    bid_size: 1.73
+    ask_size: 1.17
+    last_size: 0.12
+    trade_side: buy
+  - move_mid_by: 0.0448
+    spread: 0.5291
+    bid_size: 1.77
+    ask_size: 1.20
+    last_size: 0.05
+    trade_side: sell
+  - move_mid_by: 0.0454
+    spread: 0.5181
+    bid_size: 1.02
+    ask_size: 1.23
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0458
+    spread: 0.5069
+    bid_size: 1.06
+    ask_size: 1.26
+    last_size: 0.06
+    trade_side: sell
+  - move_mid_by: 0.0461
+    spread: 0.5525
+    bid_size: 1.11
+    ask_size: 0.81
+    last_size: 0.07
+    trade_side: none
+  - move_mid_by: 0.0463
+    spread: 0.5159
+    bid_size: 1.20
+    ask_size: 0.87
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0463
+    spread: 0.5269
+    bid_size: 1.28
+    ask_size: 0.93
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0463
+    spread: 0.5373
+    bid_size: 1.36
+    ask_size: 0.99
+    last_size: 0.12
+    trade_side: sell
+  - move_mid_by: 0.0462
+    spread: 0.5470
+    bid_size: 1.45
+    ask_size: 1.05
+    last_size: 0.06
+    trade_side: buy
+  - move_mid_by: 0.0459
+    spread: 0.5558
+    bid_size: 1.53
+    ask_size: 1.11
+    last_size: 0.07
+    trade_side: sell
+  - move_mid_by: 0.0456
+    spread: 0.5634
+    bid_size: 1.60
+    ask_size: 1.17
+    last_size: 0.08
+    trade_side: buy
+  - move_mid_by: 0.0451
+    spread: 0.5697
+    bid_size: 1.68
+    ask_size: 1.23
+    last_size: 0.09
+    trade_side: sell
+  - move_mid_by: 0.0446
+    spread: 0.5746
+    bid_size: 1.76
+    ask_size: 1.28
+    last_size: 0.10
+    trade_side: buy
+  - move_mid_by: 0.0439
+    spread: 0.6259
+    bid_size: 1.83
+    ask_size: 1.34
+    last_size: 0.11
+    trade_side: none
