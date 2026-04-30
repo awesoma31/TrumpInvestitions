@@ -40,5 +40,9 @@ clickhouse_logs
 .idea/
 
 .vscode/
-.claude
 mobile/android-native/.gradle
+.claude
+front-ktl/.idea
+front-ktl/app/build
+front-ktl/local.properties
+front-ktl/.gradle

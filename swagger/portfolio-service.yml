@@ -275,6 +275,47 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /balance/cash:
+    get:
+      tags: [Balance]
+      summary: Получить текущий денежный баланс пользователя
+      description: |
+        Используется другими сервисами (например, Trading Service) для проверки
+        достаточности средств перед размещением заявки на покупку.
+      operationId: getCashBalance
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Текущий баланс пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashBalanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /assets/{symbol}/quantity:
+    get:
+      tags: [Positions]
+      summary: Получить количество акций пользователя по тикеру
+      description: |
+        Используется другими сервисами (например, Trading Service) для проверки
+        достаточности количества акций перед размещением заявки на продажу.
+      operationId: getAssetQuantity
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Количество акций по тикеру
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetQuantityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /system/health:
     get:
       tags: [System]
@@ -508,6 +549,43 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    CashBalanceResponse:
+      type: object
+      required:
+        - userId
+        - balance
+        - currency
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        balance:
+          type: string
+          example: "150000.00"
+        currency:
+          type: string
+          example: USD
+
+    AssetQuantityResponse:
+      type: object
+      required:
+        - userId
+        - symbol
+        - quantity
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        symbol:
+          type: string
+          example: AAPL
+        quantity:
+          type: integer
+          minimum: 0
+          example: 10
 
     OrderHistoryItem:
       type: object
