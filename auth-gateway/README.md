@@ -12,10 +12,12 @@ Protected routes validate JWT and forward `X-User-Id` to internal services.
 
 ## Configuration
 
-| Variable | Default |
+The values below match the root `docker-compose.yml` used to run the full stack locally.
+
+| Variable | Value |
 | --- | --- |
 | `PORT` | `8080` |
-| `DATABASE_URL` | `jdbc:postgresql://localhost:5433/auth_gateway` |
+| `DATABASE_URL` | `jdbc:postgresql://postgres:5432/auth_gateway` |
 | `DATABASE_USER` | `auth` |
 | `DATABASE_PASSWORD` | `auth` |
 | `JWT_ISSUER` | `trump-investitions-auth-gateway` |
@@ -24,9 +26,9 @@ Protected routes validate JWT and forward `X-User-Id` to internal services.
 | `JWT_SECRET` | `change-me-in-production` |
 | `ACCESS_TOKEN_TTL_SECONDS` | `900` |
 | `REFRESH_TOKEN_TTL_SECONDS` | `2592000` |
-| `MARKET_SERVICE_URL` | `http://localhost:8081/api/v1` |
-| `ORDER_SERVICE_URL` | `http://localhost:8082/api/v1` |
-| `PORTFOLIO_SERVICE_URL` | `http://localhost:8083/api/v1` |
+| `MARKET_SERVICE_URL` | `http://market-data-service:8081/api/v1` |
+| `ORDER_SERVICE_URL` | `http://trading-service:8083/api/v1` |
+| `PORTFOLIO_SERVICE_URL` | `http://portfolio-service:8082/api/v1` |
 
 ## Run
 
