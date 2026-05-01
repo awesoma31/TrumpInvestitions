@@ -19,7 +19,7 @@ info:
 servers:
   - url: https://api.example.com/api/v1
     description: Public production endpoint
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:8084/api/v1
     description: Local development endpoint
 
 tags:

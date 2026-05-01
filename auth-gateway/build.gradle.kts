@@ -11,8 +11,23 @@ application {
     mainClass.set("org.awesoma.trumpinvestitions.gateway.ApplicationKt")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+val integrationTest by sourceSets.creating {
+    compileClasspath += sourceSets.main.get().output + configurations.testRuntimeClasspath.get()
+    runtimeClasspath += output + compileClasspath
+}
+
+configurations[integrationTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
+configurations[integrationTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
+
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
 }
 
 dependencies {
@@ -38,8 +53,21 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+
+    "integrationTestImplementation"("org.testcontainers:postgresql:1.20.4")
+    "integrationTestImplementation"("org.testcontainers:junit-jupiter:1.20.4")
 }
 
 tasks.test {
+    useJUnitPlatform()
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+    testClassesDirs = integrationTest.output.classesDirs
+    classpath = integrationTest.runtimeClasspath
+    shouldRunAfter(tasks.test)
     useJUnitPlatform()
 }

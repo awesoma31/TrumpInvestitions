@@ -34,13 +34,13 @@ services:
       ORDER_SERVICE_URL: http://trading-service:8083/api/v1
       PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1
     ports:
-      - "8080:8080"
+      - "8084:8080"
 
   # auth-postgres:
   #   image: postgres:16-alpine
   #   container_name: auth-postgres
   #   ports:
-  #     - "5433:5432"
+  #     - "5434:5432"
   #   environment:
   #     POSTGRES_USER: auth
   #     POSTGRES_PASSWORD: auth
@@ -171,7 +171,7 @@ services:
           {"url":"/swagger/market-data-service.yml","name":"Market Data Service"}
         ]
     volumes:
-      - ./swagger:/swagger:ro
+      - ./swagger:/usr/share/nginx/html/swagger:ro
 
 volumes:
   auth_pgdata:

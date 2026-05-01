@@ -141,6 +141,9 @@ internal fun Application.module(
                 val userId = credential.payload.getClaim("user_id").asLong()
                 if (userId != null) JWTPrincipal(credential.payload) else null
             }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, call.error("UNAUTHORIZED", "Bearer token is missing or invalid"))
+            }
         }
     }
 
@@ -262,7 +265,7 @@ class ProxyClient(
                 method = call.request.httpMethod
                 headers {
                     call.request.headers.toMap().forEach { (name, values) ->
-                        if (name !in hopByHopHeaders && !name.equals(HttpHeaders.Authorization, ignoreCase = true)) {
+                        if (!name.isHopByHopHeader() && !name.isGatewayManagedHeader() && !name.equals(HttpHeaders.Authorization, ignoreCase = true)) {
                             values.forEach { append(name, it) }
                         }
                     }
@@ -321,6 +324,14 @@ class ProxyClient(
             HttpHeaders.Host,
             HttpHeaders.ContentLength,
         )
+        val gatewayManagedHeaders = setOf(
+            "X-Request-Id",
+            "X-Correlation-Id",
+            "X-User-Id",
+        )
+
+        private fun String.isHopByHopHeader(): Boolean = hopByHopHeaders.any { equals(it, ignoreCase = true) }
+        private fun String.isGatewayManagedHeader(): Boolean = gatewayManagedHeaders.any { equals(it, ignoreCase = true) }
     }
 }
 
@@ -564,9 +575,9 @@ data class GatewayConfig(
             host = env("HOST", "0.0.0.0"),
             port = env("PORT", "8080").toInt(),
             database = DatabaseConfig(
-                url = env("DATABASE_URL", "jdbc:postgresql://localhost:5432/trump_investitions"),
-                user = env("DATABASE_USER", "postgres"),
-                password = env("DATABASE_PASSWORD", "postgres"),
+                url = env("DATABASE_URL", "jdbc:postgresql://localhost:5434/auth_gateway"),
+                user = env("DATABASE_USER", "auth"),
+                password = env("DATABASE_PASSWORD", "auth"),
                 poolSize = env("DATABASE_POOL_SIZE", "10").toInt(),
             ),
             jwt = JwtConfig(
@@ -578,9 +589,9 @@ data class GatewayConfig(
                 refreshTokenTtlSeconds = env("REFRESH_TOKEN_TTL_SECONDS", "2592000").toLong(),
             ),
             services = ServiceUrls(
-                market = env("MARKET_SERVICE_URL", "http://localhost:8081/api/v1"),
+                market = env("MARKET_SERVICE_URL", "http://localhost:8083/api/v1"),
                 order = env("ORDER_SERVICE_URL", "http://localhost:8082/api/v1"),
-                portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8083/api/v1"),
+                portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8081/api/v1"),
             ),
         )
 

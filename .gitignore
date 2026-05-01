@@ -40,6 +40,10 @@ postgres_data
 
 # service build outputs
 auth-gateway/build/
+auth-gateway/.gradle/
+auth-gateway/.kotlin/
+auth-gateway/.gradle-user-home/
+auth-gateway/.tmp/
 
 .idea/
 

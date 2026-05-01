@@ -133,6 +133,53 @@ class AuthGatewayTest {
     }
 
     @Test
+    fun `login accepts valid credentials and returns auth response`() = testApplication {
+        environment { config = MapApplicationConfig() }
+        application { module(testConfig, FakeAuthRepository(), FakeUpstreamGateway()) }
+
+        val response = client.post("/api/v1/auth/login") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody("""{"login":"investor_01","password":"StrongPass123!"}""")
+        }
+
+        val body = response.bodyAsText()
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(body.contains("\"tokenType\":\"Bearer\""))
+        assertTrue(body.contains("\"refreshToken\":\"refresh-1\""))
+        assertTrue(body.contains("\"username\":\"investor_01\""))
+    }
+
+    @Test
+    fun `refresh rotates refresh token`() = testApplication {
+        environment { config = MapApplicationConfig() }
+        application { module(testConfig, FakeAuthRepository(), FakeUpstreamGateway()) }
+
+        val response = client.post("/api/v1/auth/refresh") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody("""{"refreshToken":"refresh-token"}""")
+        }
+
+        val body = response.bodyAsText()
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(body.contains("\"refreshToken\":\"rotated-1\""))
+    }
+
+    @Test
+    fun `logout revokes refresh token`() = testApplication {
+        val repository = FakeAuthRepository()
+        environment { config = MapApplicationConfig() }
+        application { module(testConfig, repository, FakeUpstreamGateway()) }
+
+        val response = client.post("/api/v1/auth/logout") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody("""{"refreshToken":"refresh-token"}""")
+        }
+
+        assertEquals(HttpStatusCode.NoContent, response.status)
+        assertEquals("refresh-token", repository.lastRevokedRefreshToken)
+    }
+
+    @Test
     fun `protected route without token returns 401`() = testApplication {
         environment { config = MapApplicationConfig() }
         application { module(testConfig, FakeAuthRepository(), FakeUpstreamGateway()) }
@@ -140,6 +187,7 @@ class AuthGatewayTest {
         val response = client.get("/api/v1/orders")
 
         assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertTrue(response.bodyAsText().contains("\"code\":\"UNAUTHORIZED\""))
     }
 
     @Test
@@ -158,6 +206,39 @@ class AuthGatewayTest {
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(TargetService.Order, upstream.lastService)
         assertEquals("/api/v1", upstream.lastStripPrefix)
+        assertEquals(1L, upstream.lastUserId)
+    }
+
+    @Test
+    fun `market route forwards without token`() = testApplication {
+        val upstream = FakeUpstreamGateway()
+        environment { config = MapApplicationConfig() }
+        application { module(testConfig, FakeAuthRepository(), upstream) }
+
+        val response = client.get("/api/v1/market/quotes?symbols=AAPL")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(TargetService.Market, upstream.lastService)
+        assertEquals("/api/v1/market", upstream.lastStripPrefix)
+        assertEquals(null, upstream.lastUserId)
+    }
+
+    @Test
+    fun `portfolio subroute strips gateway prefix and forwards user id`() = testApplication {
+        val upstream = FakeUpstreamGateway()
+        environment { config = MapApplicationConfig() }
+        application { module(testConfig, FakeAuthRepository(), upstream) }
+        val accessToken = TokenService(testConfig.jwt)
+            .authResponse(testUser, IssuedRefreshToken("refresh-token", Instant.now()))
+            .accessToken
+
+        val response = client.get("/api/v1/portfolio/positions?symbol=AAPL") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(TargetService.Portfolio, upstream.lastService)
+        assertEquals("/api/v1/portfolio", upstream.lastStripPrefix)
         assertEquals(1L, upstream.lastUserId)
     }
 
@@ -191,6 +272,7 @@ private class FakeAuthRepository(
     private val ready: Boolean = true,
 ) : AuthRepository {
     var createdUsers = 0
+    var lastRevokedRefreshToken: String? = null
     private val users = mutableMapOf("investor_01" to UserWithPassword(testUser, PasswordHasher.hash("StrongPass123!")))
     private val refreshTokens = mutableMapOf("refresh-token" to testUser)
 
@@ -217,6 +299,7 @@ private class FakeAuthRepository(
     }
 
     override fun revokeRefreshToken(refreshToken: String) {
+        lastRevokedRefreshToken = refreshToken
         refreshTokens.remove(refreshToken)
     }
 
