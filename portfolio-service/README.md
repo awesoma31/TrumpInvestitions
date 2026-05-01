@@ -88,7 +88,7 @@ unrealizedPnl = (currentPrice - avgPrice) * qty
 docker compose up --build portfolio-service postgres kafka
 ```
 
-Сервис поднимется на `http://localhost:8081`. Postgres и Kafka стартуют автоматически как зависимости.
+Сервис поднимется на `http://localhost:8082`. Postgres и Kafka стартуют автоматически как зависимости.
 
 Чтобы остановить и удалить контейнеры:
 
@@ -102,7 +102,7 @@ docker compose down
 
 ```bash
 pip install requests
-python portfolio-service/test_endpoints.py --base-url http://localhost:8081/api/v1
+python portfolio-service/test_endpoints.py --base-url http://localhost:8082/api/v1
 ```
 
 Пример вывода:

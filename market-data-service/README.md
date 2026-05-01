@@ -1,6 +1,6 @@
 # Market Data Service
 
-Go-сервис для агрегации рыночных данных из ClickHouse по спецификации [`swagger/market-data-service.yml`](/Users/kirill/coding/TrumpInvestitions/swagger/market-data-service.yml).
+Go-сервис для агрегации рыночных данных из ClickHouse по спецификации [`swagger/market-data-service.yml`](../swagger/market-data-service.yml).
 
 ## Что умеет
 
@@ -15,67 +15,71 @@ Go-сервис для агрегации рыночных данных из Cli
 - В текущей схеме ClickHouse нет отдельного справочника инструментов, поэтому `name`, `currency`, `lotSize` и `active` формируются на стороне сервиса.
 - В таблице `quotes` нет полного depth-of-market стакана, поэтому `/order-book/{symbol}` агрегирует уровни из последних `bid/ask` значений по инструменту.
 
-## Запуск
+## Запуск (все команды из корня репозитория)
 
-1. Поднять ClickHouse:
+### Первый запуск
 
-   ```bash
-   docker compose up -d
-   ./db/clickhouse/init_clickhouse.sh
-   ```
+```bash
+# 1. Поднять все сервисы
+docker compose up -d --build
 
-   Или сразу поднять ClickHouse вместе с API:
+# 2. Создать схему ClickHouse (таблица quotes)
+db/clickhouse/init_clickhouse.sh
 
-   ```bash
-   docker compose up -d --build
-   ./db/clickhouse/init_clickhouse.sh
-   ```
+# 3. Собрать pricing_engine
+make -C pricing_engine
 
-2. Собрать `pricing_engine`:
+# 4. Загрузить котировки (выбрать один или несколько сценариев)
+./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/btcusdt_1000.yaml | ./pricing_engine/push_input_to_db.sh
+./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/aapl_1000.yaml   | ./pricing_engine/push_input_to_db.sh
+```
 
-   ```bash
-   make -C pricing_engine
-   ```
+### Повторный запуск / перезагрузка данных
 
-3. Загрузить тестовые котировки:
+```bash
+docker compose up -d --build
 
-   ```bash
-   ./pricing_engine/pricing_engine --scenario pricing_engine/examples/basic_btc.yaml | ./pricing_engine/push_input_to_db.sh
-   ```
+# Сначала init (идемпотентен — CREATE TABLE IF NOT EXISTS),
+# затем reset (TRUNCATE) — такой порядок безопасен при пересоздании volumes
+db/clickhouse/init_clickhouse.sh
+scripts/reset-clickhouse.sh
 
-4. Запустить сервис:
+make -C pricing_engine
+./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/btcusdt_1000.yaml | ./pricing_engine/push_input_to_db.sh
+```
 
-   ```bash
-   cd market-data-service
-   go run ./cmd/market-data-service
-   ```
+> **Важно:** `scripts/reset-clickhouse.sh` делает `TRUNCATE TABLE quotes` и требует, чтобы таблица уже существовала. Всегда запускай его **после** `init_clickhouse.sh`.
 
-По умолчанию сервис поднимается на `http://localhost:8080/api/v1`.
+### Доступные сценарии
+
+| Файл | Символ | Шагов |
+|---|---|---|
+| `generated/btcusdt_1000.yaml` | BTCUSDT | 1000 |
+| `generated/ethusdt_1000.yaml` | ETHUSDT | 1000 |
+| `generated/aapl_1000.yaml` | AAPL | 1000 |
+| `generated/msft_1000.yaml` | MSFT | 1000 |
+| `generated/tsla_1000.yaml` | TSLA | 1000 |
+| `basic_btc.yaml` | BTCUSDT | 5 (минимальный регрессионный) |
+
+Можно загрузить несколько сценариев подряд — они добавляются в таблицу, не перезаписывают друг друга.
 
 ## Smoke test вместе с pricing_engine
 
-Есть готовый скрипт:
+Есть готовый скрипт, который делает всё автоматически:
 
 ```bash
 ./scripts/smoke-test-market-data.sh
 ```
 
-Он делает следующее:
+Он поднимает `clickhouse` и `market-data-service`, инициализирует схему, очищает таблицу, прогоняет `basic_btc.yaml` и вызывает все endpoint'ы.
 
-- поднимает `clickhouse` и `market-data-service` через `docker compose`
-- инициализирует таблицу `quotes`
-- по умолчанию очищает `quotes` через `TRUNCATE TABLE`
-- собирает `pricing_engine`
-- прогоняет сценарий `pricing_engine/examples/basic_btc.yaml`
-- вызывает основные endpoint'ы из swagger и печатает ответы
-
-Если нужен другой сценарий:
+Можно передать другой сценарий первым аргументом:
 
 ```bash
-./scripts/smoke-test-market-data.sh pricing_engine/examples/basic_btc.yaml
+./scripts/smoke-test-market-data.sh pricing_engine/examples/generated/btcusdt_1000.yaml
 ```
 
-Если не хочешь очищать таблицу перед тестом:
+Пропустить очистку таблицы:
 
 ```bash
 RESET_DB=0 ./scripts/smoke-test-market-data.sh

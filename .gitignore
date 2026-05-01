@@ -50,3 +50,6 @@ front-ktl/.idea
 front-ktl/app/build
 front-ktl/local.properties
 front-ktl/.gradle
+mobile/android-native/build/reports/problems
+mobile/android-native/.gradle
+auth-gateway/.gradle

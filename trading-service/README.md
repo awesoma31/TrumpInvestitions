@@ -118,7 +118,7 @@ POST /orders
 docker compose up --build trading-service portfolio-service postgres kafka
 ```
 
-Сервис будет доступен на `http://localhost:8082`.
+Сервис будет доступен на `http://localhost:8083`.
 
 Миграция БД выполняется автоматически через `entrypoint.sh` при каждом старте контейнера.
 
@@ -133,11 +133,11 @@ go test ./...
 
 ### Интеграционные тесты
 
-В корне репозитория находится скрипт `test_portfolio_trading.py`, который тестирует trading-service и portfolio-service совместно, включая сквозной сценарий через Kafka.
+В папке `tests/` находится скрипт `test_portfolio_trading.py`, который тестирует trading-service и portfolio-service совместно, включая сквозной сценарий через Kafka.
 
 ```bash
 pip install requests
-python test_portfolio_trading.py
+python tests/test_portfolio_trading.py
 ```
 
 Что проверяется:
@@ -156,8 +156,8 @@ python test_portfolio_trading.py
 Параметры запуска:
 
 ```bash
-python test_portfolio_trading.py \
-  --portfolio-url http://localhost:8081/api/v1 \
-  --trading-url   http://localhost:8082/api/v1 \
+python tests/test_portfolio_trading.py \
+  --portfolio-url http://localhost:8082/api/v1 \
+  --trading-url   http://localhost:8083/api/v1 \
   --kafka-wait    3
 ```
