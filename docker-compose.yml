@@ -114,6 +114,7 @@ services:
     environment:
       HTTP_PORT: "8082"
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/portfolio?sslmode=disable
+      MARKET_DATA_URL: http://market-data-service:8081/api/v1
       KAFKA_BROKERS: kafka:9092
       KAFKA_TOPIC: trading-events
       KAFKA_GROUP_ID: portfolio-service
@@ -133,6 +134,7 @@ services:
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: trading-events
       SERVER_PORT: "8083"
+      MARKET_DATA_URL: http://market-data-service:8081/api/v1
       PORTFOLIO_URL: http://portfolio-service:8082
     depends_on:
       postgres:

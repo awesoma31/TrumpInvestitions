@@ -81,8 +81,8 @@ type MockMarketClient struct {
 	mock.Mock
 }
 
-func (m *MockMarketClient) GetMarketData(ctx context.Context, symbol string) (decimal.Decimal, int, error) {
-	args := m.Called(ctx, symbol)
+func (m *MockMarketClient) GetMarketData(ctx context.Context, symbol string, side domain.OrderSide) (decimal.Decimal, int, error) {
+	args := m.Called(ctx, symbol, side)
 	return args.Get(0).(decimal.Decimal), args.Int(1), args.Error(2)
 }
 
@@ -141,7 +141,7 @@ func makeRequest(router *chi.Mux, method, path string, body interface{}, headers
 }
 
 func setupMocksForSuccessfulBuy(repo *MockOrderRepo, market *MockMarketClient, portfolio *MockPortfolioClient, producer *MockProducer) {
-	market.On("GetMarketData", mock.Anything, "AAPL").
+	market.On("GetMarketData", mock.Anything, "AAPL", domain.OrderSideBuy).
 		Return(decimal.NewFromInt(150), 100000, nil)
 	portfolio.On("GetCashBalance", mock.Anything, int64(1)).
 		Return(decimal.NewFromInt(100000), nil)
@@ -200,7 +200,7 @@ func TestCreateOrder_SuccessfulSell(t *testing.T) {
 	portfolio := new(MockPortfolioClient)
 	producer := new(MockProducer)
 
-	market.On("GetMarketData", mock.Anything, "TSLA").
+	market.On("GetMarketData", mock.Anything, "TSLA", domain.OrderSideSell).
 		Return(decimal.NewFromInt(200), 50000, nil)
 	portfolio.On("GetAssetQuantity", mock.Anything, int64(2), "TSLA").
 		Return(100, nil)
@@ -244,7 +244,7 @@ func TestCreateOrder_InsufficientFunds(t *testing.T) {
 	portfolio := new(MockPortfolioClient)
 	producer := new(MockProducer)
 
-	market.On("GetMarketData", mock.Anything, "AAPL").
+	market.On("GetMarketData", mock.Anything, "AAPL", domain.OrderSideBuy).
 		Return(decimal.NewFromInt(2000), 100000, nil)
 	portfolio.On("GetCashBalance", mock.Anything, int64(1)).
 		Return(decimal.NewFromInt(100), nil)
@@ -283,7 +283,7 @@ func TestCreateOrder_InsufficientAssets(t *testing.T) {
 	portfolio := new(MockPortfolioClient)
 	producer := new(MockProducer)
 
-	market.On("GetMarketData", mock.Anything, "GOOGL").
+	market.On("GetMarketData", mock.Anything, "GOOGL", domain.OrderSideSell).
 		Return(decimal.NewFromInt(100), 100000, nil)
 	portfolio.On("GetAssetQuantity", mock.Anything, int64(2), "GOOGL").
 		Return(10, nil)
@@ -323,7 +323,7 @@ func TestCreateOrder_InsufficientMarketVolume(t *testing.T) {
 	producer := new(MockProducer)
 
 	// Объём рынка 5, а запрашивают 100
-	market.On("GetMarketData", mock.Anything, "AAPL").
+	market.On("GetMarketData", mock.Anything, "AAPL", domain.OrderSideBuy).
 		Return(decimal.NewFromInt(150), 5, nil)
 	repo.On("CreateOrder", mock.Anything, mock.Anything).
 		Return(nil)

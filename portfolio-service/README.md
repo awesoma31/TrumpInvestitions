@@ -63,7 +63,7 @@ realizedPnl += (sellPrice - avgPrice) * qty
 unrealizedPnl = (currentPrice - avgPrice) * qty
 ```
 
-> Текущая цена возвращается заглушкой `StubPriceProvider` — всегда $100. В production сюда должен подключаться реальный market data провайдер через интерфейс `PriceProvider`.
+> Текущая цена запрашивается через интерфейс `PriceProvider`. В текущем рантайме используется HTTP-интеграция с `market-data-service`.
 
 ## База данных
 

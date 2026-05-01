@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/awesoma31/portfolio-service/config"
+	"github.com/awesoma31/portfolio-service/external"
 	"github.com/awesoma31/portfolio-service/handler"
 	"github.com/awesoma31/portfolio-service/kafka"
 	"github.com/awesoma31/portfolio-service/repository"
@@ -38,7 +39,7 @@ func main() {
 	log.Println("Connected to PostgreSQL")
 
 	repo := repository.NewPostgresRepository(db)
-	priceProvider := &service.StubPriceProvider{}
+	priceProvider := external.NewMarketDataPriceProvider(cfg.MarketDataURL)
 	svc := service.NewPortfolioService(repo, priceProvider)
 
 	r := mux.NewRouter()

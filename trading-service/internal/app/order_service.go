@@ -69,7 +69,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, req CreateOrderReq) (*do
 		return nil, fmt.Errorf("create order: %w", err)
 	}
 
-	price, volume, err := s.marketClient.GetMarketData(ctx, req.Symbol)
+	price, volume, err := s.marketClient.GetMarketData(ctx, req.Symbol, req.Side)
 	if err != nil {
 		return nil, fmt.Errorf("get market data: %w", err)
 	}

@@ -15,13 +15,6 @@ type PriceProvider interface {
 	GetCurrentPrice(symbol string) (decimal.Decimal, error)
 }
 
-// StubPriceProvider returns a fixed price for MVP
-type StubPriceProvider struct{}
-
-func (s *StubPriceProvider) GetCurrentPrice(symbol string) (decimal.Decimal, error) {
-	return decimal.NewFromFloat(100.0), nil
-}
-
 type PortfolioService struct {
 	repo  repository.Repository
 	price PriceProvider

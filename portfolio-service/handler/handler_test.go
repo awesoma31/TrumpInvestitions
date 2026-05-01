@@ -16,9 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type fixedPriceProvider struct{}
+
+func (f *fixedPriceProvider) GetCurrentPrice(symbol string) (decimal.Decimal, error) {
+	return decimal.NewFromFloat(100.0), nil
+}
+
 func setupHandler() (*Handler, *mux.Router) {
 	repo := repository.NewMockRepository()
-	price := &service.StubPriceProvider{}
+	price := &fixedPriceProvider{}
 	svc := service.NewPortfolioService(repo, price)
 	h := NewHandler(svc, repo)
 	r := mux.NewRouter()
