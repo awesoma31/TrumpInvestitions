@@ -575,9 +575,9 @@ data class GatewayConfig(
             host = env("HOST", "0.0.0.0"),
             port = env("PORT", "8080").toInt(),
             database = DatabaseConfig(
-                url = env("DATABASE_URL", "jdbc:postgresql://localhost:5434/auth_gateway"),
-                user = env("DATABASE_USER", "auth"),
-                password = env("DATABASE_PASSWORD", "auth"),
+                url = env("DATABASE_URL", "jdbc:postgresql://localhost:5433/portfolio"),
+                user = env("DATABASE_USER", "postgres"),
+                password = env("DATABASE_PASSWORD", "postgres"),
                 poolSize = env("DATABASE_POOL_SIZE", "10").toInt(),
             ),
             jwt = JwtConfig(
@@ -589,9 +589,9 @@ data class GatewayConfig(
                 refreshTokenTtlSeconds = env("REFRESH_TOKEN_TTL_SECONDS", "2592000").toLong(),
             ),
             services = ServiceUrls(
-                market = env("MARKET_SERVICE_URL", "http://localhost:8083/api/v1"),
-                order = env("ORDER_SERVICE_URL", "http://localhost:8082/api/v1"),
-                portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8081/api/v1"),
+                market = env("MARKET_SERVICE_URL", "http://localhost:8081/api/v1"),
+                order = env("ORDER_SERVICE_URL", "http://localhost:8083/api/v1"),
+                portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8082/api/v1"),
             ),
         )
 
