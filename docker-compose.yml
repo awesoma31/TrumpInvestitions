@@ -17,6 +17,42 @@ services:
         soft: 262144
         hard: 262144
 
+  auth-gateway:
+    build:
+      context: ./auth-gateway
+    container_name: auth-gateway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/portfolio?sslmode=disable
+      DATABASE_USER: auth
+      DATABASE_PASSWORD: auth
+      JWT_SECRET: change-me-in-production
+      MARKET_SERVICE_URL: http://market-data-service:8081/api/v1
+      ORDER_SERVICE_URL: http://trading-service:8083/api/v1
+      PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1
+    ports:
+      - "8080:8080"
+
+  # auth-postgres:
+  #   image: postgres:16-alpine
+  #   container_name: auth-postgres
+  #   ports:
+  #     - "5433:5432"
+  #   environment:
+  #     POSTGRES_USER: auth
+  #     POSTGRES_PASSWORD: auth
+  #     POSTGRES_DB: auth_gateway
+  #   volumes:
+  #     - auth_pgdata:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U auth -d auth_gateway"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
   market-data-service:
     build:
       context: ./market-data-service
@@ -24,14 +60,14 @@ services:
     depends_on:
       - clickhouse
     environment:
-      HTTP_PORT: 8080
+      HTTP_PORT: 8081
       HTTP_BASE_PATH: /api/v1
       CLICKHOUSE_URL: http://clickhouse:8123
       CLICKHOUSE_DATABASE: default
       CLICKHOUSE_USER: market_data
       CLICKHOUSE_PASSWORD: market_data_password
     ports:
-      - "8080:8080"
+      - "8081:8081"
   postgres:
     image: postgres:16-alpine
     container_name: postgres
@@ -43,6 +79,7 @@ services:
       POSTGRES_DB: portfolio
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - auth_pgdata:/var/lib/postgresql/auth_pgdata
       - ./db/postgres-init.sql:/docker-entrypoint-initdb.d/00_create_trading_db.sql
       - ./portfolio-service/migrations/001_init.sql:/docker-entrypoint-initdb.d/01_portfolio_schema.sql
       - ./portfolio-service/migrations/002_drop_trade_fk.sql:/docker-entrypoint-initdb.d/02_drop_trade_fk.sql
@@ -90,9 +127,9 @@ services:
     build: ./portfolio-service
     container_name: portfolio-service
     ports:
-      - "8081:8080"
+      - "8082:8082"
     environment:
-      HTTP_PORT: "8080"
+      HTTP_PORT: "8082"
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/portfolio?sslmode=disable
       KAFKA_BROKERS: kafka:9092
       KAFKA_TOPIC: trading-events
@@ -107,13 +144,13 @@ services:
     build: ./trading-service
     container_name: trading-service
     ports:
-      - "8082:8080"
+      - "8083:8083"
     environment:
       DATABASE_URL: postgres://trading:trading@postgres:5432/trading?sslmode=disable
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: trading-events
-      SERVER_PORT: "8080"
-      PORTFOLIO_URL: http://portfolio-service:8080
+      SERVER_PORT: "8083"
+      PORTFOLIO_URL: http://portfolio-service:8082
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,7 +161,7 @@ services:
     image: swaggerapi/swagger-ui:latest
     container_name: swagger-ui
     ports:
-      - "8090:8080"
+      - "8090:8090"
     environment:
       URLS: >
         [
@@ -137,4 +174,5 @@ services:
       - ./swagger:/swagger:ro
 
 volumes:
+  auth_pgdata:
   pgdata:
