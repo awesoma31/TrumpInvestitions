@@ -28,7 +28,7 @@ export interface Order {
   orderType: 'market' | 'limit';
   price?: number;
   amount: number;
-  status: 'pending' | 'filled' | 'cancelled' | 'partial';
+  status: 'pending' | 'filled' | 'cancelled' | 'partial' | 'rejected';
   createdAt: string;
   updatedAt: string;
 }

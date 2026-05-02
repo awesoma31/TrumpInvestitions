@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { Portfolio } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const PortfolioComponent: React.FC = () => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
@@ -19,7 +19,7 @@ const PortfolioComponent: React.FC = () => {
 
   const loadPortfolio = async () => {
     try {
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         const data = await service.getPortfolio();
         setPortfolio(data);

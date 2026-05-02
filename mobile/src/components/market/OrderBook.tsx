@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { OrderBook } from '../../types/market';
 import type { Stock } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 interface OrderBookProps {
   stock: Stock;
@@ -24,7 +24,7 @@ const OrderBook: React.FC<OrderBookProps> = ({ stock }) => {
 
   const loadOrderBook = async () => {
     try {
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         const data = await service.getOrderBook(stock.id);
         setOrderBook(data);

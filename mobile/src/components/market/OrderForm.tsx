@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { Stock } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 interface OrderFormProps {
   stock: Stock;
@@ -28,7 +28,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ stock, onOrderCreated, onClose })
 
     try {
       setLoading(true);
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         await service.createOrder({
           stockId: stock.id,
