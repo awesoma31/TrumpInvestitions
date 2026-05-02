@@ -1,6 +1,7 @@
 package org.awesoma.trumpinvestitions.data.stub
 
 import org.awesoma.trumpinvestitions.data.model.Order
+import org.awesoma.trumpinvestitions.data.model.OrderKind
 import org.awesoma.trumpinvestitions.data.model.OrderStatus
 import org.awesoma.trumpinvestitions.data.model.OrderType
 import org.awesoma.trumpinvestitions.data.model.Position
@@ -34,11 +35,11 @@ object StubRepository {
     )
 
     val orders = listOf(
-        Order("1", "AAPL", OrderType.BUY, 10, 180.00, OrderStatus.FILLED, "2025-04-10 09:30"),
-        Order("2", "TSLA", OrderType.BUY, 5, 245.00, OrderStatus.FILLED, "2025-04-12 11:00"),
-        Order("3", "GOOGL", OrderType.SELL, 3, 176.00, OrderStatus.CANCELLED, "2025-04-15 14:20"),
-        Order("4", "MSFT", OrderType.BUY, 2, 414.00, OrderStatus.ACCEPTED, "2025-04-18 10:05"),
-        Order("5", "NVDA", OrderType.BUY, 1, 870.00, OrderStatus.NEW, "2025-04-19 08:15"),
+        Order("1", "AAPL", OrderType.BUY, OrderKind.MARKET, 10, 180.00, OrderStatus.FILLED, "2025-04-10 09:30"),
+        Order("2", "TSLA", OrderType.BUY, OrderKind.MARKET, 5, 245.00, OrderStatus.FILLED, "2025-04-12 11:00"),
+        Order("3", "GOOGL", OrderType.SELL, OrderKind.MARKET, 3, 176.00, OrderStatus.CANCELLED, "2025-04-15 14:20"),
+        Order("4", "MSFT", OrderType.BUY, OrderKind.LIMIT, 2, 414.00, OrderStatus.NEW, "2025-04-18 10:05"),
+        Order("5", "NVDA", OrderType.BUY, OrderKind.MARKET, 1, 870.00, OrderStatus.NEW, "2025-04-19 08:15"),
     )
 
     val positions = listOf(

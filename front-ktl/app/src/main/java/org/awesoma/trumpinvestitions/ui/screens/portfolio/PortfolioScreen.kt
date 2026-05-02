@@ -1,25 +1,29 @@
 package org.awesoma.trumpinvestitions.ui.screens.portfolio
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,56 +32,73 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.awesoma.trumpinvestitions.data.model.Order
 import org.awesoma.trumpinvestitions.data.model.OrderStatus
 import org.awesoma.trumpinvestitions.data.model.OrderType
 import org.awesoma.trumpinvestitions.data.model.Position
-import org.awesoma.trumpinvestitions.data.stub.StubRepository
+import org.awesoma.trumpinvestitions.ui.viewmodel.PortfolioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioScreen() {
-    val positions = StubRepository.positions
-    val orders = StubRepository.orders
-    val user = StubRepository.currentUser
-    val totalPnl = positions.sumOf { it.pnl }
+    val vm: PortfolioViewModel = viewModel()
+    val state by vm.state.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Позиции", "История заявок")
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Портфель") }) }
     ) { padding ->
-        LazyColumn(contentPadding = padding) {
-            item {
-                PortfolioSummaryCard(balance = user.balance, totalPnl = totalPnl)
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-            item {
-                TabRow(selectedTabIndex = selectedTab) {
-                    tabs.forEachIndexed { i, title ->
-                        Tab(
-                            selected = selectedTab == i,
-                            onClick = { selectedTab = i },
-                            text = { Text(title) }
-                        )
+        } else {
+            val positions = state?.positions ?: emptyList()
+            val orders = state?.orders ?: emptyList()
+            val cashBalance = state?.cashBalance ?: 0.0
+            val totalPnl = state?.totalPnl ?: 0.0
+
+            LazyColumn(contentPadding = padding) {
+                item {
+                    PortfolioSummaryCard(balance = cashBalance, totalPnl = totalPnl)
+                }
+                item {
+                    TabRow(selectedTabIndex = selectedTab) {
+                        tabs.forEachIndexed { i, title ->
+                            Tab(
+                                selected = selectedTab == i,
+                                onClick = { selectedTab = i },
+                                text = { Text(title) }
+                            )
+                        }
                     }
                 }
-            }
-            if (selectedTab == 0) {
-                if (positions.isEmpty()) {
-                    item { EmptyState("Нет открытых позиций") }
-                } else {
-                    items(positions) { position ->
-                        PositionItem(position)
-                        HorizontalDivider()
+                if (selectedTab == 0) {
+                    if (positions.isEmpty()) {
+                        item { EmptyState("Нет открытых позиций") }
+                    } else {
+                        items(positions) { position ->
+                            PositionItem(position)
+                            HorizontalDivider()
+                        }
                     }
-                }
-            } else {
-                if (orders.isEmpty()) {
-                    item { EmptyState("История заявок пуста") }
                 } else {
-                    items(orders) { order ->
-                        OrderItem(order)
-                        HorizontalDivider()
+                    if (orders.isEmpty()) {
+                        item { EmptyState("История заявок пуста") }
+                    } else {
+                        items(orders) { order ->
+                            OrderItem(order)
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
@@ -144,9 +165,9 @@ private fun OrderItem(order: Order) {
     val typeLabel = if (order.type == OrderType.BUY) "Покупка" else "Продажа"
     val statusLabel = when (order.status) {
         OrderStatus.NEW -> "Новая"
-        OrderStatus.ACCEPTED -> "Принята"
         OrderStatus.FILLED -> "Исполнена"
         OrderStatus.CANCELLED -> "Отменена"
+        OrderStatus.REJECTED -> "Отклонена"
     }
 
     ListItem(

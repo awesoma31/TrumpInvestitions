@@ -8,10 +8,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -52,28 +51,30 @@ private val bottomNavItems = listOf(
 
 @Composable
 fun TrumpInvestitionsApp() {
-    var isLoggedIn by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val app = context.applicationContext as TrumpApp
+    val isLoggedIn by app.tokenManager.isLoggedInFlow().collectAsState(initial = false)
 
     if (!isLoggedIn) {
-        AuthFlow(onLoginSuccess = { isLoggedIn = true })
+        AuthFlow()
     } else {
-        MainApp(onLogout = { isLoggedIn = false })
+        MainApp()
     }
 }
 
 @Composable
-fun AuthFlow(onLoginSuccess: () -> Unit) {
+fun AuthFlow() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.Login.route) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginSuccess = onLoginSuccess,
+                onLoginSuccess = { /* tokenManager flow handles transition */ },
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) }
             )
         }
         composable(Screen.Register.route) {
             RegisterScreen(
-                onRegisterSuccess = onLoginSuccess,
+                onRegisterSuccess = { /* tokenManager flow handles transition */ },
                 onNavigateToLogin = { navController.popBackStack() }
             )
         }
@@ -81,7 +82,7 @@ fun AuthFlow(onLoginSuccess: () -> Unit) {
 }
 
 @Composable
-fun MainApp(onLogout: () -> Unit) {
+fun MainApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -107,12 +108,12 @@ fun MainApp(onLogout: () -> Unit) {
             }
         }
     ) {
-        MainNavHost(navController = navController, onLogout = onLogout)
+        MainNavHost(navController = navController)
     }
 }
 
 @Composable
-fun MainNavHost(navController: NavHostController, onLogout: () -> Unit) {
+fun MainNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Screen.StockList.route) {
         composable(Screen.StockList.route) {
             StocksScreen(onStockClick = { symbol ->
@@ -130,7 +131,7 @@ fun MainNavHost(navController: NavHostController, onLogout: () -> Unit) {
             PortfolioScreen()
         }
         composable(Screen.Profile.route) {
-            ProfileScreen(onLogout = onLogout)
+            ProfileScreen(onLogout = { /* tokenManager flow handles transition */ })
         }
     }
 }

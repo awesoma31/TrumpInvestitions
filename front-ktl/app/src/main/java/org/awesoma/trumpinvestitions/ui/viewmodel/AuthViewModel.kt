@@ -1,0 +1,59 @@
+package org.awesoma.trumpinvestitions.ui.viewmodel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.awesoma.trumpinvestitions.TrumpApp
+import org.awesoma.trumpinvestitions.data.repository.AuthRepository
+
+data class AuthUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isSuccess: Boolean = false
+)
+
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val app = application as TrumpApp
+    private val authRepository = AuthRepository(app.network.authApiService, app.tokenManager)
+
+    private val _uiState = MutableStateFlow(AuthUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState
+
+    fun login(login: String, password: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState(isLoading = true)
+            try {
+                authRepository.login(login, password)
+                _uiState.value = AuthUiState(isSuccess = true)
+            } catch (e: Exception) {
+                _uiState.value = AuthUiState(error = e.message ?: "Ошибка входа")
+            }
+        }
+    }
+
+    fun register(username: String, email: String, password: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState(isLoading = true)
+            try {
+                authRepository.register(username, email, password)
+                _uiState.value = AuthUiState(isSuccess = true)
+            } catch (e: Exception) {
+                _uiState.value = AuthUiState(error = e.message ?: "Ошибка регистрации")
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+}
