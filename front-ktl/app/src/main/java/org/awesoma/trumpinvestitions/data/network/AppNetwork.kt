@@ -11,11 +11,7 @@ import org.awesoma.trumpinvestitions.data.auth.TokenRefreshAuthenticator
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
-class AppNetwork(tokenManager: TokenManager) {
-
-    companion object {
-        const val BASE_URL = "http://10.0.2.2:8080/api/v1/"
-    }
+class AppNetwork(baseUrl: String, tokenManager: TokenManager? = null) {
 
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
 
@@ -30,22 +26,24 @@ class AppNetwork(tokenManager: TokenManager) {
         .build()
 
     val authApiService: AuthApiService = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(baseUrl)
         .client(plainClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
         .create(AuthApiService::class.java)
 
     val apiService: ApiService = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(baseUrl)
         .client(
-            OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .addInterceptor(AuthInterceptor(tokenManager))
-                .authenticator(TokenRefreshAuthenticator(tokenManager, authApiService))
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build()
+            if (tokenManager != null) {
+                OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .addInterceptor(AuthInterceptor(tokenManager))
+                    .authenticator(TokenRefreshAuthenticator(tokenManager, authApiService))
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build()
+            } else plainClient
         )
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()

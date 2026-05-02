@@ -24,9 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.awesoma.trumpinvestitions.TrumpApp
 import org.awesoma.trumpinvestitions.ui.viewmodel.AuthViewModel
 
 @Composable
@@ -36,9 +38,13 @@ fun LoginScreen(
 ) {
     val vm: AuthViewModel = viewModel()
     val uiState by vm.uiState.collectAsState()
+    val context = LocalContext.current
+    val app = context.applicationContext as TrumpApp
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var serverHost by remember { mutableStateOf(app.settingsManager.serverHost) }
+    var serverExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) onLoginSuccess()
@@ -87,6 +93,39 @@ fun LoginScreen(
         }
         TextButton(onClick = onNavigateToRegister) {
             Text("Нет аккаунта? Зарегистрироваться")
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        TextButton(onClick = { serverExpanded = !serverExpanded }) {
+            Text(
+                if (serverExpanded) "▲ Сервер: $serverHost" else "▼ Настройки сервера",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+
+        if (serverExpanded) {
+            Spacer(Modifier.height(4.dp))
+            OutlinedTextField(
+                value = serverHost,
+                onValueChange = { serverHost = it },
+                label = { Text("host:port") },
+                placeholder = { Text("192.168.0.3:8080") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    app.settingsManager.serverHost = serverHost.trim()
+                    app.rebuildNetwork()
+                    serverExpanded = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Сохранить")
+            }
         }
     }
 }
