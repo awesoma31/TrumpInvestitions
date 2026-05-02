@@ -297,6 +297,24 @@ func (s *PortfolioService) handleTradeExecuted(ctx context.Context, event *model
 		return err
 	}
 
+	// Update cash balance
+	portfolio, err := s.repo.GetOrCreatePortfolio(ctx, event.UserID)
+	if err != nil {
+		return err
+	}
+
+	if event.Side == "BUY" {
+		newBalance := portfolio.CashBalance.Sub(grossAmount)
+		if _, err := s.repo.UpdateCashBalance(ctx, event.UserID, newBalance); err != nil {
+			return err
+		}
+	} else {
+		newBalance := portfolio.CashBalance.Add(grossAmount)
+		if _, err := s.repo.UpdateCashBalance(ctx, event.UserID, newBalance); err != nil {
+			return err
+		}
+	}
+
 	// Update position
 	pos, err := s.repo.GetPosition(ctx, event.UserID, event.Symbol)
 	if err != nil {
@@ -329,7 +347,8 @@ func (s *PortfolioService) handleTradeExecuted(ctx context.Context, event *model
 func (s *PortfolioService) buildPositionResponse(p *models.Position) (*models.PositionResponse, error) {
 	currentPrice, err := s.price.GetCurrentPrice(p.Symbol)
 	if err != nil {
-		return nil, err
+		// Fallback to avg_price if market data is unavailable
+		currentPrice = p.AvgPrice
 	}
 	marketValue := currentPrice.Mul(decimal.NewFromInt(int64(p.Quantity)))
 	unrealized := currentPrice.Sub(p.AvgPrice).Mul(decimal.NewFromInt(int64(p.Quantity)))
