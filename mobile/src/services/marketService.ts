@@ -39,7 +39,7 @@ const convertOrderToOrder = (order: OrderResponse): Order => ({
   orderType: order.type === 'MARKET' ? 'market' : 'limit',
   price: order.avgFillPrice ? parseFloat(order.avgFillPrice) : undefined,
   amount: order.quantity,
-  status: order.status === 'FILLED' ? 'filled' : order.status === 'CANCELLED' ? 'cancelled' : 'pending',
+  status: order.status === 'FILLED' ? 'filled' : order.status === 'CANCELLED' ? 'cancelled' : order.status === 'REJECTED' ? 'rejected' : 'pending',
   createdAt: order.createdAt,
   updatedAt: order.updatedAt,
 });
@@ -63,8 +63,8 @@ const convertPositionToHolding = (position: PositionResponse) => ({
   averagePrice: parseFloat(position.avgPrice),
   currentPrice: parseFloat(position.currentPrice),
   totalValue: parseFloat(position.marketValue),
-  pnl: parseFloat(position.unrealizedPnl),
-  pnlPercentage: position.marketValue !== '0' ? (parseFloat(position.unrealizedPnl) / parseFloat(position.marketValue)) * 100 : 0,
+  pnl: parseFloat(position.totalPnl),
+  pnlPercentage: position.marketValue !== '0' ? (parseFloat(position.totalPnl) / parseFloat(position.marketValue)) * 100 : 0,
 });
 
 const convertPortfolioToPortfolio = (portfolio: PortfolioResponse): Portfolio => ({

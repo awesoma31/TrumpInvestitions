@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiClient } from '../services/apiClient';
 import type { User } from '../types/auth';
 
 interface AuthContextType {
@@ -19,45 +20,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem('auth_token');
-      if (token) {
-        const userData = await AsyncStorage.getItem('user_data');
-        setUser(userData ? JSON.parse(userData) : null);
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        if (token) {
+          const userData = await AsyncStorage.getItem('user_data');
+          setUser(userData ? JSON.parse(userData) : null);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
   }, []);
 
   const login = async (login: string, password: string) => {
-    const mockUser: User = {
-      id: '1',
-      email: login,
-      name: login.split('@')[0],
-    };
-    const mockToken = 'mock_token_' + Date.now();
+    const response = await apiClient.login(login, password);
     
-    await AsyncStorage.setItem('auth_token', mockToken);
-    await AsyncStorage.setItem('user_data', JSON.stringify(mockUser));
-    setUser(mockUser);
+    const user: User = {
+      id: response.user.id.toString(),
+      email: response.user.email,
+      name: response.user.username,
+    };
+    
+    await AsyncStorage.setItem('user_data', JSON.stringify(user));
+    setUser(user);
   };
 
   const register = async (username: string, email: string, password: string) => {
-    const mockUser: User = {
-      id: '1',
-      email,
-      name: username,
-    };
-    const mockToken = 'mock_token_' + Date.now();
+    const response = await apiClient.register(username, email, password);
     
-    await AsyncStorage.setItem('auth_token', mockToken);
-    await AsyncStorage.setItem('user_data', JSON.stringify(mockUser));
-    setUser(mockUser);
+    const user: User = {
+      id: response.user.id.toString(),
+      email: response.user.email,
+      name: response.user.username,
+    };
+    
+    await AsyncStorage.setItem('user_data', JSON.stringify(user));
+    setUser(user);
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('auth_token');
+    await apiClient.logout();
     await AsyncStorage.removeItem('user_data');
     setUser(null);
   };

@@ -73,6 +73,9 @@ export interface OrderBookResponse {
   symbol: string;
   bids: OrderBookLevel[];
   asks: OrderBookLevel[];
+  bestBid: string | null;
+  bestAsk: string | null;
+  spread: string | null;
   timestamp: string;
 }
 
@@ -149,7 +152,11 @@ export interface PositionResponse {
   avgPrice: string;
   currentPrice: string;
   marketValue: string;
+  realizedPnl: string;
   unrealizedPnl: string;
+  totalPnl: string;
+  currency: string;
+  updatedAt: string;
 }
 
 export interface PositionListResponse {
@@ -191,4 +198,23 @@ export interface ErrorResponse {
 export interface ErrorDetail {
   field: string;
   issue: string;
+}
+
+// System Types
+export interface HealthResponse {
+  status: string;
+  service: string;
+  timestamp: string;
+}
+
+export interface ReadinessResponse {
+  status: string;
+  service: string;
+  dependencies?: DependencyStatus[];
+  timestamp: string;
+}
+
+export interface DependencyStatus {
+  name: string;
+  status: string;
 }

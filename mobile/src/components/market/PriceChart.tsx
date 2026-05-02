@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { Stock } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 interface PriceChartProps {
   stock: Stock;
@@ -24,9 +24,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ stock }) => {
 
   const loadPriceHistory = async () => {
     try {
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
-        const history = await service.getPriceHistory(stock.id, period);
+        const history = await service.getPriceHistory(stock.id);
         setPriceHistory(history.map(h => h.price));
         setError('');
       }

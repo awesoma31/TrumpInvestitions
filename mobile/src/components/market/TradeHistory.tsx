@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { Trade, Order } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const TradeHistory: React.FC = () => {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -22,7 +22,7 @@ const TradeHistory: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         if (activeTab === 'trades') {
           const tradesData = await service.getUserTrades();
@@ -42,7 +42,7 @@ const TradeHistory: React.FC = () => {
 
   const handleCancelOrder = async (orderId: string) => {
     try {
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         await service.cancelOrder(orderId);
         loadData();

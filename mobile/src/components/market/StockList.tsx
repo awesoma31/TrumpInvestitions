@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { mockMarketService } from '../../services/mockMarketService';
+import { marketService } from '../../services/marketService';
 import type { Stock } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 interface StockListProps {
   onStockSelect?: (stock: Stock) => void;
@@ -23,7 +23,7 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
 
   const loadStocks = async () => {
     try {
-      const service = USE_MOCK ? mockMarketService : null;
+      const service = !USE_MOCK ? marketService : null;
       if (service) {
         const data = await service.getStocks();
         setStocks(data);

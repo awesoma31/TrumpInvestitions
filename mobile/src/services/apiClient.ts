@@ -137,26 +137,35 @@ class ApiClient {
     return this.get(endpoint);
   }
 
+  async getInstrumentBySymbol(symbol: string) {
+    return this.get(`/api/v1/market/instruments/${symbol}`);
+  }
+
   async getQuotes(symbols: string) {
     return this.get(`/api/v1/market/quotes?symbols=${symbols}`);
   }
 
-  async getOrderBook(symbol: string, depth?: number) {
-    const queryParams = new URLSearchParams();
-    queryParams.append('symbol', symbol);
-    if (depth) queryParams.append('depth', depth.toString());
-    
-    return this.get(`/api/v1/market/order-book?${queryParams}`);
+  async getQuoteBySymbol(symbol: string) {
+    return this.get(`/api/v1/market/quotes/${symbol}`);
   }
 
-  async getMarketHistory(symbol: string, from: string, to: string, interval: string) {
+  async getOrderBook(symbol: string, depth?: number) {
+    const queryParams = new URLSearchParams();
+    if (depth) queryParams.append('depth', depth.toString());
+    
+    const endpoint = `/api/v1/market/order-book/${symbol}${queryParams.toString() ? `?${queryParams}` : ''}`;
+    return this.get(endpoint);
+  }
+
+  async getMarketHistory(symbol: string, from: string, to: string, interval: string, limit?: number) {
     const queryParams = new URLSearchParams();
     queryParams.append('symbol', symbol);
     queryParams.append('from', from);
     queryParams.append('to', to);
     queryParams.append('interval', interval);
+    if (limit) queryParams.append('limit', limit.toString());
     
-    return this.get(`/api/v1/market/history?${queryParams}`);
+    return this.get(`/api/v1/market/history/candles?${queryParams}`);
   }
 
   // Order methods
@@ -193,6 +202,10 @@ class ApiClient {
     return this.get(endpoint);
   }
 
+  async getTradeById(tradeId: string) {
+    return this.get(`/api/v1/trades/${tradeId}`);
+  }
+
   // Portfolio methods
   async getPortfolio() {
     return this.get('/api/v1/portfolio');
@@ -206,18 +219,22 @@ class ApiClient {
     return this.get(endpoint);
   }
 
-  async getPnl(params?: { from?: string; to?: string }) {
-    const queryParams = new URLSearchParams();
-    if (params?.from) queryParams.append('from', params.from);
-    if (params?.to) queryParams.append('to', params.to);
-    
-    const endpoint = `/api/v1/portfolio/pnl${queryParams.toString() ? `?${queryParams}` : ''}`;
-    return this.get(endpoint);
+  async getPnl() {
+    return this.get('/api/v1/portfolio/pnl');
   }
 
   // WebSocket token
   async getWebSocketToken() {
     return this.post('/api/v1/realtime/ws-token');
+  }
+
+  // System endpoints
+  async health() {
+    return this.get('/api/v1/system/health');
+  }
+
+  async ready() {
+    return this.get('/api/v1/system/ready');
   }
 }
 
