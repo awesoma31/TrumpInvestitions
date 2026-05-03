@@ -1,5 +1,6 @@
 package org.awesoma.trumpinvestitions.ui.screens.market
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,16 +17,21 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,21 +39,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import org.awesoma.trumpinvestitions.data.stub.StubRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import org.awesoma.trumpinvestitions.data.model.PricePoint
+import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
+import org.awesoma.trumpinvestitions.ui.viewmodel.StockDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockDetailScreen(symbol: String, onBack: () -> Unit) {
-    val stock = StubRepository.getStock(symbol)
+    val vm: StockDetailViewModel = viewModel(factory = StockDetailViewModel.factory(symbol))
+    val stock by vm.stock.collectAsState()
+    val candles by vm.candles.collectAsState()
+    val orderBook by vm.orderBook.collectAsState()
+    val orderResult by vm.orderResult.collectAsState()
+
     var showOrderDialog by remember { mutableStateOf(false) }
     var orderType by remember { mutableStateOf("BUY") }
 
-    if (stock == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Акция не найдена")
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(orderResult) {
+        if (orderResult != null) {
+            snackbarHostState.showSnackbar(orderResult!!)
+            vm.clearOrderResult()
         }
-        return
     }
 
     if (showOrderDialog) {
@@ -55,14 +75,18 @@ fun StockDetailScreen(symbol: String, onBack: () -> Unit) {
             symbol = symbol,
             type = orderType,
             onDismiss = { showOrderDialog = false },
-            onConfirm = { showOrderDialog = false }
+            onConfirm = { quantity ->
+                vm.placeOrder(orderType, quantity)
+                showOrderDialog = false
+            }
         )
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(stock.symbol) },
+                title = { Text(stock?.symbol ?: symbol) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
@@ -90,42 +114,128 @@ fun StockDetailScreen(symbol: String, onBack: () -> Unit) {
             }
         }
     ) { padding ->
-        LazyColumn(contentPadding = padding) {
-            item {
-                Column(Modifier.padding(16.dp)) {
-                    Text(stock.name, style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(4.dp))
-                    Text("$${String.format("%.2f", stock.price)}", style = MaterialTheme.typography.headlineMedium)
-                    val changeColor = if (stock.changePercent >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
-                    val sign = if (stock.changePercent >= 0) "+" else ""
-                    Text("$sign${String.format("%.2f", stock.changePercent)}%", color = changeColor)
+        if (stock == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(contentPadding = padding) {
+                item {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(stock!!.name, style = MaterialTheme.typography.titleLarge)
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "$${String.format("%.2f", stock!!.price)}",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        val changeColor =
+                            if (stock!!.changePercent >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
+                        val sign = if (stock!!.changePercent >= 0) "+" else ""
+                        Text(
+                            "$sign${String.format("%.2f", stock!!.changePercent)}%",
+                            color = changeColor
+                        )
+                    }
                 }
+                item { PriceChart(points = candles) }
+                item {
+                    Text(
+                        "Биржевой стакан",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+                item {
+                    if (orderBook != null) {
+                        RealOrderBook(orderBook = orderBook!!)
+                    } else {
+                        OrderBookStub(
+                            highestBid = stock!!.highestBid,
+                            lowestAsk = stock!!.lowestAsk
+                        )
+                    }
+                }
+                item { Spacer(Modifier.height(80.dp)) }
             }
-            item { ChartPlaceholder() }
-            item {
-                Text(
-                    "Биржевой стакан",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
-            item { OrderBookStub(highestBid = stock.highestBid, lowestAsk = stock.lowestAsk) }
-            item { Spacer(Modifier.height(80.dp)) }
         }
     }
 }
 
 @Composable
-fun ChartPlaceholder() {
-    Box(
-        modifier = Modifier
+fun PriceChart(points: List<PricePoint>, modifier: Modifier = Modifier) {
+    if (points.size < 2) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(16.dp)
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant,
+                    MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Загрузка графика...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        return
+    }
+    val minPrice = points.minOf { it.price }
+    val maxPrice = points.maxOf { it.price }
+    val priceRange = (maxPrice - minPrice).coerceAtLeast(0.01)
+    val isUp = points.last().price >= points.first().price
+    val lineColor = if (isUp) Color(0xFF4CAF50) else Color(0xFFF44336)
+
+    Canvas(
+        modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text("График цены (TODO)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val w = size.width
+        val h = size.height
+        val stepX = w / (points.size - 1)
+        val path = Path()
+        points.forEachIndexed { i, pt ->
+            val x = i * stepX
+            val y = (h * (1f - ((pt.price - minPrice) / priceRange).toFloat())).coerceIn(0f, h)
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        drawPath(
+            path,
+            lineColor,
+            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        )
+    }
+}
+
+@Composable
+fun RealOrderBook(orderBook: OrderBookResponseDto) {
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Bid", color = Color(0xFF4CAF50), style = MaterialTheme.typography.labelLarge)
+            Text("Ask", color = Color(0xFFF44336), style = MaterialTheme.typography.labelLarge)
+        }
+        Spacer(Modifier.height(4.dp))
+        val maxRows = maxOf(orderBook.bids.size, orderBook.asks.size)
+        repeat(maxRows) { i ->
+            val bid = orderBook.bids.getOrNull(i)
+            val ask = orderBook.asks.getOrNull(i)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    if (bid != null) "${bid.price} (${bid.quantity})" else "—",
+                    color = Color(0xFF4CAF50)
+                )
+                Text(
+                    if (ask != null) "${ask.price} (${ask.quantity})" else "—",
+                    color = Color(0xFFF44336)
+                )
+            }
+        }
     }
 }
 
@@ -147,8 +257,13 @@ fun OrderBookStub(highestBid: Double, lowestAsk: Double) {
 }
 
 @Composable
-fun OrderDialog(symbol: String, type: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    var quantity by remember { mutableStateOf("1") }
+fun OrderDialog(
+    symbol: String,
+    type: String,
+    onDismiss: () -> Unit,
+    onConfirm: (quantity: Int) -> Unit
+) {
+    var quantityText by remember { mutableStateOf("1") }
     val title = if (type == "BUY") "Купить $symbol" else "Продать $symbol"
 
     AlertDialog(
@@ -159,8 +274,8 @@ fun OrderDialog(symbol: String, type: String, onDismiss: () -> Unit, onConfirm: 
                 Text("Количество акций:")
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = quantity,
-                    onValueChange = { quantity = it.filter { c -> c.isDigit() } },
+                    value = quantityText,
+                    onValueChange = { quantityText = it.filter { c -> c.isDigit() } },
                     label = { Text("Количество") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -168,7 +283,10 @@ fun OrderDialog(symbol: String, type: String, onDismiss: () -> Unit, onConfirm: 
             }
         },
         confirmButton = {
-            Button(onClick = onConfirm) { Text("Подтвердить") }
+            Button(onClick = {
+                val qty = quantityText.toIntOrNull()?.takeIf { it > 0 } ?: 1
+                onConfirm(qty)
+            }) { Text("Подтвердить") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Отмена") }

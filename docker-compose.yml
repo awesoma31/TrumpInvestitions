@@ -10,8 +10,8 @@ services:
       - "8123:8123"
       - "9000:9000"
     volumes:
-      - ./clickhouse_data:/var/lib/clickhouse
-      - ./clickhouse_logs:/var/log/clickhouse-server
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
     ulimits:
       nofile:
         soft: 262144
@@ -181,3 +181,5 @@ services:
 
 volumes:
   pgdata:
+  clickhouse_data:
+  clickhouse_logs:

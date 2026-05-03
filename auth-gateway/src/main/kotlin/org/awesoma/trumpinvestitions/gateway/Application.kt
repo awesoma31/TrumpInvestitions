@@ -697,12 +697,12 @@ private fun validateRegister(request: RegisterRequest) {
     require(request.username.length in 3..64) { "username length must be between 3 and 64" }
     require(request.username.matches(Regex("^[a-zA-Z0-9._-]+$"))) { "username contains invalid characters" }
     require(request.email.length <= 255 && request.email.contains("@")) { "email is invalid" }
-    require(request.password.length in 8..128) { "password length must be between 8 and 128" }
+    require(request.password.isNotEmpty()) { "password must not be empty" }
 }
 
 private fun validateLogin(request: LoginRequest) {
     require(request.login.length in 3..255) { "login length must be between 3 and 255" }
-    require(request.password.length in 8..128) { "password length must be between 8 and 128" }
+    require(request.password.isNotEmpty()) { "password must not be empty" }
 }
 
 private fun ApplicationCall.error(code: String, message: String): ErrorResponse =

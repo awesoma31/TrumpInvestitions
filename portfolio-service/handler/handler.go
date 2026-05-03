@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -110,16 +113,23 @@ func (h *Handler) GetPnl(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Deposit(w http.ResponseWriter, r *http.Request) {
 	userID, ok := getUserID(r)
 	if !ok {
+		log.Printf("[deposit] missing X-User-Id header")
 		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Missing or invalid X-User-Id header")
 		return
 	}
+	bodyBytes, _ := io.ReadAll(r.Body)
+	log.Printf("[deposit] userID=%d body=%s", userID, string(bodyBytes))
+	r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 	var req models.BalanceOperationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("[deposit] decode error: %v", err)
 		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid request body")
 		return
 	}
+	log.Printf("[deposit] amount field: %q", req.Amount)
 	amount, err := decimal.NewFromString(req.Amount)
 	if err != nil || amount.LessThanOrEqual(decimal.Zero) {
+		log.Printf("[deposit] invalid amount: err=%v amount=%v", err, amount)
 		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid amount")
 		return
 	}

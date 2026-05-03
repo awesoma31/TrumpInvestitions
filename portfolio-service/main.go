@@ -57,6 +57,12 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(otelmux.Middleware("portfolio-service"))
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			log.Printf("[http] %s %s from %s", req.Method, req.URL.Path, req.RemoteAddr)
+			next.ServeHTTP(w, req)
+		})
+	})
 	h := handler.NewHandler(svc, repo)
 	h.RegisterRoutes(r)
 
