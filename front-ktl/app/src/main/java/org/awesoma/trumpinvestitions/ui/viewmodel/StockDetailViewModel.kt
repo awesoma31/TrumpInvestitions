@@ -20,8 +20,9 @@ class StockDetailViewModel(
     private val symbol: String
 ) : AndroidViewModel(application) {
 
-    private val marketRepository = MarketRepository((application as TrumpApp).network.apiService)
-    private val apiService = (application as TrumpApp).network.apiService
+    private val app = application as TrumpApp
+    private val marketRepository get() = MarketRepository(app.network.apiService)
+    private val apiService get() = app.network.apiService
 
     private val _stock = MutableStateFlow<Stock?>(null)
     val stock: StateFlow<Stock?> = _stock

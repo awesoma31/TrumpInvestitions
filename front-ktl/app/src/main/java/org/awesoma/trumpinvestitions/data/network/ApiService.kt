@@ -6,6 +6,7 @@ import org.awesoma.trumpinvestitions.data.network.dto.InstrumentListResponseDto
 import org.awesoma.trumpinvestitions.data.network.dto.OrderDto
 import org.awesoma.trumpinvestitions.data.network.dto.OrderListResponseDto
 import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
+import org.awesoma.trumpinvestitions.data.network.dto.DepositRequestDto
 import org.awesoma.trumpinvestitions.data.network.dto.PortfolioResponseDto
 import org.awesoma.trumpinvestitions.data.network.dto.QuoteDto
 import org.awesoma.trumpinvestitions.data.network.dto.QuoteListResponseDto
@@ -55,4 +56,10 @@ interface ApiService {
 
     @GET("portfolio")
     suspend fun getPortfolio(): PortfolioResponseDto
+
+    @POST("portfolio/balance/deposit")
+    suspend fun deposit(@Body request: DepositRequestDto): PortfolioResponseDto
+
+    @POST("portfolio/balance/withdraw")
+    suspend fun withdraw(@Body request: DepositRequestDto): PortfolioResponseDto
 }

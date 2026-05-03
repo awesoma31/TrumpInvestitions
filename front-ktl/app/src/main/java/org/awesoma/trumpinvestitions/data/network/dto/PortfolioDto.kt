@@ -3,33 +3,36 @@ package org.awesoma.trumpinvestitions.data.network.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class DepositRequestDto(val amount: String)
+
+@Serializable
 data class PositionResponseDto(
-    val symbol: String,
-    val quantity: Int,
-    val avgPrice: String,
-    val currentPrice: String,
-    val marketValue: String,
-    val realizedPnl: String,
-    val unrealizedPnl: String,
-    val totalPnl: String,
-    val currency: String,
-    val updatedAt: String
+    val symbol: String = "",
+    val quantity: Int = 0,
+    val avgPrice: String = "0",
+    val currentPrice: String = "0",
+    val marketValue: String = "0",
+    val realizedPnl: String = "0",
+    val unrealizedPnl: String = "0",
+    val totalPnl: String = "0",
+    val currency: String = "",
+    val updatedAt: String = ""
 )
 
 @Serializable
 data class PositionListResponseDto(
-    val items: List<PositionResponseDto>
+    val items: List<PositionResponseDto> = emptyList()
 )
 
 @Serializable
 data class PortfolioResponseDto(
-    val userId: Long,
-    val cashBalance: String,
-    val totalMarketValue: String,
-    val totalEquity: String,
-    val realizedPnl: String,
-    val unrealizedPnl: String,
-    val totalPnl: String,
-    val positions: List<PositionResponseDto>,
-    val updatedAt: String
+    val userId: Long = 0,
+    val cashBalance: String = "0",
+    val totalMarketValue: String = "0",
+    val totalEquity: String = "0",
+    val realizedPnl: String = "0",
+    val unrealizedPnl: String = "0",
+    val totalPnl: String = "0",
+    val positions: List<PositionResponseDto> = emptyList(),
+    val updatedAt: String = ""
 )
