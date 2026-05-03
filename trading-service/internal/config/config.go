@@ -9,6 +9,7 @@ type Config struct {
 	ServerPort    string
 	MarketDataURL string
 	PortfolioURL  string
+	OtelEndpoint  string
 }
 
 func Load() *Config {
@@ -19,6 +20,7 @@ func Load() *Config {
 		ServerPort:    getEnv("SERVER_PORT", "8080"),
 		MarketDataURL: getEnv("MARKET_DATA_URL", "http://market-data-service:8081/api/v1"),
 		PortfolioURL:  getEnv("PORTFOLIO_URL", "http://portfolio-service:8080"),
+		OtelEndpoint:  getEnv("OTEL_EXPORTER_ENDPOINT", ""),
 	}
 }
 

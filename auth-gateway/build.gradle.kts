@@ -17,6 +17,7 @@ kotlin {
 
 dependencies {
     val ktorVersion = "2.3.12"
+    val otelVersion = "1.40.0"
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -29,6 +30,11 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+
+    // OpenTelemetry
+    implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
+    implementation("io.opentelemetry:opentelemetry-sdk:$otelVersion")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp:$otelVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.zaxxer:HikariCP:5.1.0")

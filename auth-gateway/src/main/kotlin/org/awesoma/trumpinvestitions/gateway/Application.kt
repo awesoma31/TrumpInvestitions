@@ -72,14 +72,49 @@ import java.util.Base64
 import java.util.Date
 import java.util.UUID
 
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
+
 fun main() {
     val config = GatewayConfig.fromEnv()
+    val openTelemetry = initOpenTelemetry(config.otelEndpoint)
     embeddedServer(Netty, host = config.host, port = config.port) {
-        module(config)
+        module(config, openTelemetry)
     }.start(wait = true)
 }
 
-fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv()) {
+private fun initOpenTelemetry(endpoint: String?): OpenTelemetry {
+    if (endpoint.isNullOrBlank()) {
+        println("OTEL_EXPORTER_ENDPOINT not set, tracing disabled")
+        return OpenTelemetry.noop()
+    }
+    val exporter = OtlpGrpcSpanExporter.builder()
+        .setEndpoint("http://$endpoint")
+        .build()
+    val resource = Resource.getDefault().merge(
+        Resource.create(Attributes.builder()
+            .put("service.name", "auth-gateway")
+            .put("service.version", "1.0.0")
+            .build())
+    )
+    val tracerProvider = SdkTracerProvider.builder()
+        .addSpanProcessor(BatchSpanProcessor.builder(exporter).build())
+        .setResource(resource)
+        .build()
+    val sdk = OpenTelemetrySdk.builder()
+        .setTracerProvider(tracerProvider)
+        .buildAndRegisterGlobal()
+    println("OpenTelemetry tracing initialized, exporting to $endpoint")
+    Runtime.getRuntime().addShutdownHook(Thread { tracerProvider.shutdown() })
+    return sdk
+}
+
+fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv(), openTelemetry: OpenTelemetry = OpenTelemetry.noop()) {
     val userRepository = UserRepository(config.database, config.jwt.refreshTokenTtlSeconds)
     val httpClient = HttpClient(CIO) {
         install(HttpTimeout) {
@@ -558,6 +593,7 @@ data class GatewayConfig(
     val database: DatabaseConfig,
     val jwt: JwtConfig,
     val services: ServiceUrls,
+    val otelEndpoint: String?,
 ) {
     companion object {
         fun fromEnv(): GatewayConfig = GatewayConfig(
@@ -582,6 +618,7 @@ data class GatewayConfig(
                 order = env("ORDER_SERVICE_URL", "http://localhost:8082/api/v1"),
                 portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8083/api/v1"),
             ),
+            otelEndpoint = System.getenv("OTEL_EXPORTER_ENDPOINT")?.takeIf { it.isNotBlank() },
         )
 
         private fun env(name: String, default: String): String = System.getenv(name)?.takeIf { it.isNotBlank() } ?: default

@@ -13,6 +13,8 @@ import (
 	"github.com/awesoma/trumpinvestitions/market-data-service/internal/httpapi"
 	"github.com/awesoma/trumpinvestitions/market-data-service/internal/service"
 	"github.com/awesoma/trumpinvestitions/market-data-service/internal/storage/clickhouse"
+	"github.com/awesoma/trumpinvestitions/market-data-service/internal/telemetry"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func main() {
@@ -22,6 +24,17 @@ func main() {
 	if err != nil {
 		logger.Fatalf("load config: %v", err)
 	}
+
+	// OpenTelemetry
+	shutdownTracer, err := telemetry.InitTracer(context.Background(), cfg.ServiceName, cfg.OtelEndpoint)
+	if err != nil {
+		logger.Fatalf("failed to init tracer: %v", err)
+	}
+	defer func() {
+		if err := shutdownTracer(context.Background()); err != nil {
+			logger.Printf("error shutting down tracer: %v", err)
+		}
+	}()
 
 	httpClient := &http.Client{Timeout: cfg.QueryTimeout}
 	repo := clickhouse.New(
@@ -38,7 +51,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:         cfg.Address(),
-		Handler:      server.Handler(),
+		Handler:      otelhttp.NewHandler(server.Handler(), cfg.ServiceName),
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
 	}

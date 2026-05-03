@@ -18,10 +18,23 @@ import (
 	"github.com/vnikolaenko/trading-service/internal/config"
 	"github.com/vnikolaenko/trading-service/internal/external"
 	"github.com/vnikolaenko/trading-service/internal/repository"
+	"github.com/vnikolaenko/trading-service/internal/telemetry"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func main() {
 	cfg := config.Load()
+
+	// OpenTelemetry
+	shutdownTracer, err := telemetry.InitTracer(context.Background(), cfg.OtelEndpoint)
+	if err != nil {
+		log.Fatalf("failed to init tracer: %v", err)
+	}
+	defer func() {
+		if err := shutdownTracer(context.Background()); err != nil {
+			log.Printf("error shutting down tracer: %v", err)
+		}
+	}()
 
 	// Database
 	db, err := sqlx.Connect("postgres", cfg.DatabaseURL)
@@ -55,7 +68,7 @@ func main() {
 	// Server
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
-		Handler: r,
+		Handler: otelhttp.NewHandler(r, "trading-service"),
 	}
 
 	go func() {

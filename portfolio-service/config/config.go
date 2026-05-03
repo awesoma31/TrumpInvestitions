@@ -9,6 +9,7 @@ type Config struct {
 	KafkaBrokers  string
 	KafkaTopic    string
 	KafkaGroupID  string
+	OtelEndpoint  string
 }
 
 func Load() *Config {
@@ -19,6 +20,7 @@ func Load() *Config {
 		KafkaBrokers:  getEnv("KAFKA_BROKERS", "localhost:9092"),
 		KafkaTopic:    getEnv("KAFKA_TOPIC", "trading-events"),
 		KafkaGroupID:  getEnv("KAFKA_GROUP_ID", "portfolio-service"),
+		OtelEndpoint:  getEnv("OTEL_EXPORTER_ENDPOINT", ""),
 	}
 }
 

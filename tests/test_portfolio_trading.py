@@ -472,8 +472,8 @@ def test_e2e(portfolio_base: str, trading_base: str, user_id: int, kafka_wait: i
 
 def main():
     parser = argparse.ArgumentParser(description="Integration tests: portfolio-service + trading-service")
-    parser.add_argument("--portfolio-url", default="http://localhost:8081/api/v1")
-    parser.add_argument("--trading-url", default="http://localhost:8082/api/v1")
+    parser.add_argument("--portfolio-url", default="http://localhost:8082/api/v1")
+    parser.add_argument("--trading-url", default="http://localhost:8083/api/v1")
     parser.add_argument("--kafka-wait", type=int, default=3, help="Секунд ждать Kafka (default: 3)")
     args = parser.parse_args()
 
