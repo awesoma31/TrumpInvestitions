@@ -24,6 +24,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      jaeger:
+        condition: service_started
     environment:
       PORT: 8080
       DATABASE_URL: jdbc:postgresql://postgres:5432/auth_gateway
@@ -33,6 +35,7 @@ services:
       MARKET_SERVICE_URL: http://market-data-service:8081/api/v1
       ORDER_SERVICE_URL: http://trading-service:8083/api/v1
       PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1
+      OTEL_EXPORTER_ENDPOINT: jaeger:4317
     ports:
       - "8080:8080"
 
@@ -42,6 +45,7 @@ services:
     container_name: market-data-service
     depends_on:
       - clickhouse
+      - jaeger
     environment:
       HTTP_PORT: 8081
       HTTP_BASE_PATH: /api/v1
@@ -49,6 +53,7 @@ services:
       CLICKHOUSE_DATABASE: default
       CLICKHOUSE_USER: market_data
       CLICKHOUSE_PASSWORD: market_data_password
+      OTEL_EXPORTER_ENDPOINT: jaeger:4317
     ports:
       - "8081:8081"
       
@@ -106,6 +111,16 @@ services:
       "kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic trading-events --partitions 1 --replication-factor 1 && echo 'Topic trading-events created'"
     restart: "no"
 
+  jaeger:
+    image: jaegertracing/jaeger:2.16.0
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
   portfolio-service:
     build: ./portfolio-service
     container_name: portfolio-service
@@ -118,11 +133,14 @@ services:
       KAFKA_BROKERS: kafka:9092
       KAFKA_TOPIC: trading-events
       KAFKA_GROUP_ID: portfolio-service
+      OTEL_EXPORTER_ENDPOINT: jaeger:4317
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      jaeger:
+        condition: service_started
 
   trading-service:
     build: ./trading-service
@@ -136,11 +154,14 @@ services:
       SERVER_PORT: "8083"
       MARKET_DATA_URL: http://market-data-service:8081/api/v1
       PORTFOLIO_URL: http://portfolio-service:8082
+      OTEL_EXPORTER_ENDPOINT: jaeger:4317
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      jaeger:
+        condition: service_started
 
   swagger-ui:
     image: swaggerapi/swagger-ui:latest

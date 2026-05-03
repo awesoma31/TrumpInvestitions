@@ -14,6 +14,8 @@ import (
 	"github.com/vnikolaenko/trading-service/internal/domain"
 	"github.com/vnikolaenko/trading-service/internal/external"
 	"github.com/vnikolaenko/trading-service/internal/repository"
+	"github.com/vnikolaenko/trading-service/internal/telemetry"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var (
@@ -54,6 +56,15 @@ func NewOrderService(
 }
 
 func (s *OrderService) CreateOrder(ctx context.Context, req CreateOrderReq) (*domain.OrderRecord, error) {
+	ctx, span := telemetry.Tracer().Start(ctx, "OrderService.CreateOrder")
+	defer span.End()
+	span.SetAttributes(
+		attribute.Int64("user.id", req.UserID),
+		attribute.String("symbol", req.Symbol),
+		attribute.String("side", string(req.Side)),
+		attribute.Int("quantity", req.Quantity),
+	)
+
 	order := &domain.OrderRecord{
 		ID:        uuid.New(),
 		UserID:    req.UserID,

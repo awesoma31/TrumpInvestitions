@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/awesoma/trumpinvestitions/market-data-service/internal/domain"
+	"github.com/awesoma/trumpinvestitions/market-data-service/internal/telemetry"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var ErrNotFound = errors.New("resource not found")
@@ -93,6 +95,10 @@ func (s *MarketDataService) GetInstrumentBySymbol(ctx context.Context, symbol st
 }
 
 func (s *MarketDataService) GetQuotes(ctx context.Context, symbols []string) (domain.QuoteListResponse, error) {
+	ctx, span := telemetry.Tracer("market-data-service").Start(ctx, "MarketDataService.GetQuotes")
+	defer span.End()
+	span.SetAttributes(attribute.StringSlice("symbols", symbols))
+
 	normalized := normalizeSymbols(symbols)
 	if len(normalized) == 0 {
 		return domain.QuoteListResponse{Items: []domain.Quote{}}, nil
@@ -112,6 +118,10 @@ func (s *MarketDataService) GetQuotes(ctx context.Context, symbols []string) (do
 }
 
 func (s *MarketDataService) GetQuoteBySymbol(ctx context.Context, symbol string) (domain.Quote, error) {
+	ctx, span := telemetry.Tracer("market-data-service").Start(ctx, "MarketDataService.GetQuoteBySymbol")
+	defer span.End()
+	span.SetAttributes(attribute.String("symbol", symbol))
+
 	snapshots, err := s.repo.GetLatestQuotes(ctx, []string{normalizeSymbol(symbol)})
 	if err != nil {
 		return domain.Quote{}, err
@@ -124,6 +134,10 @@ func (s *MarketDataService) GetQuoteBySymbol(ctx context.Context, symbol string)
 }
 
 func (s *MarketDataService) GetCandleHistory(ctx context.Context, symbol string, from, to time.Time, interval string, limit int) (domain.CandleListResponse, error) {
+	ctx, span := telemetry.Tracer("market-data-service").Start(ctx, "MarketDataService.GetCandleHistory")
+	defer span.End()
+	span.SetAttributes(attribute.String("symbol", symbol), attribute.String("interval", interval))
+
 	symbol = normalizeSymbol(symbol)
 
 	points, err := s.repo.GetCandles(ctx, symbol, from.UTC(), to.UTC(), interval, limit)
@@ -144,6 +158,10 @@ func (s *MarketDataService) GetCandleHistory(ctx context.Context, symbol string,
 }
 
 func (s *MarketDataService) GetOrderBook(ctx context.Context, symbol string, depth int) (domain.OrderBookResponse, error) {
+	ctx, span := telemetry.Tracer("market-data-service").Start(ctx, "MarketDataService.GetOrderBook")
+	defer span.End()
+	span.SetAttributes(attribute.String("symbol", symbol), attribute.Int("depth", depth))
+
 	symbol = normalizeSymbol(symbol)
 
 	snapshots, err := s.repo.GetLatestQuotes(ctx, []string{symbol})

@@ -7,8 +7,11 @@ import (
 
 	"github.com/awesoma31/portfolio-service/models"
 	"github.com/awesoma31/portfolio-service/repository"
+	"github.com/awesoma31/portfolio-service/telemetry"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type PriceProvider interface {
@@ -25,6 +28,10 @@ func NewPortfolioService(repo repository.Repository, price PriceProvider) *Portf
 }
 
 func (s *PortfolioService) GetPortfolio(ctx context.Context, userID int64) (*models.PortfolioResponse, error) {
+	ctx, span := telemetry.Tracer().Start(ctx, "PortfolioService.GetPortfolio")
+	defer span.End()
+	span.SetAttributes(attribute.Int64("user.id", userID))
+
 	portfolio, err := s.repo.GetOrCreatePortfolio(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -113,6 +120,10 @@ func (s *PortfolioService) GetPnl(ctx context.Context, userID int64) (*models.Po
 }
 
 func (s *PortfolioService) Deposit(ctx context.Context, userID int64, amount decimal.Decimal) (*models.BalanceResponse, error) {
+	ctx, span := telemetry.Tracer().Start(ctx, "PortfolioService.Deposit")
+	defer span.End()
+	span.SetAttributes(attribute.Int64("user.id", userID), attribute.String("amount", amount.String()))
+
 	if amount.LessThanOrEqual(decimal.Zero) {
 		return nil, fmt.Errorf("amount must be positive")
 	}
@@ -134,6 +145,10 @@ func (s *PortfolioService) Deposit(ctx context.Context, userID int64, amount dec
 }
 
 func (s *PortfolioService) Withdraw(ctx context.Context, userID int64, amount decimal.Decimal) (*models.BalanceResponse, error) {
+	ctx, span := telemetry.Tracer().Start(ctx, "PortfolioService.Withdraw")
+	defer span.End()
+	span.SetAttributes(attribute.Int64("user.id", userID), attribute.String("amount", amount.String()))
+
 	if amount.LessThanOrEqual(decimal.Zero) {
 		return nil, fmt.Errorf("amount must be positive")
 	}
@@ -222,18 +237,33 @@ func (s *PortfolioService) GetAssetQuantity(ctx context.Context, userID int64, s
 
 // ProcessTradingEvent handles Kafka events from Trading Service
 func (s *PortfolioService) ProcessTradingEvent(ctx context.Context, event *models.TradingEvent) error {
+	ctx, span := telemetry.Tracer().Start(ctx, "PortfolioService.ProcessTradingEvent")
+	defer span.End()
+	span.SetAttributes(
+		attribute.String("event.type", event.EventType),
+		attribute.Int64("user.id", event.UserID),
+		attribute.String("symbol", event.Symbol),
+		attribute.String("order.id", event.OrderID),
+	)
+
+	var err error
 	switch event.EventType {
 	case "ORDER_FILLED":
-		return s.handleOrderFilled(ctx, event)
+		err = s.handleOrderFilled(ctx, event)
 	case "ORDER_REJECTED":
-		return s.handleOrderRejected(ctx, event)
+		err = s.handleOrderRejected(ctx, event)
 	case "ORDER_CANCELLED":
-		return s.handleOrderCancelled(ctx, event)
+		err = s.handleOrderCancelled(ctx, event)
 	case "TRADE_EXECUTED":
-		return s.handleTradeExecuted(ctx, event)
+		err = s.handleTradeExecuted(ctx, event)
 	default:
-		return fmt.Errorf("unknown event type: %s", event.EventType)
+		err = fmt.Errorf("unknown event type: %s", event.EventType)
 	}
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+	return err
 }
 
 func (s *PortfolioService) handleOrderFilled(ctx context.Context, event *models.TradingEvent) error {
