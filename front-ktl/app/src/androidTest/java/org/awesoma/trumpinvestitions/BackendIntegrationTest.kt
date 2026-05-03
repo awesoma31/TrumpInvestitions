@@ -1,6 +1,7 @@
 package org.awesoma.trumpinvestitions
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -41,7 +42,14 @@ import kotlin.test.assertTrue
 class BackendIntegrationTest {
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:8080/api/v1/"
+        // Для эмулятора: 10.0.2.2 (loopback на хост)
+        // Для физического устройства: передать IP через аргумент:
+        //   -e backendHost 192.168.0.3
+        // или задать в build.gradle: testInstrumentationRunnerArguments["backendHost"] = "192.168.0.3"
+        private val backendHost: String by lazy {
+            InstrumentationRegistry.getArguments().getString("backendHost", "10.0.2.2")
+        }
+        private val BASE_URL get() = "http://$backendHost:8080/api/v1/"
         private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
 
         private lateinit var authService: AuthApiService
@@ -75,7 +83,7 @@ class BackendIntegrationTest {
             OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .build()
-                .newCall(Request.Builder().url("http://10.0.2.2:8080/api/v1/health").build())
+                .newCall(Request.Builder().url("http://$backendHost:8080/api/v1/system/health").build())
                 .execute()
                 .isSuccessful
         } catch (_: Exception) { false }
@@ -219,6 +227,21 @@ class BackendIntegrationTest {
     // ── 3. Orders (требует токен) ─────────────────────────────────────────────
 
     @Test
+    fun test08b_depositBalance() = runBlocking {
+        Assume.assumeTrue("accessToken не получен", accessToken.isNotBlank())
+        val api = authedApiService()
+
+        val portfolio = api.deposit(
+            org.awesoma.trumpinvestitions.data.network.dto.DepositRequestDto("50000.00")
+        )
+
+        assertTrue(
+            portfolio.balance.toDoubleOrNull()!! >= 50000.0,
+            "После пополнения баланс должен быть >= 50000, получен: ${portfolio.balance}"
+        )
+    }
+
+    @Test
     fun test09_createMarketOrder_returnsOrderWithId() = runBlocking {
         Assume.assumeTrue("accessToken не получен", accessToken.isNotBlank())
         val api = authedApiService()
@@ -258,7 +281,7 @@ class BackendIntegrationTest {
         val api = authedApiService()
 
         val order = api.createOrder(
-            CreateOrderRequestDto(symbol = "GOOGL", side = "BUY", type = "MARKET", quantity = 1)
+            CreateOrderRequestDto(symbol = "MSFT", side = "BUY", type = "MARKET", quantity = 1)
         )
         assertNotNull(order.id)
 

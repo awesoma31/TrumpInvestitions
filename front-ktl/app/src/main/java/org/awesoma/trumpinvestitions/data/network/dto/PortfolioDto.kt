@@ -6,6 +6,14 @@ import kotlinx.serialization.Serializable
 data class DepositRequestDto(val amount: String)
 
 @Serializable
+data class BalanceResponseDto(
+    val userId: Long = 0,
+    val balance: String = "0",
+    val currency: String = "",
+    val updatedAt: String = ""
+)
+
+@Serializable
 data class PositionResponseDto(
     val symbol: String = "",
     val quantity: Int = 0,

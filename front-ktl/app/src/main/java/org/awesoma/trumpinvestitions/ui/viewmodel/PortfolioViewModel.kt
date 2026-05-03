@@ -39,7 +39,7 @@ class PortfolioViewModel(application: Application) : AndroidViewModel(applicatio
             try {
                 val result = app.network.apiService.deposit(DepositRequestDto(String.format(java.util.Locale.US, "%.2f", amount)))
                 _state.value = _state.value?.copy(
-                    cashBalance = result.cashBalance.toDoubleOrNull() ?: 0.0
+                    cashBalance = result.balance.toDoubleOrNull() ?: 0.0
                 )
             } catch (e: Exception) {
                 _depositError.value = e.message ?: "Ошибка пополнения"
