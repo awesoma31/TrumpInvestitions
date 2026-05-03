@@ -21,6 +21,7 @@
 | [[market-data-service]] | `market-data-service` |
 | [[portfolio-service]] | `portfolio-service` |
 | [[trading-service]] | `trading-service` |
+| Android-приложение | `android-client` |
 
 ## Что трейсится
 
@@ -53,13 +54,26 @@ auth-gateway: POST /api/v1/trading/orders         [200ms]
 
 ## Открыть UI
 
+```bash
+make telemetry
+# открывает http://localhost:16686 в браузере (Linux/macOS)
+# на Windows: перейти вручную по ссылке ниже
 ```
-http://localhost:16686
-```
+
+**http://localhost:16686**
 
 Выбрать сервис → Find Traces → смотреть waterfall-диаграмму.
 
-## Переменная окружения (все сервисы)
+## Android-клиент
+
+Android-приложение отправляет трейсы по OTLP HTTP (порт 4318) — без gRPC.
+
+Эндпоинт по умолчанию: `http://10.0.2.2:4318` (из эмулятора `10.0.2.2` = localhost хоста).  
+Можно переопределить через `SettingsManager.otelEndpoint` (SharedPreferences, ключ `otel_endpoint`).
+
+Трейсятся все HTTP-запросы через OkHttp: авторизация, котировки, ордера, портфель.
+
+## Переменная окружения (бэкенд-сервисы)
 
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317

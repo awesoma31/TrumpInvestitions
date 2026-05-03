@@ -3,13 +3,13 @@ TRADING_URL   ?= http://localhost:8083/api/v1
 GATEWAY_URL   ?= http://localhost:8080/api/v1
 KAFKA_WAIT    ?= 3
 
-.PHONY: setup up down wait status \
+.PHONY: setup up down wait status telemetry \
         db-init clickhouse-init load-data reset-data \
         test-unit test-portfolio test-integration test-gateway test-all
 
-# ─── Статус ──────────────────────────────────────────────────────────────────
+# --- Status ------------------------------------------------------------------
 
-## Показать состояние всех сервисов
+## Show status of all services
 status:
 	@echo "=== Docker containers ==="
 	@docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
@@ -35,46 +35,55 @@ status:
 		elif command -v ipconfig >/dev/null 2>&1; then \
 			ip=$$(ipconfig 2>/dev/null | grep -A4 "Wi-Fi\|Wireless" | grep "IPv4" | grep -oP "[\d]+\.[\d]+\.[\d]+\.[\d]+" | head -1); \
 		fi; \
-		[ -n "$$ip" ] && echo "  Backend IP: $$ip:8080" || echo "  Could not define IP — use ipconfig/ip addr"'
+		[ -n "$$ip" ] && echo "  Backend IP: $$ip:8080" || echo "  Could not define IP -- use ipconfig/ip addr"'
 
-# ─── Запуск ──────────────────────────────────────────────────────────────────
+# --- Observability -----------------------------------------------------------
 
-## Первый запуск: поднять всё, инициализировать БД и загрузить данные
+## Open Jaeger UI (distributed tracing) in browser
+telemetry:
+	@echo "Jaeger UI: http://localhost:16686"
+	@bash -c 'if command -v xdg-open >/dev/null 2>&1; then xdg-open http://localhost:16686; \
+		elif command -v open >/dev/null 2>&1; then open http://localhost:16686; \
+		else echo "Open manually: http://localhost:16686"; fi'
+
+# --- Launch ------------------------------------------------------------------
+
+## First run: bring up everything, init DB and load data
 setup: up db-init clickhouse-init load-data
 
-## Поднять инфраструктуру (с пересборкой образов)
+## Start infrastructure (with image rebuild)
 up:
 	docker compose up -d --build
 
-## Остановить инфраструктуру (тома сохраняются)
+## Stop infrastructure (volumes are preserved)
 down:
 	docker compose down
 
-## Остановить и удалить тома (полный сброс)
+## Stop and remove volumes (full reset)
 down-clean:
 	docker compose down -v
 
-## Дождаться готовности всех сервисов
+## Wait for all services to become ready
 wait:
 	@bash scripts/wait-services.sh
 
-## Дождаться конкретного сервиса: make wait-portfolio
+## Wait for a specific service: make wait-portfolio
 wait-%:
 	@bash scripts/wait-services.sh $*
 
-# ─── Инициализация ────────────────────────────────────────────────────────────
+# --- Init --------------------------------------------------------------------
 
-## Создать пользователей и БД в postgres (идемпотентно)
+## Create users and DBs in postgres (idempotent)
 db-init:
 	@bash scripts/init-postgres.sh
 	@echo "Restarting auth-gateway..."
 	docker compose restart auth-gateway
 
-## Создать схему таблицы quotes в ClickHouse (идемпотентно)
+## Create quotes table schema in ClickHouse (idempotent)
 clickhouse-init:
 	bash db/clickhouse/init_clickhouse.sh
 
-## Собрать pricing_engine и загрузить все сценарии в ClickHouse
+## Build pricing_engine and load all scenarios into ClickHouse
 load-data:
 	make -C pricing_engine
 	./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/btcusdt_1000.yaml | bash pricing_engine/push_input_to_db.sh
@@ -83,34 +92,34 @@ load-data:
 	./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/msft_1000.yaml   | bash pricing_engine/push_input_to_db.sh
 	./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/tsla_1000.yaml   | bash pricing_engine/push_input_to_db.sh
 
-## Сбросить котировки и загрузить заново
+## Reset quotes and reload
 reset-data:
 	bash scripts/reset-clickhouse.sh
 	$(MAKE) load-data
 
-# ─── Тесты ───────────────────────────────────────────────────────────────────
+# --- Tests -------------------------------------------------------------------
 
-## Юнит-тесты Go (не требуют запущенной инфраструктуры)
+## Go unit tests (no running infrastructure required)
 test-unit:
 	cd trading-service  && go test ./...
 	cd portfolio-service && go test ./...
 
-## Интеграционные тесты portfolio-service
+## Integration tests for portfolio-service
 test-portfolio: wait-portfolio-service
 	python portfolio-service/test_endpoints.py --base-url $(PORTFOLIO_URL)
 
-## E2E-тесты: portfolio + trading + Kafka
+## E2E tests: portfolio + trading + Kafka
 test-integration: wait-portfolio-service wait-trading-service
 	python tests/test_portfolio_trading.py \
 		--portfolio-url $(PORTFOLIO_URL) \
 		--trading-url   $(TRADING_URL) \
 		--kafka-wait    $(KAFKA_WAIT)
 
-## E2E-тесты через auth-gateway (JWT, portfolio, trading, Kafka)
+## E2E tests via auth-gateway (JWT, portfolio, trading, Kafka)
 test-gateway: wait-auth-gateway wait-portfolio-service wait-trading-service
 	python tests/test_gateway.py \
 		--base-url    $(GATEWAY_URL) \
 		--kafka-wait  $(KAFKA_WAIT)
 
-## Полный цикл: поднять → инициализировать → юнит + интеграция + gateway
+## Full cycle: up -> init -> unit + integration + gateway
 test-all: up db-init clickhouse-init load-data wait test-unit test-integration test-gateway

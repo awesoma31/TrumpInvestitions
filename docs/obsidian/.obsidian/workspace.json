@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00 - Главная/Архитектура.md",
+                "file": "02 - Инфраструктура/Jaeger.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Архитектура"
+              "title": "Jaeger"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "00 - Главная/Архитектура.md",
+                "file": "01 - Сервисы/pricing_engine.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Обратные ссылки для Архитектура"
+              "title": "Обратные ссылки для pricing_engine"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "00 - Главная/Архитектура.md",
+                "file": "01 - Сервисы/pricing_engine.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Исходящие ссылки из Архитектура"
+              "title": "Исходящие ссылки из pricing_engine"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "00 - Главная/Архитектура.md",
+                "file": "01 - Сервисы/pricing_engine.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура Архитектура"
+              "title": "Структура pricing_engine"
             }
           }
         ]
@@ -185,6 +185,10 @@
   },
   "active": "227180767936e302",
   "lastOpenFiles": [
+    "01 - Сервисы/pricing_engine.md",
+    "01 - Сервисы/market-data-service.md",
+    "01 - Сервисы/auth-gateway.md",
+    "00 - Главная/Архитектура.md",
     "00 - Главная/README.md",
     "02 - Инфраструктура/Jaeger.md"
   ]
