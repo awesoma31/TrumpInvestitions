@@ -1,23 +1,53 @@
-CC = cc
-CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic -Iinclude
-LDFLAGS =
+MODULE_NAME := pricing_engine
 
-SRC = \
-	src/main.c \
-	src/scenario.c \
-	src/generator.c \
-	src/rng.c \
-	src/json_writer.c
+SRC_DIR := src
+INC_DIR := include
 
-OBJ = $(SRC:.c=.o)
-TARGET = pricing_engine
+KDIR ?= /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
 
-all: $(TARGET)
+obj-m := $(MODULE_NAME).o
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@ $(LDFLAGS)
+$(MODULE_NAME)-y := \
+	$(SRC_DIR)/pricing_engine_main.o \
+	$(SRC_DIR)/pricing_engine_device.o \
+	$(SRC_DIR)/pricing_engine_generator.o
+
+ccflags-y := -I$(PWD)/$(INC_DIR) -Wall -Wextra
+
+all: modules test-reader
+
+modules:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+test-reader:
+	gcc -Wall -Wextra -Wpedantic tests/test_reader.c -lm -o test_reader
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf \
+		*.ko \
+		.*.o \
+		*.o \
+		*.mod \
+		*.mod.c \
+		*.order \
+		*.symvers \
+		.tmp_versions \
+		test_reader \
+		$(SRC_DIR)/*.o \
+		$(SRC_DIR)/*.mod \
+		$(SRC_DIR)/*.mod.c \
+		$(SRC_DIR)/.*.cmd \
+		.*.cmd
 
-.PHONY: all clean
+kclean:
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
+install:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules_install
+	depmod -a
+
+uninstall:
+	rm -f /lib/modules/$(shell uname -r)/extra/$(MODULE_NAME).ko
+	depmod -a
+

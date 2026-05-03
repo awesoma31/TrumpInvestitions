@@ -1,104 +1,126 @@
-# pricing_engine
+# pricing_engine (Kernel Driver)
 
-Minimal C pricing engine that:
-- loads deterministic test scenarios from YAML
-- generates quote events
-- prints NDJSON to stdout
+`pricing_engine` is a Linux character device driver that generates synthetic market data (quotes and trades) directly in kernel space and exposes them via `/dev/pricing_engine`.
 
-## Build
-
-```bash
-make
-````
-
-## Run
-
-```bash
-./pricing_engine --scenario examples/basic_btc.yaml
-./pricing_engine --scenario examples/basic_btc.yaml --limit 2
-```
-
-## YAML scenario format
-
-```yaml
-scenario_id: basic_btc_regression
-venue: BINANCE
-symbol: BTCUSDT
-seed: 42
-start_time_ns: 1713439200000000000
-tick_interval_ms: 100
-initial_mid_price: 65000.0
-initial_spread: 0.50
-default_bid_size: 1.20
-default_ask_size: 1.00
-default_last_size: 0.10
-steps:
-  - move_mid_by: 0.25
-    bid_size: 1.10
-    ask_size: 0.90
-    last_size: 0.05
-    trade_side: buy
-```
-
-Supported top-level fields:
-
-* `scenario_id`
-* `venue`
-* `symbol`
-* `seed`
-* `start_time_ns`
-* `tick_interval_ms`
-* `initial_mid_price`
-* `initial_spread`
-* `default_bid_size`
-* `default_ask_size`
-* `default_last_size`
-* `steps`
-
-Supported step fields:
-
-* `move_mid_by`
-* `spread`
-* `bid_size`
-* `ask_size`
-* `last_size`
-* `trade_side` (`buy`, `sell`, `none`)
-
-## Output
-
-Each line is one JSON quote event.
+Each `read()` call returns a stream of JSON-formatted quote events (NDJSON), which can be directly ingested into systems like ClickHouse.
 
 ---
 
-## ClickHouse integration (local)
+## Overview
 
-The engine outputs NDJSON, which can be directly piped into ClickHouse using `JSONEachRow`.
+The driver simulates a simple market using a random walk model:
 
-### 1. Run ClickHouse via Docker
+- mid price evolves randomly
+- bid/ask are derived from spread
+- last trade is generated within bid/ask
+- sizes and trade side are randomized
 
-```bash
-docker compose up -d
+Output format is compatible with:
+
+```text
+ClickHouse FORMAT JSONEachRow
+````
+
+---
+
+## Output Example
+
+```json
+{"schema_version":1,"sequence":1,"event_type":"quote","quote_type":"update","event_time_ns":...,"engine_time_ns":...,"scenario_id":"kernel_random_walk","venue":"KERNEL_SIM","symbol":"BTCUSDT","bid_price":64999.75,"bid_size":100.00,"ask_price":65000.25,"ask_size":100.00,"mid_price":65000.00,"spread":0.50,"last_price":65000.10,"last_size":50.00,"last_trade_side":"buy"}
 ```
 
-### 2. Initialize schema
+---
+
+## Build
+
+Requires Linux kernel headers.
 
 ```bash
-cat db/init.sql | docker exec -i clickhouse-local clickhouse-client
+make
 ```
 
-### 3. Push data to DB
+---
 
-Run pipeline:
+## Load Driver
 
 ```bash
-./pricing_engine --scenario examples/basic_btc.yaml | ./push_input_to_db.sh
+sudo insmod pricing_engine.ko
 ```
+
+With parameters:
+
+```bash
+sudo insmod pricing_engine.ko \
+  start_price_cents=6500000 \
+  spread_cents=50 \
+  max_move_cents=25 \
+  default_size_units=100 \
+  max_last_move_cents=10
+```
+
+---
+
+## Read Data
+
+```bash
+head -n 10 /dev/pricing_engine
+```
+
+Or continuous stream:
+
+```bash
+cat /dev/pricing_engine
+```
+
+---
+
+## Unload Driver
+
+```bash
+sudo rmmod pricing_engine
+```
+
+---
+
+## ClickHouse Integration
+
+Example ingestion:
+
+```bash
+head -n 1000 /dev/pricing_engine | curl -sS \
+  'http://localhost:8123/?query=INSERT%20INTO%20quotes%20FORMAT%20JSONEachRow' \
+  --data-binary @-
+```
+
+Or use batch ingestion script.
+
+---
+
+## Test
+
+Build test utility:
+
+```bash
+make test-reader
+```
+
+Run:
+
+```bash
+./test_reader
+```
+
+Validates:
+
+* bid ≤ ask
+* mid within spread
+* correct spread
+* sequence monotonicity
 
 ---
 
 ## Notes
 
-* NDJSON output is fully compatible with ClickHouse `JSONEachRow`
-* Table schema must match JSON fields (`init.sql`)
-* If Docker volume is removed (`docker compose down -v`), schema must be re-initialized
-
+* The driver is intended for educational and testing purposes
+* Business logic in kernel space is not recommended for production systems
+* Prefer user-space services for real pricing engines
