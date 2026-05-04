@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthResponse } from '../types/api';
 
-const API_BASE_URL = 'https://localhost:8081';
+const API_BASE_URL = 'http://192.168.1.83:8080';
 
 class ApiClient {
   private async getAccessToken(): Promise<string | null> {
