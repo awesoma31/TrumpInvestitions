@@ -5,6 +5,7 @@ KAFKA_WAIT    ?= 3
 
 .PHONY: setup up down wait status telemetry \
         db-init clickhouse-init load-data reset-data \
+        load-test load-test-10000 load-status \
         test-unit test-portfolio test-integration test-gateway test-all
 
 # --- Status ------------------------------------------------------------------
@@ -96,6 +97,36 @@ load-data:
 reset-data:
 	bash scripts/reset-clickhouse.sh
 	$(MAKE) load-data
+
+# --- Load testing -------------------------------------------------------------
+
+## Run Kotlin load-service with configurable load: make load-test LOAD_USERS=1000
+load-test:
+	LOAD_USERS=$(or $(LOAD_USERS),1000) \
+	LOAD_DURATION_SECONDS=$(or $(LOAD_DURATION_SECONDS),120) \
+	LOAD_RAMP_UP_SECONDS=$(or $(LOAD_RAMP_UP_SECONDS),30) \
+	LOAD_WITHDRAW_REQUEST_PERCENT=$(or $(LOAD_WITHDRAW_REQUEST_PERCENT),5) \
+	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
+	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
+	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	docker compose --profile load up --build load-service
+
+## Run Kotlin load-service with 10000 virtual clients
+load-test-10000:
+	LOAD_USERS=10000 \
+	LOAD_DURATION_SECONDS=$(or $(LOAD_DURATION_SECONDS),300) \
+	LOAD_RAMP_UP_SECONDS=$(or $(LOAD_RAMP_UP_SECONDS),120) \
+	LOAD_WITHDRAW_REQUEST_PERCENT=$(or $(LOAD_WITHDRAW_REQUEST_PERCENT),5) \
+	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
+	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
+	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	docker compose --profile load up --build load-service
+
+## Show current load-service status
+load-status:
+	curl -s http://localhost:8095/api/v1/load/status
 
 # --- Tests -------------------------------------------------------------------
 
