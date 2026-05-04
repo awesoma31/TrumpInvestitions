@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   typeButton: {
     flex: 1,
-    padding: spacing.md,
+    padding: spacing.sm,
     borderRadius: 8,
     alignItems: 'center',
     backgroundColor: colors.background,

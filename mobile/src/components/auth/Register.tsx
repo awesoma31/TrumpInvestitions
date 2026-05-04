@@ -72,7 +72,7 @@ const Register: React.FC<RegisterProps> = ({ onLogin }) => {
       
       {onLogin && (
         <TouchableOpacity style={styles.linkButton} onPress={onLogin}>
-          <Text style={styles.linkText}>Уже есть аккаунт? Войти</Text>
+          <Text style={styles.linkText}>Уже есть аккаунт? <Text style={styles.linkTextBold}>Войти</Text></Text>
         </TouchableOpacity>
       )}
     </View>
@@ -124,6 +124,11 @@ const styles = StyleSheet.create({
   linkText: {
     color: colors.primary,
     fontSize: 14,
+  },
+  linkTextBold: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 

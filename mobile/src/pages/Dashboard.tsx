@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView, Dimensions } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 import StockList from '../components/market/StockList';
@@ -29,9 +29,11 @@ const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<'market' | 'portfolio' | 'history'>('market');
   const [showPriceChart, setShowPriceChart] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [showStockModal, setShowStockModal] = useState(false);
 
   const handleStockSelect = (stock: Stock) => {
     setSelectedStock(stock);
+    setShowStockModal(true);
   };
 
   const handleOrderCreated = () => {
@@ -95,8 +97,40 @@ const Dashboard: React.FC = () => {
       {activeView === 'market' && (
         <View style={styles.content}>
           <StockList onStockSelect={handleStockSelect} />
-          {selectedStock && (
-            <>
+        </View>
+      )}
+
+      {/* Всплывающее окно для выбранной акции */}
+      {showStockModal && selectedStock !== null && (
+        <View style={styles.popupOverlay}>
+          <TouchableOpacity 
+            style={styles.overlayBackground} 
+            onPress={() => {
+              setShowStockModal(false);
+              setShowPriceChart(false);
+            }}
+          />
+          <View style={styles.popupContainer}>
+            <View style={styles.popupHeader}>
+              <TouchableOpacity onPress={() => setShowStockModal(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+              <Text style={styles.popupTitle}>{selectedStock?.symbol}</Text>
+              <View style={styles.placeholder} />
+            </View>
+            
+            <ScrollView style={styles.popupContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.stockInfo}>
+                <Text style={styles.stockName}>{selectedStock?.name}</Text>
+                <Text style={styles.stockPrice}>${selectedStock?.currentPrice.toFixed(2)}</Text>
+                <Text style={[
+                  styles.stockChange,
+                  (selectedStock?.change24h ?? 0) >= 0 ? styles.positive : styles.negative
+                ]}>
+                  {(selectedStock?.change24h ?? 0) >= 0 ? '+' : ''}{(selectedStock?.change24h ?? 0).toFixed(2)}%
+                </Text>
+              </View>
+
               <View style={styles.stockActions}>
                 <TouchableOpacity
                   style={[styles.actionButton, showPriceChart && styles.activeAction]}
@@ -113,12 +147,25 @@ const Dashboard: React.FC = () => {
                   </TouchableOpacity>
                 )}
               </View>
-              {showPriceChart && <PriceChart stock={selectedStock} />}
-              {user && (
-                <OrderForm stock={selectedStock} onOrderCreated={handleOrderCreated} onClose={() => setSelectedStock(null)} />
+
+              {showPriceChart && (
+                <View style={styles.chartContainer}>
+                  <PriceChart stock={selectedStock!} />
+                </View>
               )}
-            </>
-          )}
+
+              {user && selectedStock && (
+                <OrderForm 
+                  stock={selectedStock} 
+                  onOrderCreated={handleOrderCreated} 
+                  onClose={() => {
+                    setSelectedStock(null);
+                    setShowStockModal(false);
+                  }} 
+                />
+              )}
+            </ScrollView>
+          </View>
         </View>
       )}
 
@@ -266,15 +313,13 @@ const styles = StyleSheet.create({
   },
   stockActions: {
     flexDirection: 'row',
-    padding: spacing.md,
+    padding: spacing.sm,
     gap: spacing.sm,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginBottom: spacing.sm,
   },
   actionButton: {
     flex: 1,
-    padding: spacing.md,
+    padding: spacing.sm,
     borderRadius: 8,
     backgroundColor: colors.background,
     borderWidth: 1,
@@ -299,6 +344,114 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: spacing.xl,
+  },
+  // Стили для всплывающего окна
+  popupOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
+  overlayBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  popupContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  popupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing.md,
+    paddingTop: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  popupTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  popupContent: {
+    flex: 1,
+    padding: spacing.md,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: spacing.md,
+    paddingTop: 50,
+    backgroundColor: colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  closeButton: {
+    fontSize: 20,
+    color: colors.textSecondary,
+    padding: spacing.sm,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  placeholder: {
+    width: 40,
+  },
+  modalContent: {
+    flex: 1,
+    padding: spacing.md,
+  },
+  stockInfo: {
+    backgroundColor: colors.card,
+    padding: spacing.lg,
+    borderRadius: 12,
+    margin: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  stockName: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  stockPrice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  stockChange: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  positive: {
+    color: colors.success,
+  },
+  negative: {
+    color: colors.danger,
+  },
+  chartContainer: {
+    backgroundColor: colors.card,
+    padding: spacing.lg,
+    borderRadius: 12,
+    margin: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.md,
   },
 });
 
