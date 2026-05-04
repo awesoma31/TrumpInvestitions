@@ -12,8 +12,14 @@ import kotlinx.coroutines.launch
 import org.awesoma.trumpinvestitions.TrumpApp
 import org.awesoma.trumpinvestitions.data.model.PricePoint
 import org.awesoma.trumpinvestitions.data.model.Stock
+import org.awesoma.trumpinvestitions.data.network.ApiError
 import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
 import org.awesoma.trumpinvestitions.data.repository.MarketRepository
+
+sealed class OrderEvent {
+    data class Success(val message: String) : OrderEvent()
+    data class Error(val message: String) : OrderEvent()
+}
 
 class StockDetailViewModel(
     application: Application,
@@ -33,8 +39,8 @@ class StockDetailViewModel(
     private val _orderBook = MutableStateFlow<OrderBookResponseDto?>(null)
     val orderBook: StateFlow<OrderBookResponseDto?> = _orderBook
 
-    private val _orderResult = MutableStateFlow<String?>(null)
-    val orderResult: StateFlow<String?> = _orderResult
+    private val _orderEvent = MutableStateFlow<OrderEvent?>(null)
+    val orderEvent: StateFlow<OrderEvent?> = _orderEvent
 
     init {
         loadData()
@@ -73,15 +79,16 @@ class StockDetailViewModel(
                         quantity = quantity
                     )
                 )
-                _orderResult.value = "Заявка ${order.id} создана"
+                val action = if (side == "BUY") "Куплено" else "Продано"
+                _orderEvent.value = OrderEvent.Success("$action $quantity акций $symbol")
             } catch (e: Exception) {
-                _orderResult.value = "Ошибка: ${e.message}"
+                _orderEvent.value = OrderEvent.Error(ApiError.parse(e))
             }
         }
     }
 
-    fun clearOrderResult() {
-        _orderResult.value = null
+    fun clearOrderEvent() {
+        _orderEvent.value = null
     }
 
     companion object {

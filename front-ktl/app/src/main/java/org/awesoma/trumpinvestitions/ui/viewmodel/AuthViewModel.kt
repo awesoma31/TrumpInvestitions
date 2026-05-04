@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.awesoma.trumpinvestitions.TrumpApp
+import org.awesoma.trumpinvestitions.data.network.ApiError
 import org.awesoma.trumpinvestitions.data.repository.AuthRepository
 
 data class AuthUiState(
@@ -32,7 +33,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 repo().login(login, password)
                 _uiState.value = AuthUiState(isSuccess = true)
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(error = e.message ?: "Ошибка входа")
+                _uiState.value = AuthUiState(error = ApiError.parse(e))
             }
         }
     }
@@ -44,7 +45,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 repo().register(username, email, password)
                 _uiState.value = AuthUiState(isSuccess = true)
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(error = e.message ?: "Ошибка регистрации")
+                _uiState.value = AuthUiState(error = ApiError.parse(e))
             }
         }
     }

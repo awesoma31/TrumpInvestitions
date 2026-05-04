@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -80,10 +81,51 @@ func (s *OrderService) CreateOrder(ctx context.Context, req CreateOrderReq) (*do
 		return nil, fmt.Errorf("create order: %w", err)
 	}
 
-	price, volume, err := s.marketClient.GetMarketData(ctx, req.Symbol, req.Side)
-	if err != nil {
-		return nil, fmt.Errorf("get market data: %w", err)
+	// Fetch market data and portfolio data concurrently.
+	type marketResult struct {
+		price  decimal.Decimal
+		volume int
+		err    error
 	}
+	type portfolioResult struct {
+		balance     decimal.Decimal
+		positionQty int
+		err         error
+	}
+
+	marketCh := make(chan marketResult, 1)
+	portfolioCh := make(chan portfolioResult, 1)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		p, v, e := s.marketClient.GetMarketData(ctx, req.Symbol, req.Side)
+		marketCh <- marketResult{price: p, volume: v, err: e}
+	}()
+
+	go func() {
+		defer wg.Done()
+		var res portfolioResult
+		switch req.Side {
+		case domain.OrderSideBuy:
+			res.balance, res.err = s.portfolioClient.GetCashBalance(ctx, req.UserID)
+		case domain.OrderSideSell:
+			res.positionQty, res.err = s.portfolioClient.GetAssetQuantity(ctx, req.UserID, req.Symbol)
+		}
+		portfolioCh <- res
+	}()
+
+	wg.Wait()
+	close(marketCh)
+	close(portfolioCh)
+
+	mr := <-marketCh
+	if mr.err != nil {
+		return nil, fmt.Errorf("get market data: %w", mr.err)
+	}
+	price, volume := mr.price, mr.volume
 
 	if volume < req.Quantity {
 		reason := "INSUFFICIENT_MARKET_VOLUME"
@@ -96,13 +138,19 @@ func (s *OrderService) CreateOrder(ctx context.Context, req CreateOrderReq) (*do
 
 	grossAmount := price.Mul(decimal.NewFromInt(int64(req.Quantity)))
 
+	pr := <-portfolioCh
+	if pr.err != nil {
+		switch req.Side {
+		case domain.OrderSideBuy:
+			return nil, fmt.Errorf("get balance: %w", pr.err)
+		case domain.OrderSideSell:
+			return nil, fmt.Errorf("get position: %w", pr.err)
+		}
+	}
+
 	switch req.Side {
 	case domain.OrderSideBuy:
-		balance, err := s.portfolioClient.GetCashBalance(ctx, req.UserID)
-		if err != nil {
-			return nil, fmt.Errorf("get balance: %w", err)
-		}
-		if balance.LessThan(grossAmount) {
+		if pr.balance.LessThan(grossAmount) {
 			reason := "INSUFFICIENT_FUNDS"
 			_ = s.repo.UpdateOrderStatus(ctx, order.ID.String(), userIDStr, domain.OrderStatusRejected, &reason)
 			order.Status = domain.OrderStatusRejected
@@ -111,11 +159,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, req CreateOrderReq) (*do
 			return order, ErrInsufficientFunds
 		}
 	case domain.OrderSideSell:
-		positionQty, err := s.portfolioClient.GetAssetQuantity(ctx, req.UserID, req.Symbol)
-		if err != nil {
-			return nil, fmt.Errorf("get position: %w", err)
-		}
-		if positionQty < req.Quantity {
+		if pr.positionQty < req.Quantity {
 			reason := "INSUFFICIENT_ASSETS"
 			_ = s.repo.UpdateOrderStatus(ctx, order.ID.String(), userIDStr, domain.OrderStatusRejected, &reason)
 			order.Status = domain.OrderStatusRejected

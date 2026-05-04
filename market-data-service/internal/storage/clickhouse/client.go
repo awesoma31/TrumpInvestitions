@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/awesoma/trumpinvestitions/market-data-service/internal/domain"
@@ -233,13 +234,28 @@ func (c *Client) GetCandles(ctx context.Context, symbol string, from, to time.Ti
 }
 
 func (c *Client) GetOrderBook(ctx context.Context, symbol string, depth int) ([]domain.OrderBookLevelSnapshot, []domain.OrderBookLevelSnapshot, error) {
-	bids, err := c.getOrderBookSide(ctx, symbol, "bid", depth)
-	if err != nil {
-		return nil, nil, err
+	var (
+		bids    []domain.OrderBookLevelSnapshot
+		asks    []domain.OrderBookLevelSnapshot
+		bidErr  error
+		askErr  error
+		wg      sync.WaitGroup
+	)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		bids, bidErr = c.getOrderBookSide(ctx, symbol, "bid", depth)
+	}()
+	go func() {
+		defer wg.Done()
+		asks, askErr = c.getOrderBookSide(ctx, symbol, "ask", depth)
+	}()
+	wg.Wait()
+	if bidErr != nil {
+		return nil, nil, bidErr
 	}
-	asks, err := c.getOrderBookSide(ctx, symbol, "ask", depth)
-	if err != nil {
-		return nil, nil, err
+	if askErr != nil {
+		return nil, nil, askErr
 	}
 	return bids, asks, nil
 }

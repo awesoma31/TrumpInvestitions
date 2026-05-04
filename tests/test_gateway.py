@@ -299,7 +299,7 @@ def test_portfolio_via_gateway(base: str, token: str, user_id: int):
 
 # ── Trading через гейтвей ──────────────────────────────────────────────────────
 
-def test_trading_via_gateway(base: str, token: str) -> dict:
+def test_trading_via_gateway(base: str, token: str, kafka_wait: int = 3) -> dict:
     print("\n── Trading via Gateway ──")
     hdrs = auth_header(token)
 
@@ -339,6 +339,10 @@ def test_trading_via_gateway(base: str, token: str) -> dict:
     if buy_order.get("id"):
         r = requests.post(f"{base}/orders/{buy_order['id']}/cancel", headers=hdrs)
         check("POST /orders/{id}/cancel на FILLED → 409", r.status_code == 409)
+
+    # Ждём пока Kafka доставит событие и portfolio обновит позицию
+    print(f"  {YELLOW}⏳ ждём {kafka_wait}с (Kafka → позиция)...{RESET}")
+    time.sleep(kafka_wait)
 
     # SELL order
     r = requests.post(f"{base}/orders", headers=hdrs,
@@ -460,7 +464,7 @@ def main():
 
     if token:
         test_portfolio_via_gateway(base, token, user_id)
-        test_trading_via_gateway(base, token)
+        test_trading_via_gateway(base, token, kafka_wait=args.kafka_wait)
 
     if refresh_token:
         new_token = test_refresh(base, refresh_token)

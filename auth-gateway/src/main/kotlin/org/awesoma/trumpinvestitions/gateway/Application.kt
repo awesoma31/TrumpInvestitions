@@ -118,9 +118,9 @@ fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv(), openTele
     val userRepository = UserRepository(config.database, config.jwt.refreshTokenTtlSeconds)
     val httpClient = HttpClient(CIO) {
         install(HttpTimeout) {
-            requestTimeoutMillis = 2_000
-            connectTimeoutMillis = 1_000
-            socketTimeoutMillis = 2_000
+            requestTimeoutMillis = 10_000
+            connectTimeoutMillis = 2_000
+            socketTimeoutMillis = 10_000
         }
     }
     val proxy = ProxyClient(httpClient, config.services)
@@ -697,7 +697,7 @@ private fun validateRegister(request: RegisterRequest) {
     require(request.username.length in 3..64) { "username length must be between 3 and 64" }
     require(request.username.matches(Regex("^[a-zA-Z0-9._-]+$"))) { "username contains invalid characters" }
     require(request.email.length <= 255 && request.email.contains("@")) { "email is invalid" }
-    require(request.password.isNotEmpty()) { "password must not be empty" }
+    require(request.password.length >= 8) { "password must be at least 8 characters" }
 }
 
 private fun validateLogin(request: LoginRequest) {

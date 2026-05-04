@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.awesoma.trumpinvestitions.data.model.PricePoint
 import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
+import org.awesoma.trumpinvestitions.ui.viewmodel.OrderEvent
 import org.awesoma.trumpinvestitions.ui.viewmodel.StockDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,17 +58,23 @@ fun StockDetailScreen(symbol: String, onBack: () -> Unit) {
     val stock by vm.stock.collectAsState()
     val candles by vm.candles.collectAsState()
     val orderBook by vm.orderBook.collectAsState()
-    val orderResult by vm.orderResult.collectAsState()
+    val orderEvent by vm.orderEvent.collectAsState()
 
     var showOrderDialog by remember { mutableStateOf(false) }
     var orderType by remember { mutableStateOf("BUY") }
+    var isOrderError by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(orderResult) {
-        if (orderResult != null) {
-            snackbarHostState.showSnackbar(orderResult!!)
-            vm.clearOrderResult()
+    LaunchedEffect(orderEvent) {
+        if (orderEvent != null) {
+            isOrderError = orderEvent is OrderEvent.Error
+            val message = when (val ev = orderEvent!!) {
+                is OrderEvent.Success -> ev.message
+                is OrderEvent.Error   -> ev.message
+            }
+            snackbarHostState.showSnackbar(message)
+            vm.clearOrderEvent()
         }
     }
 
@@ -83,7 +91,15 @@ fun StockDetailScreen(symbol: String, onBack: () -> Unit) {
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = if (isOrderError) Color(0xFFC62828) else Color(0xFF2E7D32),
+                    contentColor = Color.White,
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 title = { Text(stock?.symbol ?: symbol) },

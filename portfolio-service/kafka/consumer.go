@@ -33,6 +33,7 @@ func (c *Consumer) newReader() *kafkago.Reader {
 		GroupID:     c.groupID,
 		MinBytes:    1,
 		MaxBytes:    10e6,
+		MaxWait:     500 * time.Millisecond,
 		StartOffset: kafkago.FirstOffset,
 		Logger:      kafkago.LoggerFunc(func(msg string, args ...interface{}) { log.Printf("[kafka] "+msg, args...) }),
 		ErrorLogger: kafkago.LoggerFunc(func(msg string, args ...interface{}) { log.Printf("[kafka-error] "+msg, args...) }),
