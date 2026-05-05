@@ -1,0 +1,796 @@
+openapi: 3.1.0
+info:
+  title: Portfolio Service API
+  version: 1.0.0
+  description: |
+    Сервис инвестиционного портфеля пользователя.
+
+    Ответственность сервиса:
+    - обновление состояния портфеля по событиям из Trading Service через Kafka
+    - хранение текущих позиций и истории заявок/сделок пользователя
+    - предоставление списка активов, сгруппированных по тикерам
+    - расчет PnL по каждому активу
+    - расчет суммарного PnL по портфелю
+    - пополнение баланса
+    - вывод средств
+
+    В MVP:
+    - при обращении к портфельным endpoint'ам сервис может запрашивать актуальные цены
+      у Market Data Service для пересчета PnL на лету
+
+servers:
+  - url: http://portfolio-service.internal/api/v1
+    description: Internal environment
+
+tags:
+  - name: Portfolio
+    description: Общее состояние портфеля
+  - name: Positions
+    description: Активы пользователя
+  - name: Balance
+    description: Пополнение и вывод средств
+  - name: OrdersHistory
+    description: История заявок пользователя
+  - name: TradesHistory
+    description: История сделок пользователя
+  - name: System
+    description: Служебные endpoint'ы
+
+paths:
+  /portfolio:
+    get:
+      tags: [Portfolio]
+      summary: Получить текущее состояние портфеля
+      description: |
+        Возвращает текущее состояние портфеля пользователя:
+        - денежный баланс
+        - рыночную стоимость активов
+        - суммарную стоимость портфеля
+        - realized / unrealized / total PnL
+        - список текущих позиций
+
+        В MVP сервис может пересчитывать PnL на основе актуальных цен,
+        полученных из Market Data Service.
+      operationId: getPortfolio
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Состояние портфеля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /positions:
+    get:
+      tags: [Positions]
+      summary: Получить список активов пользователя, сгруппированных по тикерам
+      description: |
+        Возвращает текущие позиции пользователя.
+        Для каждой позиции рассчитывается PnL по конкретному тикеру.
+      operationId: listPositions
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+            example: AAPL
+      responses:
+        '200':
+          description: Список позиций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /positions/{symbol}:
+    get:
+      tags: [Positions]
+      summary: Получить позицию по конкретному тикеру
+      operationId: getPositionBySymbol
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Позиция по инструменту
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /pnl:
+    get:
+      tags: [Portfolio]
+      summary: Получить доходность портфеля
+      description: |
+        Возвращает агрегированный PnL по всему портфелю пользователя.
+        В MVP сервис может пересчитывать PnL при каждом запросе,
+        используя актуальные данные из Market Data Service.
+      operationId: getPortfolioPnl
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Агрегированный PnL по портфелю
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioPnlResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /balance/deposit:
+    post:
+      tags: [Balance]
+      summary: Пополнить баланс пользователя
+      operationId: depositBalance
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BalanceOperationRequest'
+            examples:
+              default:
+                value:
+                  amount: "10000.00"
+      responses:
+        '200':
+          description: Баланс пополнен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /balance/withdraw:
+    post:
+      tags: [Balance]
+      summary: Вывести средства с баланса пользователя
+      operationId: withdrawBalance
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BalanceOperationRequest'
+            examples:
+              default:
+                value:
+                  amount: "5000.00"
+      responses:
+        '200':
+          description: Средства выведены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          description: Недостаточно средств
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficientFunds:
+                  value:
+                    code: INSUFFICIENT_BALANCE
+                    message: Not enough balance to withdraw requested amount
+                    traceId: 4d1bfc77f42a4d79
+
+  /orders:
+    get:
+      tags: [OrdersHistory]
+      summary: Получить историю заявок пользователя
+      description: |
+        Возвращает историю заявок пользователя,
+        включая исполненные, отклоненные и отмененные заявки.
+      operationId: listUserOrdersHistory
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: История заявок пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderHistoryListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /trades:
+    get:
+      tags: [TradesHistory]
+      summary: Получить историю сделок пользователя
+      operationId: listUserTradesHistory
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: side
+          schema:
+            $ref: '#/components/schemas/OrderSide'
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: История сделок пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeHistoryListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /balance/cash:
+    get:
+      tags: [Balance]
+      summary: Получить текущий денежный баланс пользователя
+      description: |
+        Используется другими сервисами (например, Trading Service) для проверки
+        достаточности средств перед размещением заявки на покупку.
+      operationId: getCashBalance
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Текущий баланс пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashBalanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /assets/{symbol}/quantity:
+    get:
+      tags: [Positions]
+      summary: Получить количество акций пользователя по тикеру
+      description: |
+        Используется другими сервисами (например, Trading Service) для проверки
+        достаточности количества акций перед размещением заявки на продажу.
+      operationId: getAssetQuantity
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Количество акций по тикеру
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetQuantityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint
+      operationId: health
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint
+      operationId: ready
+      responses:
+        '200':
+          description: Сервис готов принимать запросы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Сервис не готов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  parameters:
+    XUserId:
+      in: header
+      name: X-User-Id
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    Symbol:
+      in: path
+      name: symbol
+      required: true
+      schema:
+        type: string
+        example: AAPL
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    OrderSide:
+      type: string
+      enum: [BUY, SELL]
+
+    OrderStatus:
+      type: string
+      enum: [NEW, FILLED, REJECTED, CANCELLED]
+
+    PositionResponse:
+      type: object
+      required:
+        - symbol
+        - quantity
+        - avgPrice
+        - currentPrice
+        - marketValue
+        - realizedPnl
+        - unrealizedPnl
+        - totalPnl
+        - currency
+        - updatedAt
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        quantity:
+          type: integer
+          minimum: 0
+          example: 10
+        avgPrice:
+          type: string
+          example: "185.50"
+        currentPrice:
+          type: string
+          example: "190.13"
+        marketValue:
+          type: string
+          example: "1901.30"
+        realizedPnl:
+          type: string
+          example: "15.00"
+        unrealizedPnl:
+          type: string
+          example: "46.30"
+        totalPnl:
+          type: string
+          example: "61.30"
+        currency:
+          type: string
+          example: USD
+        updatedAt:
+          type: string
+          format: date-time
+
+    PositionListResponse:
+      type: object
+      required:
+        - items
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionResponse'
+
+    PortfolioResponse:
+      type: object
+      required:
+        - userId
+        - cashBalance
+        - totalMarketValue
+        - totalEquity
+        - realizedPnl
+        - unrealizedPnl
+        - totalPnl
+        - positions
+        - updatedAt
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        cashBalance:
+          type: string
+          example: "150000.00"
+        totalMarketValue:
+          type: string
+          example: "5400.20"
+        totalEquity:
+          type: string
+          example: "155400.20"
+        realizedPnl:
+          type: string
+          example: "45.00"
+        unrealizedPnl:
+          type: string
+          example: "120.20"
+        totalPnl:
+          type: string
+          example: "165.20"
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionResponse'
+        updatedAt:
+          type: string
+          format: date-time
+
+    PortfolioPnlResponse:
+      type: object
+      required:
+        - realizedPnl
+        - unrealizedPnl
+        - totalPnl
+        - currency
+        - updatedAt
+      additionalProperties: false
+      properties:
+        realizedPnl:
+          type: string
+          example: "45.00"
+        unrealizedPnl:
+          type: string
+          example: "120.20"
+        totalPnl:
+          type: string
+          example: "165.20"
+        currency:
+          type: string
+          example: USD
+        updatedAt:
+          type: string
+          format: date-time
+
+    BalanceOperationRequest:
+      type: object
+      required:
+        - amount
+      additionalProperties: false
+      properties:
+        amount:
+          type: string
+          example: "10000.00"
+          description: Денежная сумма в формате decimal string
+
+    BalanceResponse:
+      type: object
+      required:
+        - userId
+        - balance
+        - currency
+        - updatedAt
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        balance:
+          type: string
+          example: "160000.00"
+        currency:
+          type: string
+          example: USD
+        updatedAt:
+          type: string
+          format: date-time
+
+    CashBalanceResponse:
+      type: object
+      required:
+        - userId
+        - balance
+        - currency
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        balance:
+          type: string
+          example: "150000.00"
+        currency:
+          type: string
+          example: USD
+
+    AssetQuantityResponse:
+      type: object
+      required:
+        - userId
+        - symbol
+        - quantity
+      additionalProperties: false
+      properties:
+        userId:
+          type: integer
+          format: int64
+        symbol:
+          type: string
+          example: AAPL
+        quantity:
+          type: integer
+          minimum: 0
+          example: 10
+
+    OrderHistoryItem:
+      type: object
+      required:
+        - id
+        - symbol
+        - side
+        - quantity
+        - status
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+          example: AAPL
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        quantity:
+          type: integer
+          example: 10
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        avgFillPrice:
+          type: string
+          nullable: true
+          example: "190.14"
+        rejectionReason:
+          type: string
+          nullable: true
+          example: INSUFFICIENT_MARKET_VOLUME
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderHistoryListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderHistoryItem'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    TradeHistoryItem:
+      type: object
+      required:
+        - id
+        - orderId
+        - symbol
+        - side
+        - quantity
+        - price
+        - grossAmount
+        - executedAt
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+          example: AAPL
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        quantity:
+          type: integer
+          example: 10
+        price:
+          type: string
+          example: "190.14"
+        grossAmount:
+          type: string
+          example: "1901.40"
+        feeAmount:
+          type: string
+          nullable: true
+          example: "1.90"
+        executedAt:
+          type: string
+          format: date-time
+
+    TradeHistoryListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeHistoryItem'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: portfolio-service
+        timestamp:
+          type: string
+          format: date-time
+
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - status
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: postgres
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required:
+        - status
+        - service
+        - dependencies
+        - timestamp
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: portfolio-service
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - issue
+      additionalProperties: false
+      properties:
+        field:
+          type: string
+        issue:
+          type: string

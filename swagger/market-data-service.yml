@@ -1,0 +1,555 @@
+openapi: 3.1.0
+info:
+  title: Market Data Service API
+  version: 1.0.0
+  description: |
+    Сервис рыночных данных.
+
+    Ответственность сервиса:
+    - получение котировок по списку тикеров из ClickHouse
+    - получение среза котировок по одному тикеру
+    - поиск тикеров
+    - получение исторических данных для графиков
+    - формирование стакана bid/ask по инструменту
+
+servers:
+  - url: http://market-data-service.internal/api/v1
+    description: Internal environment
+
+tags:
+  - name: Instruments
+    description: Инструменты и поиск тикеров
+  - name: Quotes
+    description: Текущие котировки и срезы
+  - name: History
+    description: История цен для графиков и таблиц
+  - name: OrderBook
+    description: Стакан bid/ask
+  - name: System
+    description: Служебные endpoint'ы
+
+paths:
+  /instruments:
+    get:
+      tags: [Instruments]
+      summary: Получить список инструментов по поисковому запросу
+      description: |
+        Возвращает список тикеров по строке поиска.
+        Используется для поиска акций и отображения списка доступных инструментов.
+      operationId: searchInstruments
+      parameters:
+        - in: query
+          name: q
+          required: false
+          schema:
+            type: string
+          description: Поиск по тикеру или названию инструмента
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список инструментов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /instruments/{symbol}:
+    get:
+      tags: [Instruments]
+      summary: Получить инструмент по тикеру
+      operationId: getInstrumentBySymbol
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Данные инструмента
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instrument'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /quotes:
+    get:
+      tags: [Quotes]
+      summary: Получить котировки по списку тикеров
+      description: |
+        Возвращает текущие котировки по нескольким инструментам.
+        Используется для списка акций на фронте.
+      operationId: getQuotes
+      parameters:
+        - in: query
+          name: symbols
+          required: true
+          description: Список тикеров через запятую
+          schema:
+            type: string
+            example: AAPL,MSFT,GOOG
+      responses:
+        '200':
+          description: Список котировок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /quotes/{symbol}:
+    get:
+      tags: [Quotes]
+      summary: Получить срез котировок по тикеру
+      description: |
+        Возвращает актуальный срез рыночных данных по одному инструменту.
+      operationId: getQuoteBySymbol
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+      responses:
+        '200':
+          description: Срез котировок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /history/candles:
+    get:
+      tags: [History]
+      summary: Получить историю котировок по инструменту
+      description: |
+        Возвращает исторические данные по акции для построения графика цены
+        и таблицы с историей цен на фронте.
+      operationId: getCandleHistory
+      parameters:
+        - in: query
+          name: symbol
+          required: true
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: interval
+          required: true
+          schema:
+            $ref: '#/components/schemas/CandleInterval'
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+            default: 1000
+      responses:
+        '200':
+          description: История котировок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandleListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /order-book/{symbol}:
+    get:
+      tags: [OrderBook]
+      summary: Получить стакан bid/ask по инструменту
+      description: |
+        Возвращает агрегированный список bid/ask по выбранному инструменту.
+        Используется для отображения best bid, best ask и полного списка уровней на фронте.
+      operationId: getOrderBook
+      parameters:
+        - $ref: '#/components/parameters/Symbol'
+        - in: query
+          name: depth
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Стакан по инструменту
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderBookResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint
+      operationId: health
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint
+      operationId: ready
+      responses:
+        '200':
+          description: Сервис готов принимать запросы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Сервис не готов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  parameters:
+    Symbol:
+      in: path
+      name: symbol
+      required: true
+      schema:
+        type: string
+        example: AAPL
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    Instrument:
+      type: object
+      required:
+        - symbol
+        - name
+        - currency
+        - lotSize
+        - active
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        name:
+          type: string
+          example: Apple Inc.
+        currency:
+          type: string
+          example: USD
+        lotSize:
+          type: integer
+          minimum: 1
+          example: 1
+        active:
+          type: boolean
+
+    InstrumentListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instrument'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    Quote:
+      type: object
+      required:
+        - symbol
+        - bid
+        - ask
+        - last
+        - timestamp
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bid:
+          type: string
+          example: "190.12"
+        ask:
+          type: string
+          example: "190.15"
+        last:
+          type: string
+          example: "190.13"
+        open:
+          type: string
+          nullable: true
+          example: "188.90"
+        high:
+          type: string
+          nullable: true
+          example: "191.20"
+        low:
+          type: string
+          nullable: true
+          example: "188.40"
+        close:
+          type: string
+          nullable: true
+          example: "189.50"
+        volume:
+          type: integer
+          format: int64
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    QuoteListResponse:
+      type: object
+      required:
+        - items
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+
+    CandleInterval:
+      type: string
+      enum: [1m, 5m, 15m, 1h, 1d]
+
+    Candle:
+      type: object
+      required:
+        - timestamp
+        - open
+        - high
+        - low
+        - close
+        - volume
+      additionalProperties: false
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        volume:
+          type: integer
+          format: int64
+
+    CandleListResponse:
+      type: object
+      required:
+        - symbol
+        - interval
+        - items
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        interval:
+          $ref: '#/components/schemas/CandleInterval'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candle'
+
+    OrderBookLevel:
+      type: object
+      required:
+        - price
+        - quantity
+      additionalProperties: false
+      properties:
+        price:
+          type: string
+          example: "190.10"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 25
+
+    OrderBookResponse:
+      type: object
+      required:
+        - symbol
+        - bids
+        - asks
+        - bestBid
+        - bestAsk
+        - timestamp
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBookLevel'
+        bestBid:
+          type: string
+          nullable: true
+          example: "190.12"
+        bestAsk:
+          type: string
+          nullable: true
+          example: "190.15"
+        spread:
+          type: string
+          nullable: true
+          example: "0.03"
+        timestamp:
+          type: string
+          format: date-time
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: market-data-service
+        timestamp:
+          type: string
+          format: date-time
+
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - status
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: clickhouse
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required:
+        - status
+        - service
+        - dependencies
+        - timestamp
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: market-data-service
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - issue
+      additionalProperties: false
+      properties:
+        field:
+          type: string
+        issue:
+          type: string

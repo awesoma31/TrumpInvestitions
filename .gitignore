@@ -36,3 +36,20 @@ pricing_engine/pricing_engine
 # db related
 clickhouse_data
 clickhouse_logs
+postgres_data
+
+# service build outputs
+auth-gateway/build/
+
+.idea/
+
+.vscode/
+mobile/android-native/.gradle
+.claude
+front-ktl/.idea
+front-ktl/app/build
+front-ktl/local.properties
+front-ktl/.gradle
+mobile/android-native/build/reports/problems
+mobile/android-native/.gradle
+auth-gateway/.gradle

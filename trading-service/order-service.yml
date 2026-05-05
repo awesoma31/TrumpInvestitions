@@ -1,0 +1,573 @@
+openapi: 3.1.0
+info:
+  title: Trading / Order Service API
+  version: 1.0.0
+  description: |
+    Сервис торговых заявок и сделок.
+
+    Ответственность сервиса:
+    - создание рыночных заявок на покупку/продажу
+    - немедленная попытка исполнения заявки
+    - запись заявки и сделки в PostgreSQL
+    - автоматическое отклонение заявки при невозможности исполнения
+    - ручная отмена заявки пользователем
+    - публикация события в Kafka при исполнении заявки
+    - предоставление истории заявок и истории сделок
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+security:
+  - userIdHeader: []
+
+tags:
+  - name: Orders
+    description: Заявки пользователя
+  - name: Trades
+    description: История сделок
+  - name: System
+    description: Служебные endpoint'ы
+
+paths:
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Создать рыночную заявку
+      description: |
+        Создает заявку на покупку или продажу акций.
+        Если на рынке достаточно встречного объема — заявка исполняется сразу и получает статус FILLED.
+        Если объема недостаточно — заявка автоматически получает статус REJECTED.
+      operationId: createOrder
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            examples:
+              buyMarket:
+                value:
+                  symbol: AAPL
+                  side: BUY
+                  type: MARKET
+                  quantity: 10
+              sellMarket:
+                value:
+                  symbol: AAPL
+                  side: SELL
+                  type: MARKET
+                  quantity: 5
+      responses:
+        '201':
+          description: Заявка создана и обработана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          description: Бизнес-ошибка обработки заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficientFunds:
+                  value:
+                    code: INSUFFICIENT_FUNDS
+                    message: Not enough cash balance to place BUY market order
+                    traceId: 4d1bfc77f42a4d79
+                insufficientAssets:
+                  value:
+                    code: INSUFFICIENT_ASSETS
+                    message: Not enough asset quantity to place SELL market order
+                    traceId: 4d1bfc77f42a4d79
+                insufficientMarketVolume:
+                  value:
+                    code: INSUFFICIENT_MARKET_VOLUME
+                    message: Not enough market volume to execute order
+                    traceId: 4d1bfc77f42a4d79
+
+    get:
+      tags: [Orders]
+      summary: Получить историю заявок пользователя
+      operationId: listOrders
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: side
+          schema:
+            $ref: '#/components/schemas/OrderSide'
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: История заявок пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Получить заявку по id
+      operationId: getOrderById
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Данные заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Отменить заявку вручную
+      description: |
+        Ручная отмена заявки пользователем.
+        Если заявка уже исполнена или отклонена, отмена невозможна.
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Заявка отменена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Заявку нельзя отменить в текущем состоянии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trades:
+    get:
+      tags: [Trades]
+      summary: Получить историю сделок пользователя
+      operationId: listTrades
+      parameters:
+        - $ref: '#/components/parameters/XUserId'
+        - in: query
+          name: symbol
+          schema:
+            type: string
+            example: AAPL
+        - in: query
+          name: side
+          schema:
+            $ref: '#/components/schemas/OrderSide'
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: История сделок пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /trades/{tradeId}:
+    get:
+      tags: [Trades]
+      summary: Получить сделку по id
+      operationId: getTradeById
+      parameters:
+        - $ref: '#/components/parameters/TradeId'
+        - $ref: '#/components/parameters/XUserId'
+      responses:
+        '200':
+          description: Данные сделки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health endpoint
+      operationId: health
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /system/ready:
+    get:
+      tags: [System]
+      summary: Readiness endpoint
+      operationId: ready
+      responses:
+        '200':
+          description: Сервис готов принимать запросы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Сервис не готов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  securitySchemes:
+    userIdHeader:
+      type: apiKey
+      in: header
+      name: X-User-Id
+
+  parameters:
+    XUserId:
+      in: header
+      name: X-User-Id
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    OrderId:
+      in: path
+      name: orderId
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    TradeId:
+      in: path
+      name: tradeId
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    OrderSide:
+      type: string
+      enum: [BUY, SELL]
+
+    OrderType:
+      type: string
+      enum: [MARKET]
+
+    OrderStatus:
+      type: string
+      enum: [NEW, FILLED, REJECTED, CANCELLED]
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - symbol
+        - side
+        - type
+        - quantity
+      properties:
+        symbol:
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: AAPL
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        quantity:
+          type: integer
+          minimum: 1
+          example: 10
+
+    OrderResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - symbol
+        - side
+        - type
+        - quantity
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: integer
+          format: int64
+        symbol:
+          type: string
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        type:
+          $ref: '#/components/schemas/OrderType'
+        quantity:
+          type: integer
+        filledQuantity:
+          type: integer
+          nullable: true
+          example: 10
+        avgFillPrice:
+          type: string
+          nullable: true
+          example: "190.14"
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        rejectionReason:
+          type: string
+          nullable: true
+          example: INSUFFICIENT_MARKET_VOLUME
+        createdAt:
+          type: string
+          format: date-time
+        filledAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    TradeResponse:
+      type: object
+      required:
+        - id
+        - orderId
+        - userId
+        - symbol
+        - side
+        - quantity
+        - price
+        - grossAmount
+        - executedAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        userId:
+          type: integer
+          format: int64
+        symbol:
+          type: string
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        quantity:
+          type: integer
+        price:
+          type: string
+          example: "190.14"
+        grossAmount:
+          type: string
+          example: "1901.40"
+        feeAmount:
+          type: string
+          nullable: true
+          example: "1.90"
+        executedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    TradeListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - limit
+        - offset
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeResponse'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: UP
+        service:
+          type: string
+          example: trading-service
+        timestamp:
+          type: string
+          format: date-time
+
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          example: postgres
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+
+    ReadinessResponse:
+      type: object
+      required:
+        - status
+        - service
+        - dependencies
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY, DEGRADED]
+        service:
+          type: string
+          example: trading-service
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - issue
+      properties:
+        field:
+          type: string
+        issue:
+          type: string
