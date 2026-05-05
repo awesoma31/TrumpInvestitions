@@ -11,4 +11,8 @@ class SettingsManager(context: Context) {
         set(value) = prefs.edit().putString("server_host", value).apply()
 
     val baseUrl: String get() = "http://$serverHost/api/v1/"
+
+    var otelEndpoint: String
+        get() = prefs.getString("otel_endpoint", "http://10.0.2.2:4318") ?: "http://10.0.2.2:4318"
+        set(value) = prefs.edit().putString("otel_endpoint", value).apply()
 }

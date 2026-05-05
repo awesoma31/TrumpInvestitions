@@ -1,0 +1,18 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto
+
+# Force LF for files that must not have CRLF
+Makefile    text eol=lf
+*.sh        text eol=lf
+*.py        text eol=lf
+*.go        text eol=lf
+*.kt        text eol=lf
+*.kts       text eol=lf
+*.toml      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.json      text eol=lf
+*.sql       text eol=lf
+*.md        text eol=lf
+*.properties text eol=lf
+*.env       text eol=lf

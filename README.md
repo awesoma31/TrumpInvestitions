@@ -41,6 +41,21 @@
 
 > Инструкция по сборке, запуску и тестированию: [DEVELOPMENT.md](DEVELOPMENT.md)
 
+## Наблюдаемость (Observability)
+
+Все сервисы — включая Android-клиент (`android-client`) — инструментированы через **OpenTelemetry** и отправляют распределённые трассы в **Jaeger**.
+
+После запуска (`make setup`) открыть UI трассировки:
+
+```bash
+make telemetry
+# → открывает http://localhost:16686 в браузере
+```
+
+Или перейти вручную: **http://localhost:16686**
+
+В интерфейсе выбрать сервис из списка (`android-client`, `auth-gateway`, `market-data-service`, `portfolio-service`, `trading-service`) и нажать **Find Traces**.
+
 ## Введение
 
 ### Актуальность проекта

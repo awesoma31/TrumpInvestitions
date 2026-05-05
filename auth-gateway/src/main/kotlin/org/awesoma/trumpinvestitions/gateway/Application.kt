@@ -72,20 +72,55 @@ import java.util.Base64
 import java.util.Date
 import java.util.UUID
 
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
+
 fun main() {
     val config = GatewayConfig.fromEnv()
+    val openTelemetry = initOpenTelemetry(config.otelEndpoint)
     embeddedServer(Netty, host = config.host, port = config.port) {
-        module(config)
+        module(config, openTelemetry)
     }.start(wait = true)
 }
 
-fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv()) {
+private fun initOpenTelemetry(endpoint: String?): OpenTelemetry {
+    if (endpoint.isNullOrBlank()) {
+        println("OTEL_EXPORTER_ENDPOINT not set, tracing disabled")
+        return OpenTelemetry.noop()
+    }
+    val exporter = OtlpGrpcSpanExporter.builder()
+        .setEndpoint("http://$endpoint")
+        .build()
+    val resource = Resource.getDefault().merge(
+        Resource.create(Attributes.builder()
+            .put("service.name", "auth-gateway")
+            .put("service.version", "1.0.0")
+            .build())
+    )
+    val tracerProvider = SdkTracerProvider.builder()
+        .addSpanProcessor(BatchSpanProcessor.builder(exporter).build())
+        .setResource(resource)
+        .build()
+    val sdk = OpenTelemetrySdk.builder()
+        .setTracerProvider(tracerProvider)
+        .buildAndRegisterGlobal()
+    println("OpenTelemetry tracing initialized, exporting to $endpoint")
+    Runtime.getRuntime().addShutdownHook(Thread { tracerProvider.shutdown() })
+    return sdk
+}
+
+fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv(), openTelemetry: OpenTelemetry = OpenTelemetry.noop()) {
     val userRepository = UserRepository(config.database, config.jwt.refreshTokenTtlSeconds)
     val httpClient = HttpClient(CIO) {
         install(HttpTimeout) {
-            requestTimeoutMillis = 2_000
-            connectTimeoutMillis = 1_000
-            socketTimeoutMillis = 2_000
+            requestTimeoutMillis = 10_000
+            connectTimeoutMillis = 2_000
+            socketTimeoutMillis = 10_000
         }
     }
     val proxy = ProxyClient(httpClient, config.services)
@@ -558,6 +593,7 @@ data class GatewayConfig(
     val database: DatabaseConfig,
     val jwt: JwtConfig,
     val services: ServiceUrls,
+    val otelEndpoint: String?,
 ) {
     companion object {
         fun fromEnv(): GatewayConfig = GatewayConfig(
@@ -582,6 +618,7 @@ data class GatewayConfig(
                 order = env("ORDER_SERVICE_URL", "http://localhost:8082/api/v1"),
                 portfolio = env("PORTFOLIO_SERVICE_URL", "http://localhost:8083/api/v1"),
             ),
+            otelEndpoint = System.getenv("OTEL_EXPORTER_ENDPOINT")?.takeIf { it.isNotBlank() },
         )
 
         private fun env(name: String, default: String): String = System.getenv(name)?.takeIf { it.isNotBlank() } ?: default
@@ -660,12 +697,12 @@ private fun validateRegister(request: RegisterRequest) {
     require(request.username.length in 3..64) { "username length must be between 3 and 64" }
     require(request.username.matches(Regex("^[a-zA-Z0-9._-]+$"))) { "username contains invalid characters" }
     require(request.email.length <= 255 && request.email.contains("@")) { "email is invalid" }
-    require(request.password.length in 8..128) { "password length must be between 8 and 128" }
+    require(request.password.length >= 8) { "password must be at least 8 characters" }
 }
 
 private fun validateLogin(request: LoginRequest) {
     require(request.login.length in 3..255) { "login length must be between 3 and 255" }
-    require(request.password.length in 8..128) { "password length must be between 8 and 128" }
+    require(request.password.isNotEmpty()) { "password must not be empty" }
 }
 
 private fun ApplicationCall.error(code: String, message: String): ErrorResponse =

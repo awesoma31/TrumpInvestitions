@@ -10,6 +10,8 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+*.exe
+
 # Package Files #
 *.jar
 *.war
@@ -53,3 +55,4 @@ front-ktl/.gradle
 mobile/android-native/build/reports/problems
 mobile/android-native/.gradle
 auth-gateway/.gradle
+auth-gateway/bin

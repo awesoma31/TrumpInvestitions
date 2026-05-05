@@ -9,7 +9,10 @@ import (
 
 	"github.com/awesoma31/portfolio-service/models"
 	"github.com/awesoma31/portfolio-service/service"
+	"github.com/awesoma31/portfolio-service/telemetry"
 	kafkago "github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type Consumer struct {
@@ -30,6 +33,7 @@ func (c *Consumer) newReader() *kafkago.Reader {
 		GroupID:     c.groupID,
 		MinBytes:    1,
 		MaxBytes:    10e6,
+		MaxWait:     500 * time.Millisecond,
 		StartOffset: kafkago.FirstOffset,
 		Logger:      kafkago.LoggerFunc(func(msg string, args ...interface{}) { log.Printf("[kafka] "+msg, args...) }),
 		ErrorLogger: kafkago.LoggerFunc(func(msg string, args ...interface{}) { log.Printf("[kafka-error] "+msg, args...) }),
@@ -82,18 +86,34 @@ func (c *Consumer) Start(ctx context.Context) {
 
 		log.Printf("kafka message received: partition=%d offset=%d key=%s", msg.Partition, msg.Offset, string(msg.Key))
 
+		msgCtx, span := telemetry.Tracer().Start(ctx, "kafka.consume")
+		span.SetAttributes(
+			attribute.String("messaging.system", "kafka"),
+			attribute.String("messaging.destination", c.topic),
+			attribute.Int("messaging.kafka.partition", msg.Partition),
+			attribute.Int64("messaging.kafka.offset", msg.Offset),
+		)
+
 		var event models.TradingEvent
 		if err := json.Unmarshal(msg.Value, &event); err != nil {
 			log.Printf("kafka unmarshal error: %v", err)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "unmarshal error")
+			span.End()
 			continue
 		}
 
+		span.SetAttributes(attribute.String("event.type", event.EventType))
 		log.Printf("processing event: type=%s user=%d symbol=%s", event.EventType, event.UserID, event.Symbol)
-		if err := c.svc.ProcessTradingEvent(ctx, &event); err != nil {
+		if err := c.svc.ProcessTradingEvent(msgCtx, &event); err != nil {
 			log.Printf("process event error: %v", err)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 		} else {
 			log.Printf("event processed successfully: type=%s", event.EventType)
+			span.SetStatus(codes.Ok, "")
 		}
+		span.End()
 	}
 }
 

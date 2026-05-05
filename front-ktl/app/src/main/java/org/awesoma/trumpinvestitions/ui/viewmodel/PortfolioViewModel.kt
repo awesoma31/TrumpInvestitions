@@ -7,18 +7,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.awesoma.trumpinvestitions.TrumpApp
+import org.awesoma.trumpinvestitions.data.network.dto.DepositRequestDto
 import org.awesoma.trumpinvestitions.data.repository.PortfolioRepository
 import org.awesoma.trumpinvestitions.data.repository.PortfolioState
 
 class PortfolioViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val portfolioRepository = PortfolioRepository((application as TrumpApp).network.apiService)
+    private val app = application as TrumpApp
+    private val portfolioRepository get() = PortfolioRepository(app.network.apiService)
 
     private val _state = MutableStateFlow<PortfolioState?>(null)
     val state: StateFlow<PortfolioState?> = _state
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _depositError = MutableStateFlow<String?>(null)
+    val depositError: StateFlow<String?> = _depositError
 
     init {
         viewModelScope.launch {
@@ -28,4 +33,19 @@ class PortfolioViewModel(application: Application) : AndroidViewModel(applicatio
             }
         }
     }
+
+    fun deposit(amount: Double) {
+        viewModelScope.launch {
+            try {
+                val result = app.network.apiService.deposit(DepositRequestDto(String.format(java.util.Locale.US, "%.2f", amount)))
+                _state.value = _state.value?.copy(
+                    cashBalance = result.balance.toDoubleOrNull() ?: 0.0
+                )
+            } catch (e: Exception) {
+                _depositError.value = e.message ?: "Ошибка пополнения"
+            }
+        }
+    }
+
+    fun clearDepositError() { _depositError.value = null }
 }

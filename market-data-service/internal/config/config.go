@@ -33,6 +33,7 @@ type Config struct {
 	ClickHouseDatabase  string
 	ClickHouseUser      string
 	ClickHousePassword  string
+	OtelEndpoint        string
 }
 
 func Load() (Config, error) {
@@ -49,6 +50,7 @@ func Load() (Config, error) {
 		ClickHouseDatabase:  envOrDefault("CLICKHOUSE_DATABASE", defaultClickHouseDatabase),
 		ClickHouseUser:      os.Getenv("CLICKHOUSE_USER"),
 		ClickHousePassword:  os.Getenv("CLICKHOUSE_PASSWORD"),
+		OtelEndpoint:        os.Getenv("OTEL_EXPORTER_ENDPOINT"),
 	}
 
 	if cfg.HTTPPort <= 0 {

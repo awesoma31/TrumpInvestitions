@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.awesoma.trumpinvestitions.TrumpApp
+import org.awesoma.trumpinvestitions.data.network.ApiError
 import org.awesoma.trumpinvestitions.data.repository.AuthRepository
 
 data class AuthUiState(
@@ -18,7 +19,9 @@ data class AuthUiState(
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as TrumpApp
-    private val authRepository = AuthRepository(app.network.authApiService, app.tokenManager)
+
+    // Репозиторий создаётся при каждом вызове чтобы всегда использовать актуальный network
+    private fun repo() = AuthRepository(app.network.authApiService, app.tokenManager)
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState
@@ -27,10 +30,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = AuthUiState(isLoading = true)
             try {
-                authRepository.login(login, password)
+                repo().login(login, password)
                 _uiState.value = AuthUiState(isSuccess = true)
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(error = e.message ?: "Ошибка входа")
+                _uiState.value = AuthUiState(error = ApiError.parse(e))
             }
         }
     }
@@ -39,17 +42,17 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = AuthUiState(isLoading = true)
             try {
-                authRepository.register(username, email, password)
+                repo().register(username, email, password)
                 _uiState.value = AuthUiState(isSuccess = true)
             } catch (e: Exception) {
-                _uiState.value = AuthUiState(error = e.message ?: "Ошибка регистрации")
+                _uiState.value = AuthUiState(error = ApiError.parse(e))
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
-            authRepository.logout()
+            repo().logout()
         }
     }
 

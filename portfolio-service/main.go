@@ -16,12 +16,25 @@ import (
 	"github.com/awesoma31/portfolio-service/kafka"
 	"github.com/awesoma31/portfolio-service/repository"
 	"github.com/awesoma31/portfolio-service/service"
+	"github.com/awesoma31/portfolio-service/telemetry"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
 func main() {
 	cfg := config.Load()
+
+	// OpenTelemetry
+	shutdownTracer, err := telemetry.InitTracer(context.Background(), cfg.OtelEndpoint)
+	if err != nil {
+		log.Fatalf("failed to init tracer: %v", err)
+	}
+	defer func() {
+		if err := shutdownTracer(context.Background()); err != nil {
+			log.Printf("error shutting down tracer: %v", err)
+		}
+	}()
 
 	db, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
@@ -43,6 +56,13 @@ func main() {
 	svc := service.NewPortfolioService(repo, priceProvider)
 
 	r := mux.NewRouter()
+	r.Use(otelmux.Middleware("portfolio-service"))
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			log.Printf("[http] %s %s from %s", req.Method, req.URL.Path, req.RemoteAddr)
+			next.ServeHTTP(w, req)
+		})
+	})
 	h := handler.NewHandler(svc, repo)
 	h.RegisterRoutes(r)
 

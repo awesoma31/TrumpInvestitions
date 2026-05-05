@@ -325,6 +325,9 @@ func TestCreateOrder_InsufficientMarketVolume(t *testing.T) {
 	// Объём рынка 5, а запрашивают 100
 	market.On("GetMarketData", mock.Anything, "AAPL", domain.OrderSideBuy).
 		Return(decimal.NewFromInt(150), 5, nil)
+	// GetCashBalance может быть вызван параллельно с GetMarketData до проверки объёма
+	portfolio.On("GetCashBalance", mock.Anything, int64(1)).
+		Maybe().Return(decimal.NewFromInt(100000), nil)
 	repo.On("CreateOrder", mock.Anything, mock.Anything).
 		Return(nil)
 	repo.On("UpdateOrderStatus", mock.Anything, mock.Anything, mock.Anything, domain.OrderStatusRejected, mock.Anything).

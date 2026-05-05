@@ -12,7 +12,8 @@ import org.awesoma.trumpinvestitions.data.repository.MarketRepository
 
 class StocksViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val marketRepository = MarketRepository((application as TrumpApp).network.apiService)
+    private val app = application as TrumpApp
+    private val marketRepository get() = MarketRepository(app.network.apiService)
 
     private val _stocks = MutableStateFlow<List<Stock>>(emptyList())
     val stocks: StateFlow<List<Stock>> = _stocks

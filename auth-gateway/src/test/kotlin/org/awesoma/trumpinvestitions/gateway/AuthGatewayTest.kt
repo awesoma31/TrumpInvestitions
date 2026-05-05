@@ -177,6 +177,7 @@ private val testConfig = GatewayConfig(
         refreshTokenTtlSeconds = 2592000,
     ),
     services = ServiceUrls("http://market.test", "http://order.test", "http://portfolio.test"),
+    otelEndpoint = null,
 )
 
 private val testUser = UserProfile(
