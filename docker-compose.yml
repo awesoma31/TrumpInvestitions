@@ -36,6 +36,7 @@ services:
       ORDER_SERVICE_URL: http://trading-service:8083/api/v1
       PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1
       OTEL_EXPORTER_ENDPOINT: jaeger:4317
+      DATABASE_POOL_SIZE: 50
     ports:
       - "8080:8080"
 
@@ -66,6 +67,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portfolio
+    command: postgres -c max_connections=200
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/postgres-init.sql:/docker-entrypoint-initdb.d/00_create_trading_db.sql
@@ -214,6 +216,16 @@ services:
       SYMBOLS: AAPL,MSFT,TSLA,BTCUSDT,ETHUSDT
     ports:
       - "8095:8095"
+
+  load-dashboard:
+    image: nginx:alpine
+    container_name: load-dashboard
+    profiles:
+      - load
+    volumes:
+      - ./load-service/dashboard:/usr/share/nginx/html:ro
+    ports:
+      - "8096:80"
 
 volumes:
   pgdata:

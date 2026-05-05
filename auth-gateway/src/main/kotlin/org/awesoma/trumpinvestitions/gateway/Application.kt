@@ -53,9 +53,11 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.toMap
 import io.ktor.utils.io.core.readBytes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -83,7 +85,13 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 fun main() {
     val config = GatewayConfig.fromEnv()
     val openTelemetry = initOpenTelemetry(config.otelEndpoint)
-    embeddedServer(Netty, host = config.host, port = config.port) {
+    val workerThreads = System.getenv("NETTY_WORKER_THREADS")?.toIntOrNull()
+        ?: (Runtime.getRuntime().availableProcessors() * 4).coerceAtLeast(16)
+    embeddedServer(Netty, host = config.host, port = config.port, configure = {
+        workerGroupSize = workerThreads
+        callGroupSize = workerThreads
+        connectionGroupSize = (workerThreads / 4).coerceAtLeast(4)
+    }) {
         module(config, openTelemetry)
     }.start(wait = true)
 }
@@ -116,7 +124,12 @@ private fun initOpenTelemetry(endpoint: String?): OpenTelemetry {
 
 fun Application.module(config: GatewayConfig = GatewayConfig.fromEnv(), openTelemetry: OpenTelemetry = OpenTelemetry.noop()) {
     val userRepository = UserRepository(config.database, config.jwt.refreshTokenTtlSeconds)
+    val maxConnections = System.getenv("HTTP_CLIENT_MAX_CONNECTIONS")?.toIntOrNull() ?: 4000
     val httpClient = HttpClient(CIO) {
+        engine {
+            maxConnectionsCount = maxConnections
+            requestTimeout = 10_000
+        }
         install(HttpTimeout) {
             requestTimeoutMillis = 10_000
             connectTimeoutMillis = 2_000
@@ -140,7 +153,7 @@ internal fun Application.module(
     val tokenService = TokenService(config.jwt)
 
     install(ContentNegotiation) { json(json) }
-    install(CallLogging) { level = Level.INFO }
+    install(CallLogging) { level = Level.WARN }
     install(CORS) {
         anyHost()
         allowHeader(HttpHeaders.Authorization)
@@ -184,28 +197,36 @@ internal fun Application.module(
             post("/auth/register") {
                 val request = call.receive<RegisterRequest>()
                 validateRegister(request)
-                val user = userRepository.createUser(request.username, request.email, request.password)
-                call.respond(HttpStatusCode.Created, tokenService.authResponse(user, userRepository.issueRefreshToken(user.id)))
+                val response = withContext(Dispatchers.IO) {
+                    val user = userRepository.createUser(request.username, request.email, request.password)
+                    tokenService.authResponse(user, userRepository.issueRefreshToken(user.id))
+                }
+                call.respond(HttpStatusCode.Created, response)
             }
             post("/auth/login") {
                 val request = call.receive<LoginRequest>()
                 validateLogin(request)
-                val user = userRepository.findByLogin(request.login)
-                    ?: return@post call.respond(HttpStatusCode.Unauthorized, call.error("INVALID_CREDENTIALS", "Invalid login or password"))
-                if (!PasswordHasher.verify(request.password, user.passwordHash)) {
-                    return@post call.respond(HttpStatusCode.Unauthorized, call.error("INVALID_CREDENTIALS", "Invalid login or password"))
+                val response = withContext(Dispatchers.IO) {
+                    val user = userRepository.findByLogin(request.login)
+                        ?: return@withContext null
+                    if (!PasswordHasher.verify(request.password, user.passwordHash)) return@withContext null
+                    tokenService.authResponse(user.profile, userRepository.issueRefreshToken(user.id))
                 }
-                call.respond(tokenService.authResponse(user.profile, userRepository.issueRefreshToken(user.id)))
+                if (response == null) {
+                    call.respond(HttpStatusCode.Unauthorized, call.error("INVALID_CREDENTIALS", "Invalid login or password"))
+                } else {
+                    call.respond(response)
+                }
             }
             post("/auth/refresh") {
                 val request = call.receive<RefreshRequest>()
-                val user = userRepository.rotateRefreshToken(request.refreshToken)
+                val user = withContext(Dispatchers.IO) { userRepository.rotateRefreshToken(request.refreshToken) }
                     ?: return@post call.respond(HttpStatusCode.Unauthorized, call.error("INVALID_REFRESH_TOKEN", "Refresh token is invalid or revoked"))
                 call.respond(tokenService.authResponse(user.profile, user.refreshToken))
             }
             post("/auth/logout") {
                 val request = call.receive<LogoutRequest>()
-                userRepository.revokeRefreshToken(request.refreshToken)
+                withContext(Dispatchers.IO) { userRepository.revokeRefreshToken(request.refreshToken) }
                 call.respond(HttpStatusCode.NoContent)
             }
 
@@ -580,7 +601,8 @@ class TokenService(private val config: JwtConfig) {
 }
 
 object PasswordHasher {
-    fun hash(password: String): String = BCrypt.withDefaults().hashToString(12, password.toCharArray())
+    private val cost = System.getenv("BCRYPT_COST")?.toIntOrNull()?.coerceIn(4, 14) ?: 10
+    fun hash(password: String): String = BCrypt.withDefaults().hashToString(cost, password.toCharArray())
     fun verify(password: String, hash: String): Boolean =
         BCrypt.verifyer().verify(password.toCharArray(), hash).verified
 }

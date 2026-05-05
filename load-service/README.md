@@ -97,13 +97,13 @@ docker compose --profile load up --build load-service
 
 ## Просмотр статуса
 
-Через Makefile:
+Через Makefile (форматированный вывод):
 
 ```bash
 make load-status
 ```
 
-Или напрямую:
+Или напрямую (raw JSON):
 
 ```bash
 curl http://localhost:8095/api/v1/load/status
@@ -120,6 +120,30 @@ curl http://localhost:8095/api/v1/load/status
 - сколько заявок было отправлено;
 - RPS;
 - latency: `min`, `avg`, `p50`, `p95`, `p99`, `max`.
+
+## Дашборд реального времени
+
+Веб-дашборд автоматически опрашивает `load-service` каждые 2 секунды и показывает живые графики.
+
+Запустить вместе с тестом:
+
+```bash
+docker compose --profile load up -d load-dashboard
+make load-dashboard   # откроет http://localhost:8096 в браузере
+```
+
+Или запустить вручную отдельно:
+
+```bash
+docker compose --profile load up -d load-service load-dashboard
+```
+
+Дашборд доступен на `http://localhost:8096` и показывает:
+
+- статус теста (запущен / остановлен) и время старта;
+- активные пользователи, total/success/error rate, RPS, p95, p99, ордера;
+- графики по времени: RPS, процент ошибок, активные пользователи, latency (p50/p95/p99);
+- таблицу эндпоинтов с количеством запросов и ошибок по каждому.
 
 ## HTTP API load-service
 

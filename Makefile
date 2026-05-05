@@ -124,9 +124,16 @@ load-test-10000:
 	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
 	docker compose --profile load up --build load-service
 
+## Open load test dashboard in browser
+load-dashboard:
+	@echo "Dashboard: http://localhost:8096"
+	@bash -c 'if command -v xdg-open >/dev/null 2>&1; then xdg-open http://localhost:8096; \
+		elif command -v open >/dev/null 2>&1; then open http://localhost:8096; \
+		else echo "Open manually: http://localhost:8096"; fi'
+
 ## Show current load-service status
 load-status:
-	curl -s http://localhost:8095/api/v1/load/status
+	@bash scripts/load-status.sh
 
 # --- Tests -------------------------------------------------------------------
 

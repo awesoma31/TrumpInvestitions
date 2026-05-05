@@ -21,6 +21,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -78,6 +79,7 @@ fun Application.module(config: LoadConfig, runner: LoadRunner) {
         explicitNulls = false
     }
 
+    install(CORS) { anyHost() }
     install(ContentNegotiation) { json(json) }
     install(CallLogging) { level = Level.INFO }
 
