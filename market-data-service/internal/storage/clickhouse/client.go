@@ -167,18 +167,29 @@ func (c *Client) GetCandles(ctx context.Context, symbol string, from, to time.Ti
 		return nil, err
 	}
 
+	// For intervals >= 1m we read from the pre-aggregated candles_1m table and
+	// re-bucket on the fly using AggregateFunction Merge combinators.
+	// This avoids full scans of the raw quotes table and is orders of magnitude
+	// faster than GROUP BY on millions of raw rows.
+	//
+	// For buckets larger than 1 minute the 1-minute states are merged together:
+	//   intDiv(bucket_ns, bucketNS) * bucketNS  →  target bucket boundary
+	//
+	// candles_1m stores argMin/argMax states keyed on event_time_ns so
+	// argMinMerge / argMaxMerge correctly pick open/close across all merged
+	// 1-minute sub-buckets.
 	sql := fmt.Sprintf(`
 		SELECT
-			intDiv(event_time_ns, %d) * %d AS bucket_ns,
-			argMin(last_price, tuple(event_time_ns, sequence)) AS open,
-			max(last_price) AS high,
-			min(last_price) AS low,
-			argMax(last_price, tuple(event_time_ns, sequence)) AS close,
-			toInt64(round(sum(last_size))) AS volume
-		FROM quotes
+			intDiv(bucket_ns, %d) * %d AS bucket_ns,
+			argMinMerge(open)          AS open,
+			maxMerge(high)             AS high,
+			minMerge(low)              AS low,
+			argMaxMerge(close)         AS close,
+			toInt64(round(sumMerge(volume))) AS volume
+		FROM candles_1m
 		WHERE symbol = %s
-		  AND event_time_ns >= %d
-		  AND event_time_ns <= %d
+		  AND bucket_ns >= %d
+		  AND bucket_ns <= %d
 		GROUP BY bucket_ns
 		ORDER BY bucket_ns
 		LIMIT %d
