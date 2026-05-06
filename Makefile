@@ -116,7 +116,7 @@ load-test:
 	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
 	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
 	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
-	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),2000) \
 	docker compose --profile load up --build load-service load-dashboard
 
 ## Run Kotlin load-service with 10000 virtual clients
@@ -128,7 +128,7 @@ load-test-10000:
 	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
 	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
 	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
-	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),2000) \
 	docker compose --profile load up --build load-service load-dashboard
 
 ## Open load test dashboard in browser
