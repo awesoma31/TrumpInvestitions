@@ -1,71 +1,66 @@
-# Compiled class file
+# ── Java / Kotlin ─────────────────────────────────────────────────────────────
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-*.exe
-
-# Package Files #
 *.jar
 *.war
 *.nar
 *.ear
+*.ctxt
+.mtj.tmp/
+hs_err_pid*
+replay_pid*
+
+# Kotlin Gradle plugin data
+.kotlin/
+
+# ── Gradle / build outputs ────────────────────────────────────────────────────
+.gradle/
+**/.gradle/
+**/build/
+**/bin/
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.idea/
+**/.idea/
+.vscode/
+*.iml
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+**/.DS_Store
+*.exe
+
+# ── Archives ──────────────────────────────────────────────────────────────────
 *.zip
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
 
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
-.kotlin/
+# ── Claude Code ───────────────────────────────────────────────────────────────
+.claude/
 
-**/.DS_Store
-
-# pricing_engine related
-pricing_engine/.cache
-pricing_engine/src/*.o
-pricing_engine/pricing_engine
-
-# db related
-clickhouse_data
-clickhouse_logs
-postgres_data
-
-# service build outputs
-auth-gateway/build/
-
-.idea/
-
-.vscode/
-mobile/android-native/.gradle
-.claude
-front-ktl/.idea
-front-ktl/app/build
+# ── Android ───────────────────────────────────────────────────────────────────
 front-ktl/local.properties
-front-ktl/.gradle
-mobile/android-native/build/reports/problems
-mobile/android-native/.gradle
-auth-gateway/.gradle
-auth-gateway/bin
-load-service/.gradle
-load-service/build/reports/problems
-pricing_engine/src/.pricing_engine_device.o.cmd
-pricing_engine/src/.pricing_engine_generator.o.cmd
-pricing_engine/src/.pricing_engine_main.o.cmd
-pricing_engine/..module-common.o.cmd
-pricing_engine/.Module.symvers.cmd
+
+# ── Database volumes ──────────────────────────────────────────────────────────
+clickhouse_data/
+clickhouse_logs/
+postgres_data/
+
+# ── pricing_engine: userspace binary ──────────────────────────────────────────
+pricing_engine/pricing_engine
+pricing_engine/test_reader
+pricing_engine/src/*.o
+
+# ── pricing_engine: kernel module build artifacts ─────────────────────────────
+pricing_engine/*.ko
+pricing_engine/*.mod
+pricing_engine/*.mod.c
+pricing_engine/*.mod.o
+pricing_engine/*.o
+pricing_engine/Module.symvers
+pricing_engine/modules.order
+pricing_engine/.*.cmd
+pricing_engine/src/.*.cmd
 pricing_engine/.module-common.o
-pricing_engine/.modules.order.cmd
-pricing_engine/.pricing_engine.ko.cmd
-pricing_engine/.pricing_engine.mod.cmd
-pricing_engine/.pricing_engine.mod.o.cmd
-pricing_engine/.pricing_engine.o.cmd
+pricing_engine/.cache/
