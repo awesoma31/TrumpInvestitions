@@ -11,7 +11,7 @@ import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
 
 class MarketRepository(private val apiService: ApiService) {
 
-    private val SYMBOLS = "AAPL,GOOGL,MSFT,AMZN,TSLA,NVDA,META,JPM"
+    private val SYMBOLS = "BTCUSDT,AAPL,ETHUSDT,MSFT,TSLA"
 
     fun getStocksFlow(): Flow<List<Stock>> = flow {
         val instruments = try {
@@ -45,9 +45,9 @@ class MarketRepository(private val apiService: ApiService) {
 
     suspend fun getCandles(symbol: String): List<PricePoint> {
         val to = java.time.Instant.now().toString()
-        val from = java.time.Instant.now().minusSeconds(24 * 3600).toString()
+        val from = java.time.Instant.now().minusSeconds(6 * 3600).toString()
         return try {
-            apiService.getCandles(symbol = symbol, from = from, to = to, interval = "1h", limit = 50)
+            apiService.getCandles(symbol = symbol, from = from, to = to, interval = "5m", limit = 50)
                 .items.map { candle ->
                     val epoch = try {
                         java.time.Instant.parse(candle.timestamp).epochSecond

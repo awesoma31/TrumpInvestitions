@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -43,28 +45,60 @@ class StockDetailViewModel(
     val orderEvent: StateFlow<OrderEvent?> = _orderEvent
 
     init {
-        loadData()
+        pollQuote()
+        pollCandles()
+        pollOrderBook()
     }
 
-    private fun loadData() {
+    private fun pollQuote() {
         viewModelScope.launch {
-            try {
-                val quote = apiService.getQuote(symbol)
-                val price = quote.last.toDoubleOrNull() ?: 0.0
-                val open = quote.open?.toDoubleOrNull() ?: price
-                val change = if (open > 0) (price - open) / open * 100 else 0.0
-                _stock.value = Stock(
-                    symbol = quote.symbol,
-                    name = quote.symbol,
-                    price = price,
-                    changePercent = change,
-                    highestBid = quote.bid.toDoubleOrNull() ?: price,
-                    lowestAsk = quote.ask.toDoubleOrNull() ?: price
-                )
-            } catch (_: Exception) {}
+            while (true) {
+                try {
+                    val quote = apiService.getQuote(symbol)
+                    val price = quote.last.toDoubleOrNull() ?: 0.0
+                    val open = quote.open?.toDoubleOrNull() ?: price
+                    val change = if (open > 0) (price - open) / open * 100 else 0.0
+                    _stock.value = Stock(
+                        symbol = quote.symbol,
+                        name = quote.symbol,
+                        price = price,
+                        changePercent = change,
+                        highestBid = quote.bid.toDoubleOrNull() ?: price,
+                        lowestAsk = quote.ask.toDoubleOrNull() ?: price
+                    )
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                }
+                delay(5_000L)
+            }
+        }
+    }
 
-            _candles.value = marketRepository.getCandles(symbol)
-            _orderBook.value = marketRepository.getOrderBook(symbol)
+    private fun pollCandles() {
+        viewModelScope.launch {
+            while (true) {
+                try {
+                    val points = marketRepository.getCandles(symbol)
+                    if (points.isNotEmpty()) _candles.value = points
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                }
+                delay(30_000L)
+            }
+        }
+    }
+
+    private fun pollOrderBook() {
+        viewModelScope.launch {
+            while (true) {
+                try {
+                    val book = marketRepository.getOrderBook(symbol)
+                    if (book != null) _orderBook.value = book
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                }
+                delay(10_000L)
+            }
         }
     }
 
