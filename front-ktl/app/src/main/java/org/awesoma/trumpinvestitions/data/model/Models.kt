@@ -47,3 +47,12 @@ data class PricePoint(
     val timestamp: Long,
     val price: Double
 )
+
+data class Candle(
+    val timestamp: Long,   // epoch seconds
+    val open: Double,
+    val high: Double,
+    val low: Double,
+    val close: Double,
+    val volume: Long
+)

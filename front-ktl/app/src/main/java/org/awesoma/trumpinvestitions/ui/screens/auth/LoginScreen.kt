@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,28 +68,30 @@ fun LoginScreen(
         Text("TrumpInvestitions", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(32.dp))
         OutlinedTextField(
-            value = username,
+            value         = username,
             onValueChange = { username = it },
-            label = { Text("Логин") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label         = { Text("Логин") },
+            singleLine    = true,
+            modifier      = Modifier.fillMaxWidth(),
+            colors        = inputColors()
         )
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
+            value               = password,
+            onValueChange       = { password = it },
+            label               = { Text("Пароль") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        imageVector        = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
                     )
                 }
             },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier   = Modifier.fillMaxWidth(),
+            colors     = inputColors()
         )
         if (uiState.error != null) {
             Spacer(Modifier.height(8.dp))
@@ -144,3 +147,10 @@ fun LoginScreen(
         }
     }
 }
+
+@Composable
+fun inputColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor   = Color.Black,
+    unfocusedTextColor = Color.Black,
+    cursorColor        = Color.Black,
+)

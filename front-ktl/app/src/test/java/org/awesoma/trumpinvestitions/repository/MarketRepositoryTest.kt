@@ -126,21 +126,24 @@ class MarketRepositoryTest {
             }
         """.trimIndent()))
 
-        val points = repository.getCandles("AAPL")
+        val candles = repository.getCandles("AAPL")
 
-        assertEquals(2, points.size)
-        assertEquals(181.50, points[0].price)
-        assertEquals(182.52, points[1].price)
-        assertTrue(points[0].timestamp > 0L, "Timestamp should be a positive epoch value")
-        assertTrue(points[1].timestamp > points[0].timestamp, "Later candle should have larger timestamp")
+        assertEquals(2, candles.size)
+        assertEquals(181.50, candles[0].close, 0.001)
+        assertEquals(182.52, candles[1].close, 0.001)
+        assertEquals(180.00, candles[0].open,  0.001)
+        assertEquals(182.00, candles[0].high,  0.001)
+        assertEquals(179.50, candles[0].low,   0.001)
+        assertTrue(candles[0].timestamp > 0L, "Timestamp should be a positive epoch value")
+        assertTrue(candles[1].timestamp > candles[0].timestamp, "Later candle should have larger timestamp")
     }
 
     @Test
     fun `getCandles — returns empty list when API fails`() = runTest {
         server.enqueue(MockResponse().setResponseCode(500))
 
-        val points = repository.getCandles("AAPL")
-        assertEquals(0, points.size)
+        val candles = repository.getCandles("AAPL")
+        assertEquals(0, candles.size)
     }
 
     @Test

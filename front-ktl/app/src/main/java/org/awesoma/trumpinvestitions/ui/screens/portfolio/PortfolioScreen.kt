@@ -67,17 +67,25 @@ fun PortfolioScreen() {
         }
     }
 
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab       by remember { mutableStateOf(0) }
     val tabs = listOf("Позиции", "История заявок")
-    var showDepositDialog by remember { mutableStateOf(false) }
+    var showDepositDialog  by remember { mutableStateOf(false) }
+    var showWithdrawDialog by remember { mutableStateOf(false) }
 
     if (showDepositDialog) {
-        DepositDialog(
-            onConfirm = { amount ->
-                vm.deposit(amount)
-                showDepositDialog = false
-            },
+        AmountDialog(
+            title     = "Пополнить баланс",
+            confirm   = "Пополнить",
+            onConfirm = { amount -> vm.deposit(amount); showDepositDialog = false },
             onDismiss = { showDepositDialog = false }
+        )
+    }
+    if (showWithdrawDialog) {
+        AmountDialog(
+            title     = "Вывести средства",
+            confirm   = "Вывести",
+            onConfirm = { amount -> vm.withdraw(amount); showWithdrawDialog = false },
+            onDismiss = { showWithdrawDialog = false }
         )
     }
 
@@ -103,9 +111,10 @@ fun PortfolioScreen() {
             LazyColumn(contentPadding = padding) {
                 item {
                     PortfolioSummaryCard(
-                        balance = cashBalance,
-                        totalPnl = totalPnl,
-                        onDepositClick = { showDepositDialog = true }
+                        balance        = cashBalance,
+                        totalPnl       = totalPnl,
+                        onDepositClick  = { showDepositDialog = true },
+                        onWithdrawClick = { showWithdrawDialog = true }
                     )
                 }
                 item {
@@ -144,31 +153,34 @@ fun PortfolioScreen() {
 }
 
 @Composable
-private fun DepositDialog(onConfirm: (Double) -> Unit, onDismiss: () -> Unit) {
+private fun AmountDialog(
+    title: String,
+    confirm: String,
+    onConfirm: (Double) -> Unit,
+    onDismiss: () -> Unit
+) {
     var amountText by remember { mutableStateOf("") }
     val amount = amountText.toDoubleOrNull()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Пополнить баланс") },
+        title = { Text(title) },
         text = {
             OutlinedTextField(
-                value = amountText,
+                value         = amountText,
                 onValueChange = { amountText = it.filter { c -> c.isDigit() || c == '.' } },
-                label = { Text("Сумма") },
-                placeholder = { Text("10000") },
+                label         = { Text("Сумма") },
+                placeholder   = { Text("10000") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                singleLine    = true,
+                modifier      = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
             Button(
                 onClick = { if (amount != null && amount > 0) onConfirm(amount) },
                 enabled = amount != null && amount > 0
-            ) {
-                Text("Пополнить")
-            }
+            ) { Text(confirm) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Отмена") }
@@ -177,7 +189,12 @@ private fun DepositDialog(onConfirm: (Double) -> Unit, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun PortfolioSummaryCard(balance: Double, totalPnl: Double, onDepositClick: () -> Unit) {
+private fun PortfolioSummaryCard(
+    balance: Double,
+    totalPnl: Double,
+    onDepositClick: () -> Unit,
+    onWithdrawClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,7 +202,7 @@ private fun PortfolioSummaryCard(balance: Double, totalPnl: Double, onDepositCli
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
@@ -204,11 +221,15 @@ private fun PortfolioSummaryCard(balance: Double, totalPnl: Double, onDepositCli
                 }
             }
             Spacer(Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onDepositClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("+ Пополнить баланс")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick  = onDepositClick,
+                    modifier = Modifier.weight(1f)
+                ) { Text("+ Пополнить") }
+                OutlinedButton(
+                    onClick  = onWithdrawClick,
+                    modifier = Modifier.weight(1f)
+                ) { Text("− Вывести") }
             }
         }
     }

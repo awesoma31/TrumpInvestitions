@@ -4,8 +4,8 @@ GATEWAY_URL   ?= http://localhost:8080/api/v1
 KAFKA_WAIT    ?= 3
 
 .PHONY: setup up down wait status telemetry \
-        db-init clickhouse-init load-data reset-data live-data \
-        load-test load-test-10000 load-status \
+        db-init clickhouse-init load-data reset-data \
+        up-userspace down-userspace \
         test-unit test-portfolio test-integration test-gateway test-all
 
 # --- Status ------------------------------------------------------------------
@@ -55,6 +55,14 @@ setup: up db-init clickhouse-init load-data
 ## Start infrastructure (with image rebuild)
 up:
 	docker compose up -d --build
+
+## Start with Python pricing engine (Windows / no kernel module)
+up-userspace:
+	docker compose --profile userspace up -d --build
+
+## Stop userspace profile
+down-userspace:
+	docker compose --profile userspace down
 
 ## Stop infrastructure (volumes are preserved)
 down:

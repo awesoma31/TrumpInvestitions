@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import org.awesoma.trumpinvestitions.ui.screens.auth.inputColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,53 +75,57 @@ fun RegisterScreen(
         Text("Регистрация", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(32.dp))
         OutlinedTextField(
-            value = username,
+            value         = username,
             onValueChange = { username = it },
-            label = { Text("Логин") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label         = { Text("Логин") },
+            singleLine    = true,
+            modifier      = Modifier.fillMaxWidth(),
+            colors        = inputColors()
         )
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
-            value = email,
+            value         = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label         = { Text("Email") },
+            singleLine    = true,
+            modifier      = Modifier.fillMaxWidth(),
+            colors        = inputColors()
         )
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
+            value                = password,
+            onValueChange        = { password = it },
+            label                = { Text("Пароль") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        imageVector        = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
                     )
                 }
             },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier   = Modifier.fillMaxWidth(),
+            colors     = inputColors()
         )
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Подтвердите пароль") },
+            value                = confirmPassword,
+            onValueChange        = { confirmPassword = it },
+            label                = { Text("Подтвердите пароль") },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(
-                        imageVector = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        imageVector        = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (confirmPasswordVisible) "Скрыть пароль" else "Показать пароль"
                     )
                 }
             },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier   = Modifier.fillMaxWidth(),
+            colors     = inputColors()
         )
         val errorText = localError ?: uiState.error
         if (errorText != null) {

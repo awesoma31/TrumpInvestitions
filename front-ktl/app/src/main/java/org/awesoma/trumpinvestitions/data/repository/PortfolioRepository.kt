@@ -27,15 +27,17 @@ class PortfolioRepository(private val apiService: ApiService) {
                 val portfolio = apiService.getPortfolio()
                 val orders = apiService.getOrders().items
 
-                val positions = portfolio.positions.map { p ->
-                    Position(
-                        symbol = p.symbol,
-                        name = p.symbol,
-                        quantity = p.quantity,
-                        avgBuyPrice = p.avgPrice.toDoubleOrNull() ?: 0.0,
-                        currentPrice = p.currentPrice.toDoubleOrNull() ?: 0.0
-                    )
-                }
+                val positions = portfolio.positions
+                    .filter { p -> p.quantity > 0 }
+                    .map { p ->
+                        Position(
+                            symbol = p.symbol,
+                            name = p.symbol,
+                            quantity = p.quantity,
+                            avgBuyPrice = p.avgPrice.toDoubleOrNull() ?: 0.0,
+                            currentPrice = p.currentPrice.toDoubleOrNull() ?: 0.0
+                        )
+                    }
 
                 val domainOrders = orders.map { o ->
                     Order(
