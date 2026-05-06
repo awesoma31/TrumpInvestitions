@@ -5,6 +5,7 @@ KAFKA_WAIT    ?= 3
 
 .PHONY: setup up down wait status telemetry \
         db-init clickhouse-init load-data reset-data \
+        up-userspace down-userspace \
         test-unit test-portfolio test-integration test-gateway test-all
 
 # --- Status ------------------------------------------------------------------
@@ -54,6 +55,14 @@ setup: up db-init clickhouse-init load-data
 ## Start infrastructure (with image rebuild)
 up:
 	docker compose up -d --build
+
+## Start with Python pricing engine (Windows / no kernel module)
+up-userspace:
+	docker compose --profile userspace up -d --build
+
+## Stop userspace profile
+down-userspace:
+	docker compose --profile userspace down
 
 ## Stop infrastructure (volumes are preserved)
 down:

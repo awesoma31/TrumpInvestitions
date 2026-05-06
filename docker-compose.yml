@@ -179,6 +179,25 @@ services:
     volumes:
       - ./swagger:/swagger:ro
 
+  pricing-engine:
+    image: python:3.12-slim
+    container_name: pricing-engine
+    profiles:
+      - userspace
+    depends_on:
+      - clickhouse
+    environment:
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: market_data
+      CLICKHOUSE_PASSWORD: market_data_password
+      TABLE: quotes
+      BATCH_SIZE: "100"
+      SLEEP_SECONDS: "0.1"
+    volumes:
+      - ./pricing_engine/userspace_generator.py:/app/generator.py:ro
+    command: python3 /app/generator.py
+    restart: unless-stopped
+
 volumes:
   pgdata:
   clickhouse_data:
