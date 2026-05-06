@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Test Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f1117; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+  h1 { font-size: 1.4rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 0.8rem; color: #666; margin-bottom: 20px; }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: #1a1d27; border: 1px solid #2a2d3a;
+    border-radius: 8px; padding: 12px 18px; margin-bottom: 20px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #555; flex-shrink: 0; }
+  .dot.running { background: #22c55e; box-shadow: 0 0 8px #22c55e88; animation: pulse 1.5s infinite; }
+  .dot.stopped { background: #6b7280; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .status-text { font-size: 0.9rem; color: #aaa; }
+  .status-text strong { color: #fff; }
+  .status-right { margin-left: auto; font-size: 0.75rem; color: #555; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 14px 16px; }
+  .card-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .card-value { font-size: 1.6rem; font-weight: 700; color: #fff; }
+  .card-value.green { color: #22c55e; }
+  .card-value.red { color: #ef4444; }
+  .card-value.yellow { color: #f59e0b; }
+  .card-sub { font-size: 0.72rem; color: #555; margin-top: 3px; }
+
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .chart-box { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; }
+  .chart-title { font-size: 0.8rem; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  canvas { max-height: 180px; }
+
+  .endpoints { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; }
+  .endpoints-title { font-size: 0.8rem; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { color: #555; font-weight: 500; text-align: left; padding: 6px 10px; border-bottom: 1px solid #2a2d3a; }
+  td { padding: 6px 10px; border-bottom: 1px solid #1e2130; color: #ccc; }
+  tr:last-child td { border-bottom: none; }
+  .bar-bg { background: #252836; border-radius: 3px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .bar-ok { background: #22c55e; }
+  .bar-err { background: #ef4444; }
+  .err-rate { font-size: 0.75rem; }
+  .err-rate.high { color: #ef4444; }
+  .err-rate.mid  { color: #f59e0b; }
+  .err-rate.low  { color: #22c55e; }
+
+  .offline { text-align: center; padding: 60px; color: #555; }
+  .offline .big { font-size: 2rem; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Load Test Dashboard</h1>
+<p class="subtitle">Auto-refreshes every 2s · <span id="load-url">http://localhost:8095</span></p>
+
+<div class="status-bar">
+  <div class="dot" id="dot"></div>
+  <div class="status-text" id="status-text">Connecting…</div>
+  <div class="status-right" id="last-update"></div>
+</div>
+
+<div class="cards" id="cards">
+  <div class="card"><div class="card-label">Active Users</div><div class="card-value" id="c-users">—</div><div class="card-sub" id="c-users-sub"></div></div>
+  <div class="card"><div class="card-label">Total Requests</div><div class="card-value" id="c-total">—</div></div>
+  <div class="card"><div class="card-label">Success Rate</div><div class="card-value" id="c-ok">—</div><div class="card-sub" id="c-ok-sub"></div></div>
+  <div class="card"><div class="card-label">Error Rate</div><div class="card-value" id="c-err">—</div><div class="card-sub" id="c-err-sub"></div></div>
+  <div class="card"><div class="card-label">RPS</div><div class="card-value" id="c-rps">—</div></div>
+  <div class="card"><div class="card-label">p95 Latency</div><div class="card-value" id="c-p95">—</div></div>
+  <div class="card"><div class="card-label">p99 Latency</div><div class="card-value" id="c-p99">—</div></div>
+  <div class="card"><div class="card-label">Orders Sent</div><div class="card-value" id="c-orders">—</div></div>
+</div>
+
+<div class="charts">
+  <div class="chart-box"><div class="chart-title">Requests/sec over time</div><canvas id="chart-rps"></canvas></div>
+  <div class="chart-box"><div class="chart-title">Error rate % over time</div><canvas id="chart-err"></canvas></div>
+  <div class="chart-box"><div class="chart-title">Active users over time</div><canvas id="chart-users"></canvas></div>
+  <div class="chart-box"><div class="chart-title">Latency over time (ms)</div><canvas id="chart-lat"></canvas></div>
+</div>
+
+<div class="endpoints">
+  <div class="endpoints-title">Endpoint breakdown</div>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Total</th><th>Failed</th><th>Err%</th><th style="width:120px">Distribution</th></tr></thead>
+    <tbody id="ep-body"><tr><td colspan="5" style="color:#555;text-align:center">No data yet</td></tr></tbody>
+  </table>
+</div>
+
+<script>
+const BASE = 'http://localhost:8095';
+const MAX_POINTS = 60;
+
+const chartOpts = (label, color, fill = false) => ({
+  type: 'line',
+  data: { labels: [], datasets: [{ label, data: [], borderColor: color, backgroundColor: fill ? color + '22' : 'transparent',
+    borderWidth: 2, pointRadius: 0, tension: 0.3, fill }] },
+  options: {
+    animation: false, responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#555', maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#1e2130' } },
+      y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1e2130' } }
+    }
+  }
+});
+
+const latOpts = () => ({
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      { label: 'p50', data: [], borderColor: '#22c55e', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false },
+      { label: 'p95', data: [], borderColor: '#f59e0b', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false },
+      { label: 'p99', data: [], borderColor: '#ef4444', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false },
+    ]
+  },
+  options: {
+    animation: false, responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: true, labels: { color: '#888', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
+    scales: {
+      x: { ticks: { color: '#555', maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#1e2130' } },
+      y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1e2130' } }
+    }
+  }
+});
+
+const cRps   = new Chart(document.getElementById('chart-rps'),   chartOpts('RPS', '#6366f1', true));
+const cErr   = new Chart(document.getElementById('chart-err'),   chartOpts('Err%', '#ef4444', true));
+const cUsers = new Chart(document.getElementById('chart-users'), chartOpts('Users', '#22c55e', true));
+const cLat   = new Chart(document.getElementById('chart-lat'),   latOpts());
+
+let prevTotal = 0, prevTime = Date.now();
+
+function push(chart, label, ...values) {
+  chart.data.labels.push(label);
+  if (values.length === 1) {
+    chart.data.datasets[0].data.push(values[0]);
+  } else {
+    values.forEach((v, i) => chart.data.datasets[i].data.push(v));
+  }
+  if (chart.data.labels.length > MAX_POINTS) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach(d => d.data.shift());
+  }
+  chart.update('none');
+}
+
+function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n); }
+function pct(a, b) { return b > 0 ? (a/b*100).toFixed(1)+'%' : '—'; }
+function errClass(rate) { return rate > 10 ? 'high' : rate > 2 ? 'mid' : 'low'; }
+
+async function refresh() {
+  const now = Date.now();
+  const label = new Date().toLocaleTimeString();
+  try {
+    const res = await fetch(`${BASE}/api/v1/load/status`);
+    if (!res.ok) throw new Error(res.status);
+    const d = await res.json();
+
+    const dot = document.getElementById('dot');
+    dot.className = 'dot ' + (d.running ? 'running' : 'stopped');
+
+    const statusText = document.getElementById('status-text');
+    statusText.innerHTML = d.running
+      ? `<strong>RUNNING</strong> · started ${d.startedAt ? new Date(d.startedAt).toLocaleTimeString() : '—'}`
+      : `<strong>STOPPED</strong>${d.finishedAt ? ' · finished ' + new Date(d.finishedAt).toLocaleTimeString() : ''}`;
+
+    document.getElementById('last-update').textContent = 'updated ' + new Date().toLocaleTimeString();
+
+    const total = d.totalRequests, ok = d.successfulRequests, fail = d.failedRequests;
+    const errRate = total > 0 ? fail/total*100 : 0;
+
+    document.getElementById('c-users').textContent = fmt(d.activeUsers);
+    document.getElementById('c-users-sub').textContent = `/ ${fmt(d.configuredUsers)} configured`;
+    document.getElementById('c-total').textContent = fmt(total);
+    document.getElementById('c-ok').textContent = pct(ok, total);
+    document.getElementById('c-ok').className = 'card-value green';
+    document.getElementById('c-ok-sub').textContent = fmt(ok) + ' requests';
+    document.getElementById('c-err').textContent = pct(fail, total);
+    document.getElementById('c-err').className = 'card-value ' + (errRate > 10 ? 'red' : errRate > 2 ? 'yellow' : 'green');
+    document.getElementById('c-err-sub').textContent = fmt(fail) + ' failed';
+    document.getElementById('c-orders').textContent = fmt(d.ordersSubmitted);
+
+    const dt = (now - prevTime) / 1000;
+    const rps = dt > 0 ? ((total - prevTotal) / dt).toFixed(1) : '—';
+    prevTotal = total; prevTime = now;
+    document.getElementById('c-rps').textContent = rps;
+
+    const s = d.summary;
+    if (s) {
+      document.getElementById('c-p95').textContent = s.latency.p95Ms + ' ms';
+      document.getElementById('c-p99').textContent = s.latency.p99Ms + ' ms';
+
+      push(cLat, label, s.latency.p50Ms, s.latency.p95Ms, s.latency.p99Ms);
+
+      const epBody = document.getElementById('ep-body');
+      const maxTotal = Math.max(...s.endpoints.map(e => e.total), 1);
+      epBody.innerHTML = s.endpoints.slice(0, 12).map(e => {
+        const er = e.total > 0 ? (e.failed/e.total*100) : 0;
+        const okW = Math.round((e.successful/maxTotal)*100);
+        const errW = Math.round((e.failed/maxTotal)*100);
+        return `<tr>
+          <td>${e.name}</td>
+          <td>${fmt(e.total)}</td>
+          <td>${fmt(e.failed)}</td>
+          <td class="err-rate ${errClass(er)}">${er.toFixed(1)}%</td>
+          <td>
+            <div class="bar-bg">
+              <div class="bar-fill bar-ok" style="width:${okW}%;display:inline-block"></div>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    push(cRps,   label, parseFloat(rps) || 0);
+    push(cErr,   label, parseFloat(errRate.toFixed(2)));
+    push(cUsers, label, d.activeUsers);
+
+  } catch (e) {
+    document.getElementById('dot').className = 'dot stopped';
+    document.getElementById('status-text').innerHTML = '<strong style="color:#ef4444">OFFLINE</strong> · load-service not reachable';
+    push(cRps,   label, 0);
+    push(cErr,   label, 0);
+    push(cUsers, label, 0);
+  }
+}
+
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

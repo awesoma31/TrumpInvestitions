@@ -15,7 +15,7 @@ import org.awesoma.trumpinvestitions.data.network.dto.OrderBookResponseDto
 
 class MarketRepository(private val apiService: ApiService) {
 
-    private val SYMBOLS = "AAPL,GOOGL,MSFT,AMZN,TSLA,NVDA,META,JPM"
+    private val SYMBOLS = "BTCUSDT,AAPL,ETHUSDT,MSFT,TSLA"
 
     fun getStocksFlow(): Flow<List<Stock>> = flow {
         val instruments = try {

@@ -9,16 +9,12 @@ MODULE_AUTHOR("pricing_engine");
 MODULE_DESCRIPTION("Character driver that generates quote events on read");
 MODULE_VERSION("1.0");
 
-unsigned long start_price_cents = 6500000;
 unsigned long spread_cents = 50;
 unsigned long max_move_cents = 25;
 unsigned long default_size_units = 100;
 unsigned long max_last_move_cents = 10;
 unsigned long history_hours = 24;
 unsigned long history_qph = 20;
-
-module_param(start_price_cents, ulong, 0444);
-MODULE_PARM_DESC(start_price_cents, "Initial mid price in cents");
 
 module_param(spread_cents, ulong, 0444);
 MODULE_PARM_DESC(spread_cents, "Bid/ask spread in cents");

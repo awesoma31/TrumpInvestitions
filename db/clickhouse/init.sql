@@ -26,4 +26,8 @@ CREATE TABLE IF NOT EXISTS quotes
     last_trade_side LowCardinality(String)
 )
 ENGINE = MergeTree
-ORDER BY (symbol, event_time_ns, sequence);
+ORDER BY (symbol, event_time_ns, sequence)
+TTL toDateTime(intDiv(event_time_ns, 1000000000)) + INTERVAL 24 HOUR;
+
+-- Apply TTL to existing table (idempotent)
+ALTER TABLE quotes MODIFY TTL toDateTime(intDiv(event_time_ns, 1000000000)) + INTERVAL 24 HOUR;

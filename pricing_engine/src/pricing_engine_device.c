@@ -23,13 +23,13 @@ static ssize_t pe_read(struct file *file, char __user *user_buffer,
   while (used < requested_size) {
     size_t written;
 
+    if (requested_size - used < PE_MAX_LINE_SIZE)
+      break;
+
     written =
         pe_generator_write_quote(kernel_buffer + used, requested_size - used);
 
     if (written == 0)
-      break;
-
-    if (used + written >= requested_size)
       break;
 
     used += written;

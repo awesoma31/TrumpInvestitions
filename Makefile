@@ -106,6 +106,50 @@ reset-data:
 	bash scripts/reset-clickhouse.sh
 	$(MAKE) load-data
 
+## Build and load kernel module, then stream live quotes for all symbols into ClickHouse (blocking)
+live-data:
+	make -C pricing_engine
+	cd pricing_engine && sudo -E bash scripts/install.sh
+	CLICKHOUSE_USER=market_data CLICKHOUSE_PASSWORD=market_data_password \
+		bash pricing_engine/scripts/ingest_to_clickhouse.sh
+
+# --- Load testing -------------------------------------------------------------
+
+## Run Kotlin load-service with configurable load: make load-test LOAD_USERS=1000
+load-test:
+	LOAD_USERS=$(or $(LOAD_USERS),1000) \
+	LOAD_DURATION_SECONDS=$(or $(LOAD_DURATION_SECONDS),120) \
+	LOAD_RAMP_UP_SECONDS=$(or $(LOAD_RAMP_UP_SECONDS),30) \
+	LOAD_WITHDRAW_REQUEST_PERCENT=$(or $(LOAD_WITHDRAW_REQUEST_PERCENT),5) \
+	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
+	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
+	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	docker compose --profile load up --build load-service load-dashboard
+
+## Run Kotlin load-service with 10000 virtual clients
+load-test-10000:
+	LOAD_USERS=10000 \
+	LOAD_DURATION_SECONDS=$(or $(LOAD_DURATION_SECONDS),300) \
+	LOAD_RAMP_UP_SECONDS=$(or $(LOAD_RAMP_UP_SECONDS),120) \
+	LOAD_WITHDRAW_REQUEST_PERCENT=$(or $(LOAD_WITHDRAW_REQUEST_PERCENT),5) \
+	LOAD_SYSTEM_REQUEST_PERCENT=$(or $(LOAD_SYSTEM_REQUEST_PERCENT),10) \
+	LOAD_HISTORY_WINDOW_SECONDS=$(or $(LOAD_HISTORY_WINDOW_SECONDS),86400) \
+	LOAD_HISTORY_LIMIT=$(or $(LOAD_HISTORY_LIMIT),100) \
+	LOAD_THINK_TIME_MS=$(or $(LOAD_THINK_TIME_MS),250) \
+	docker compose --profile load up --build load-service load-dashboard
+
+## Open load test dashboard in browser
+load-dashboard:
+	@echo "Dashboard: http://localhost:8096"
+	@bash -c 'if command -v xdg-open >/dev/null 2>&1; then xdg-open http://localhost:8096; \
+		elif command -v open >/dev/null 2>&1; then open http://localhost:8096; \
+		else echo "Open manually: http://localhost:8096"; fi'
+
+## Show current load-service status
+load-status:
+	@bash scripts/load-status.sh
+
 # --- Tests -------------------------------------------------------------------
 
 ## Go unit tests (no running infrastructure required)
