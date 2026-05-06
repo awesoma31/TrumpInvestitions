@@ -7,8 +7,15 @@
 
 static DEFINE_MUTEX(generator_lock);
 
-static u64 sequence;
-static s64 mid_price_cents;
+struct pe_symbol_state pe_symbols[PE_NUM_SYMBOLS] = {
+	{"BTCUSDT", 0, 0, 6500000},
+	{"AAPL",    0, 0,   17500},
+	{"ETHUSDT", 0, 0,  350000},
+	{"MSFT",    0, 0,   40000},
+	{"TSLA",    0, 0,   17000},
+};
+
+int pe_current_symbol_idx = 0;
 
 static s64 random_signed_delta(unsigned long max_abs_value) {
   u32 rnd;
@@ -58,19 +65,26 @@ static void format_size(char *buffer, size_t size, unsigned long units) {
 }
 
 void pe_generator_init(void) {
+  int i;
+
   mutex_lock(&generator_lock);
 
-  sequence = 0;
-  mid_price_cents = (s64)start_price_cents;
+  for (i = 0; i < PE_NUM_SYMBOLS; i++) {
+    pe_symbols[i].mid_price_cents = (s64)pe_symbols[i].initial_price_cents;
+    pe_symbols[i].sequence = 0;
+  }
+  pe_current_symbol_idx = 0;
 
   mutex_unlock(&generator_lock);
 }
 
 size_t pe_generator_write_quote(char *buffer, size_t buffer_size) {
+  const char *symbol;
   u64 event_sequence;
   u64 event_time_ns;
   u64 engine_time_ns;
 
+  s64 mid_cents;
   s64 bid_cents;
   s64 ask_cents;
   s64 last_cents;
@@ -96,45 +110,49 @@ size_t pe_generator_write_quote(char *buffer, size_t buffer_size) {
 
   mutex_lock(&generator_lock);
 
-  mid_price_cents += random_signed_delta(max_move_cents);
+  {
+    struct pe_symbol_state *sym = &pe_symbols[pe_current_symbol_idx];
+    pe_current_symbol_idx = (pe_current_symbol_idx + 1) % PE_NUM_SYMBOLS;
 
-  if (mid_price_cents < 1)
-    mid_price_cents = 1;
+    sym->mid_price_cents += random_signed_delta(max_move_cents);
+    if (sym->mid_price_cents < 1)
+      sym->mid_price_cents = 1;
 
-  half_spread = (s64)spread_cents / 2;
-  bid_cents = mid_price_cents - half_spread;
-  ask_cents = mid_price_cents + ((s64)spread_cents - half_spread);
+    half_spread = (s64)spread_cents / 2;
+    bid_cents   = sym->mid_price_cents - half_spread;
+    ask_cents   = sym->mid_price_cents + ((s64)spread_cents - half_spread);
 
-  last_cents = mid_price_cents + random_signed_delta(max_last_move_cents);
+    last_cents = sym->mid_price_cents + random_signed_delta(max_last_move_cents);
+    if (last_cents < bid_cents)
+      last_cents = bid_cents;
+    if (last_cents > ask_cents)
+      last_cents = ask_cents;
 
-  if (last_cents < bid_cents)
-    last_cents = bid_cents;
+    bid_size_units  = random_size_units();
+    ask_size_units  = random_size_units();
+    last_size_units = random_size_units();
 
-  if (last_cents > ask_cents)
-    last_cents = ask_cents;
+    last_trade_side = random_trade_side();
 
-  bid_size_units = random_size_units();
-  ask_size_units = random_size_units();
-  last_size_units = random_size_units();
+    sym->sequence++;
+    event_sequence = sym->sequence;
+    mid_cents      = sym->mid_price_cents;
+    symbol         = sym->symbol;
+  }
 
-  last_trade_side = random_trade_side();
-
-  sequence++;
-  event_sequence = sequence;
-
-  event_time_ns = ktime_get_real_ns();
+  event_time_ns  = ktime_get_real_ns();
   engine_time_ns = ktime_get_real_ns();
 
   mutex_unlock(&generator_lock);
 
-  format_money(bid_price, sizeof(bid_price), bid_cents);
-  format_money(ask_price, sizeof(ask_price), ask_cents);
-  format_money(mid_price, sizeof(mid_price), mid_price_cents);
-  format_money(spread, sizeof(spread), (s64)spread_cents);
+  format_money(bid_price,  sizeof(bid_price),  bid_cents);
+  format_money(ask_price,  sizeof(ask_price),  ask_cents);
+  format_money(mid_price,  sizeof(mid_price),  mid_cents);
+  format_money(spread,     sizeof(spread),     (s64)spread_cents);
   format_money(last_price, sizeof(last_price), last_cents);
 
-  format_size(bid_size, sizeof(bid_size), bid_size_units);
-  format_size(ask_size, sizeof(ask_size), ask_size_units);
+  format_size(bid_size,  sizeof(bid_size),  bid_size_units);
+  format_size(ask_size,  sizeof(ask_size),  ask_size_units);
   format_size(last_size, sizeof(last_size), last_size_units);
 
   written =
@@ -158,7 +176,7 @@ size_t pe_generator_write_quote(char *buffer, size_t buffer_size) {
                 "\"last_size\":%s,"
                 "\"last_trade_side\":\"%s\"}\n",
                 event_sequence, event_time_ns, engine_time_ns, PE_SCENARIO_ID,
-                PE_VENUE, PE_SYMBOL, bid_price, bid_size, ask_price, ask_size,
+                PE_VENUE, symbol, bid_price, bid_size, ask_price, ask_size,
                 mid_price, spread, last_price, last_size, last_trade_side);
 
   return written;

@@ -7,11 +7,19 @@
 #define PE_DEVICE_NAME "pricing_engine"
 #define PE_BUFFER_LIMIT 4096
 
-#define PE_SYMBOL "BTCUSDT"
-#define PE_VENUE "KERNEL_SIM"
+#define PE_NUM_SYMBOLS 5
+#define PE_VENUE       "KERNEL_SIM"
 #define PE_SCENARIO_ID "kernel_random_walk"
 
-extern unsigned long start_price_cents;
+struct pe_symbol_state {
+	const char   *symbol;
+	s64           mid_price_cents;
+	u64           sequence;
+	unsigned long initial_price_cents;
+};
+
+extern struct pe_symbol_state pe_symbols[PE_NUM_SYMBOLS];
+extern int pe_current_symbol_idx;
 extern unsigned long spread_cents;
 extern unsigned long max_move_cents;
 extern unsigned long default_size_units;

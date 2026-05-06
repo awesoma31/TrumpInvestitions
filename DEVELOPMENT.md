@@ -19,10 +19,21 @@
 |---|---|---|
 | Docker + Compose | любая актуальная | запуск всей системы |
 | GCC | любая | сборка `pricing_engine` |
+| Linux kernel headers | текущего ядра | сборка kernel module (`make live-data`) |
 | Python 3 + `requests` | 3.8+ | интеграционные тесты |
 | Go | 1.22+ | локальная разработка Go-сервисов |
 | JDK | 21 | локальная разработка auth-gateway |
 | Gradle | 8.10+ | локальная сборка auth-gateway |
+
+Установить kernel headers (если нет):
+
+```bash
+# Arch Linux
+sudo pacman -S linux-headers
+
+# Ubuntu/Debian
+sudo apt install linux-headers-$(uname -r)
+```
 
 ```bash
 pip install requests   # один раз, для тестов
@@ -52,11 +63,18 @@ make setup
 ```
 
 Выполняет по порядку:
+
 1. `docker compose up -d --build` — сборка и запуск всех контейнеров
 2. `scripts/init-postgres.sh` — создание пользователей и БД (`trading`, `auth_gateway`) в postgres
 3. `docker compose restart auth-gateway` — перезапуск после готовности postgres
 4. `db/clickhouse/init_clickhouse.sh` — создание таблицы `quotes` в ClickHouse
-5. `make -C pricing_engine` + загрузка 5 сценариев котировок (5×1000 строк)
+5. `make -C pricing_engine` + загрузка 5 сценариев котировок (5×1000 строк, статика)
+
+После `make setup` котировки статичны. Для живого потока запустить в отдельном терминале:
+
+```bash
+make live-data
+```
 
 ### Повторный запуск (тома сохранены)
 
@@ -398,9 +416,11 @@ python tests/test_gateway.py \
 
 ### pricing_engine
 
-C (C11). CLI-инструмент: генерирует котировки по YAML-сценарию и пишет JSON в stdout.
+Linux kernel module (character device driver). Генерирует синтетические котировки для 5 символов (BTCUSDT, AAPL, ETHUSDT, MSFT, TSLA) прямо в kernel space и экспортирует их через `/dev/pricing_engine`.
 
-#### Сборка
+Есть два режима работы: **статическая загрузка** (разовый seed из YAML) и **живой поток** (kernel module, непрерывно).
+
+#### Сборка kernel module
 
 ```bash
 make -C pricing_engine
@@ -408,27 +428,32 @@ make -C pricing_engine
 cd pricing_engine && make
 ```
 
-Бинарь: `pricing_engine/pricing_engine`
+Артефакты: `pricing_engine.ko` (модуль), `test_reader` (валидатор).
 
-#### Запуск и загрузка в ClickHouse
+#### Режим 1 — статические данные (YAML-сценарии)
+
+Разовая загрузка 5×1000 котировок из предопределённых сценариев:
 
 ```bash
 # ClickHouse должен быть запущен и инициализирован
 docker compose up -d clickhouse
 make clickhouse-init
 
-# Загрузить один сценарий
-./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/btcusdt_1000.yaml \
-  | ./pricing_engine/push_input_to_db.sh
-
-# Загрузить все сценарии
+# Загрузить все 5 сценариев
 make load-data
 
 # Сбросить и перезагрузить
 make reset-data
 ```
 
-#### Доступные сценарии
+Загрузить один сценарий вручную:
+
+```bash
+./pricing_engine/pricing_engine --scenario pricing_engine/examples/generated/btcusdt_1000.yaml \
+  | ./pricing_engine/push_input_to_db.sh
+```
+
+Доступные сценарии:
 
 | Файл | Символ | Шагов |
 |---|---|---|
@@ -437,9 +462,50 @@ make reset-data
 | `generated/aapl_1000.yaml` | AAPL | 1000 |
 | `generated/msft_1000.yaml` | MSFT | 1000 |
 | `generated/tsla_1000.yaml` | TSLA | 1000 |
-| `basic_btc.yaml` | BTCUSDT | 5 (минимальный) |
 
-Несколько сценариев можно загружать последовательно — они добавляются в таблицу, не перезаписывают друг друга.
+#### Режим 2 — живой поток (kernel module)
+
+Непрерывная генерация котировок для всех 5 символов через `/dev/pricing_engine`:
+
+```bash
+# Требуется отдельный терминал — процесс блокирующий
+make live-data
+```
+
+Выполняет по порядку:
+
+1. Собирает `.ko`
+2. `sudo insmod pricing_engine.ko` — загружает модуль, создаёт `/dev/pricing_engine`
+3. Читает батчи из `/dev/pricing_engine` и вставляет в ClickHouse в бесконечном цикле
+
+Остановить: `Ctrl+C`. Выгрузить модуль:
+
+```bash
+sudo rmmod pricing_engine
+```
+
+Параметры модуля (опционально при `insmod`):
+
+| Параметр | Дефолт | Описание |
+|---|---|---|
+| `spread_cents` | 50 | Спред bid/ask в центах |
+| `max_move_cents` | 25 | Макс. случайное движение цены за тик |
+| `default_size_units` | 100 | Базовый размер котировки |
+| `max_last_move_cents` | 10 | Макс. отклонение last от mid |
+
+```bash
+sudo insmod pricing_engine.ko spread_cents=100 max_move_cents=50
+```
+
+#### Проверка модуля
+
+```bash
+# Прочитать несколько котировок вручную
+head -n 5 /dev/pricing_engine
+
+# Запустить встроенный валидатор
+./pricing_engine/test_reader
+```
 
 #### Очистка
 

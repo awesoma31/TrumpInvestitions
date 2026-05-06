@@ -1,79 +1,112 @@
+---
+tags: [service, c, kernel-module, data-generator]
+---
+
 # pricing_engine
 
-#service #c #data-generator
-
 | Параметр | Значение |
-|---|---|
+| --- | --- |
 | Язык | C |
-| Тип | Генератор данных (не HTTP-сервис) |
+| Тип | Linux kernel module (character device driver) |
+| Устройство | `/dev/pricing_engine` |
 | Вывод | JSON → [[ClickHouse]] |
 
 ## Роль в системе
 
-Генерирует синтетические рыночные данные и загружает их в ClickHouse. Используется для:
-- Наполнения стенда демо-данными
-- Интеграционных тестов (воспроизводимые сценарии)
+Генерирует синтетические рыночные котировки для 5 символов и загружает их в ClickHouse. Используется для:
 
-Не принимает HTTP-запросы. Запускается как разовый процесс или по расписанию.
+- Наполнения стенда демо-данными (статический режим)
+- Непрерывного live-потока котировок в реальном времени (kernel module)
+
+Не принимает HTTP-запросы. Не является Docker-контейнером.
+
+## Два режима работы
+
+### Режим 1 — статические данные (YAML-сценарии)
+
+Разовая загрузка предопределённых котировок из YAML-файлов. Запускается при `make setup`.
+
+```bash
+make load-data   # загрузить все 5 сценариев (5×1000 строк)
+make reset-data  # сбросить и перезагрузить
+```
+
+### Режим 2 — живой поток (kernel module)
+
+Непрерывная генерация котировок через `/dev/pricing_engine`. Каждый `read()` возвращает новые котировки для следующего символа по round-robin.
+
+```bash
+# Собрать .ko, загрузить модуль, запустить батч-цикл (блокирующий)
+make live-data
+
+# Остановить поток: Ctrl+C
+# Выгрузить модуль:
+sudo rmmod pricing_engine
+```
 
 ## Поддерживаемые инструменты
 
-Предзагружено 5 сценариев:
+Все 5 символов генерируются одним экземпляром модуля по round-robin:
 
-| Символ | Описание |
-|---|---|
-| `AAPL` | Apple Inc. |
-| `MSFT` | Microsoft Corp. |
-| `TSLA` | Tesla Inc. |
-| `BTC/USDT` | Bitcoin |
-| `ETH/USDT` | Ethereum |
+| Символ | Начальная цена |
+| --- | --- |
+| `BTCUSDT` | $65 000 |
+| `AAPL` | $175 |
+| `ETHUSDT` | $3 500 |
+| `MSFT` | $400 |
+| `TSLA` | $170 |
 
 ## Что генерируется
 
-Для каждого инструмента генерируются свечи OHLCV + котировки (bid/ask/last) и записываются в таблицу `quotes` ClickHouse.
+Для каждого символа генерируются котировки (bid/ask/last) по модели случайного блуждания. Цена каждого символа эволюционирует независимо.
 
 Структура генерируемой записи:
 
 ```json
 {
-  "symbol":         "AAPL",
+  "schema_version": 1,
+  "sequence":       42,
+  "event_type":     "quote",
+  "quote_type":     "update",
   "event_time_ns":  1700000000000000000,
-  "sequence":       1,
-  "bid_price":      "150.25",
-  "bid_size":       "100",
-  "ask_price":      "150.30",
-  "ask_size":       "150",
-  "last_price":     "150.27",
-  "last_size":      "50",
-  "mid_price":      "150.275",
-  "spread":         "0.05",
-  "scenario_id":    "scenario_aapl_1",
-  "venue":          "NASDAQ",
-  "event_type":     "QUOTE",
-  "quote_type":     "NBBO"
+  "engine_time_ns": 1700000000000000000,
+  "scenario_id":    "kernel_random_walk",
+  "venue":          "KERNEL_SIM",
+  "symbol":         "BTCUSDT",
+  "bid_price":      64999.75,
+  "bid_size":       100.00,
+  "ask_price":      65000.25,
+  "ask_size":       100.00,
+  "mid_price":      65000.00,
+  "spread":         0.50,
+  "last_price":     65000.10,
+  "last_size":      50.00,
+  "last_trade_side": "buy"
 }
+```
+
+## Параметры модуля
+
+При загрузке через `insmod` можно переопределить:
+
+| Параметр | Дефолт | Описание |
+| --- | --- | --- |
+| `spread_cents` | 50 | Спред bid/ask в центах ($0.50) |
+| `max_move_cents` | 25 | Макс. случайное движение цены за тик |
+| `default_size_units` | 100 | Базовый размер котировки |
+| `max_last_move_cents` | 10 | Макс. отклонение last от mid |
+
+```bash
+sudo insmod pricing_engine.ko spread_cents=100 max_move_cents=50
 ```
 
 ## Связь с другими компонентами
 
 ```mermaid
 graph LR
-    PE["pricing_engine (C)"] -->|"INSERT candles/quotes"| CH[("ClickHouse\nquotes")]
+    PE["pricing_engine\n(kernel module)"] -->|"/dev/pricing_engine\n→ ingest_to_clickhouse.sh"| CH[("ClickHouse\nquotes")]
     CH --> MDS["market-data-service"]
 ```
-
-## Запуск
-
-```bash
-# Сборка
-cd pricing_engine && make build
-
-# Запуск через Docker Compose (автоматически при make setup)
-docker compose up pricing_engine
-```
-
-> [!info] Только для тестов
-> В продуктовой среде pricing_engine заменяется на реальный маркет-дата фид. Сервис предназначен исключительно для разработки и тестирования.
 
 ## Связанные страницы
 

@@ -4,7 +4,7 @@ GATEWAY_URL   ?= http://localhost:8080/api/v1
 KAFKA_WAIT    ?= 3
 
 .PHONY: setup up down wait status telemetry \
-        db-init clickhouse-init load-data reset-data \
+        db-init clickhouse-init load-data reset-data live-data \
         load-test load-test-10000 load-status \
         test-unit test-portfolio test-integration test-gateway test-all
 
@@ -97,6 +97,13 @@ load-data:
 reset-data:
 	bash scripts/reset-clickhouse.sh
 	$(MAKE) load-data
+
+## Build and load kernel module, then stream live quotes for all symbols into ClickHouse (blocking)
+live-data:
+	make -C pricing_engine
+	cd pricing_engine && sudo bash scripts/install.sh
+	CLICKHOUSE_USER=market_data CLICKHOUSE_PASSWORD=market_data_password \
+		bash pricing_engine/scripts/ingest_to_clickhouse.sh
 
 # --- Load testing -------------------------------------------------------------
 

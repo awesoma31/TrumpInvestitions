@@ -198,15 +198,15 @@ make telemetry
 
 ---
 
-#### 3. Эмулятор биржи (драйвер на C)
+#### 3. Эмулятор биржи (kernel module на C)
 
-Компонент на **C** рассматривается как «биржа», которая **генерирует котировки**.
+**Linux kernel module** (character device driver) на **C**, который генерирует синтетические котировки в kernel space и экспортирует их через `/dev/pricing_engine`.
 
 Функции:
 
-- генерация потоков котировок;
-- публикация рыночных событий в брокер сообщений;
-- предсказуемый сценарий для тестов и воспроизводимости.
+- генерация потоков котировок для 5 символов (BTCUSDT, AAPL, ETHUSDT, MSFT, TSLA) по round-robin;
+- два режима: статическая разовая загрузка из YAML-сценариев и непрерывный живой поток (`make live-data`);
+- предсказуемый сценарий для тестов и воспроизводимости (YAML с фиксированным seed).
 
 ---
 
@@ -299,24 +299,22 @@ make telemetry
 #### Поток рыночных данных (Market Data Flow)
 
 ```text
-Exchange Emulator (C)
+pricing_engine (kernel module)
+        │
+        │ /dev/pricing_engine
+        ▼
+ingest_to_clickhouse.sh
         │
         ▼
-Market Data Service
+    ClickHouse
         │
-        ├── Redis (последняя цена)
-        |
-        ├── Kafka (Pub/Sub)
-        │
-        └── ClickHouse (история котировок)
+        ▼
+Market Data Service (read-only HTTP API)
 ```
 
-1. эмулятор генерирует котировки
-2. Market Data Service принимает данные
-3. данные:
-    - кэшируются в Redis
-    - публикуются в Kafka Pub/Sub (для realtime)
-    - записываются в ClickHouse (для истории)
+1. `pricing_engine.ko` генерирует котировки для 5 символов через `/dev/pricing_engine`
+2. `ingest_to_clickhouse.sh` читает батчами и вставляет в ClickHouse (`INSERT INTO quotes`)
+3. Market Data Service читает данные из ClickHouse по HTTP-запросам клиентов
 
 далее эти данные можно использовать следующим образом:
 

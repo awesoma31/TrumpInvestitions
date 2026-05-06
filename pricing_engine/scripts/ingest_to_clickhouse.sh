@@ -3,6 +3,8 @@ set -euo pipefail
 
 DEVICE="${DEVICE:-/dev/pricing_engine}"
 CLICKHOUSE_URL="${CLICKHOUSE_URL:-http://localhost:8123}"
+CLICKHOUSE_USER="${CLICKHOUSE_USER:-market_data}"
+CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD:-market_data_password}"
 TABLE="${TABLE:-quotes}"
 BATCH_SIZE="${BATCH_SIZE:-1000}"
 SLEEP_SECONDS="${SLEEP_SECONDS:-0.1}"
@@ -26,7 +28,7 @@ while true; do
 
   # отправляем в ClickHouse
   if ! curl -sS -f \
-    "${CLICKHOUSE_URL}/?query=INSERT%20INTO%20${TABLE}%20FORMAT%20JSONEachRow" \
+    "${CLICKHOUSE_URL}/?user=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&query=INSERT%20INTO%20${TABLE}%20FORMAT%20JSONEachRow" \
     --data-binary @"$TMP_FILE"; then
     echo "ClickHouse insert failed, retrying..."
     sleep 1
