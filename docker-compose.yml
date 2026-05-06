@@ -36,6 +36,7 @@ services:
       ORDER_SERVICE_URL: http://trading-service:8083/api/v1
       PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1
       OTEL_EXPORTER_ENDPOINT: jaeger:4317
+      DATABASE_POOL_SIZE: 50
     ports:
       - "8080:8080"
 
@@ -66,6 +67,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portfolio
+    command: postgres -c max_connections=200
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/postgres-init.sql:/docker-entrypoint-initdb.d/00_create_trading_db.sql
@@ -178,6 +180,52 @@ services:
         ]
     volumes:
       - ./swagger:/swagger:ro
+
+  load-service:
+    build:
+      context: ./load-service
+    container_name: load-service
+    profiles:
+      - load
+    depends_on:
+      auth-gateway:
+        condition: service_started
+      market-data-service:
+        condition: service_started
+      portfolio-service:
+        condition: service_started
+      trading-service:
+        condition: service_started
+    environment:
+      PORT: 8095
+      GATEWAY_URL: http://auth-gateway:8080/api/v1
+      VIRTUAL_USERS: ${LOAD_USERS:-1000}
+      MAX_VIRTUAL_USERS: 10000
+      DURATION_SECONDS: ${LOAD_DURATION_SECONDS:-300}
+      RAMP_UP_SECONDS: ${LOAD_RAMP_UP_SECONDS:-30}
+      REQUEST_TIMEOUT_MS: ${LOAD_REQUEST_TIMEOUT_MS:-30000}
+      ORDER_EVERY_N_ITERATIONS: ${LOAD_ORDER_EVERY_N_ITERATIONS:-6}
+      WITHDRAW_REQUEST_PERCENT: ${LOAD_WITHDRAW_REQUEST_PERCENT:-5}
+      SYSTEM_REQUEST_PERCENT: ${LOAD_SYSTEM_REQUEST_PERCENT:-10}
+      PROGRESS_LOG_INTERVAL_SECONDS: ${LOAD_PROGRESS_LOG_INTERVAL_SECONDS:-10}
+      HISTORY_WINDOW_SECONDS: ${LOAD_HISTORY_WINDOW_SECONDS:-86400}
+      HISTORY_LIMIT: ${LOAD_HISTORY_LIMIT:-100}
+      THINK_TIME_MS: ${LOAD_THINK_TIME_MS:-250}
+      RUN_ON_START: ${LOAD_RUN_ON_START:-true}
+      START_DELAY_SECONDS: ${LOAD_START_DELAY_SECONDS:-10}
+      SYMBOLS: AAPL,MSFT,TSLA,BTCUSDT,ETHUSDT
+    ports:
+      - "8095:8095"
+
+  load-dashboard:
+    image: nginx:alpine
+    container_name: load-dashboard
+    profiles:
+      - load
+    volumes:
+      - ./load-service/dashboard:/usr/share/nginx/html:ro
+    ports:
+      - "8096:80"
 
 volumes:
   pgdata:

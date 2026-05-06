@@ -118,6 +118,43 @@ make test-all
 
 ---
 
+## Нагрузочное тестирование
+
+Нагрузочный сервис запускается через отдельный Docker Compose profile и не стартует при обычном `make up`.
+
+```bash
+# Стандартный запуск: 1000 пользователей, 120 секунд
+make load-test
+
+# Кастомные параметры
+make load-test LOAD_USERS=500 LOAD_DURATION_SECONDS=60 LOAD_RAMP_UP_SECONDS=15
+
+# 10 000 виртуальных пользователей
+make load-test-10000
+
+# Статус теста (во время или после)
+make load-status
+# или напрямую:
+curl http://localhost:8095/api/v1/load/status
+```
+
+Сервис доступен на `http://localhost:8095`. Управление через REST API:
+
+```bash
+# Запустить тест вручную с кастомными параметрами
+curl -X POST http://localhost:8095/api/v1/load/run \
+  -H "Content-Type: application/json" \
+  -d '{"virtualUsers": 200, "durationSeconds": 60, "rampUpSeconds": 10}'
+```
+
+Перед запуском нагрузочного теста убедись что инфраструктура поднята и данные загружены:
+
+```bash
+make setup   # если ещё не запускали
+```
+
+---
+
 ## Отдельные сервисы
 
 ---
