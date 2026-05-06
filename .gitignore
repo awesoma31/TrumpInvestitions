@@ -56,3 +56,16 @@ mobile/android-native/build/reports/problems
 mobile/android-native/.gradle
 auth-gateway/.gradle
 auth-gateway/bin
+load-service/.gradle
+load-service/build/reports/problems
+pricing_engine/src/.pricing_engine_device.o.cmd
+pricing_engine/src/.pricing_engine_generator.o.cmd
+pricing_engine/src/.pricing_engine_main.o.cmd
+pricing_engine/..module-common.o.cmd
+pricing_engine/.Module.symvers.cmd
+pricing_engine/.module-common.o
+pricing_engine/.modules.order.cmd
+pricing_engine/.pricing_engine.ko.cmd
+pricing_engine/.pricing_engine.mod.cmd
+pricing_engine/.pricing_engine.mod.o.cmd
+pricing_engine/.pricing_engine.o.cmd
