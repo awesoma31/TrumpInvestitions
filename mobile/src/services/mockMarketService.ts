@@ -1,5 +1,22 @@
 import type { Stock, PriceHistory, OrderBook, Order, Trade, Portfolio } from '../types/market';
 
+// Функция загрузки данных из JSON файлов
+const loadCandleData = async (symbol: string): Promise<PriceHistory[]> => {
+  try {
+    const response = await fetch(`../assets/market_data/market_data_${symbol.toLowerCase()}_candles.json`);
+    const data = await response.json();
+    
+    return data.map((candle: any) => ({
+      timestamp: new Date(candle.timestamp).getTime(),
+      price: parseFloat(candle.close),
+      volume: candle.volume,
+    }));
+  } catch (error) {
+    console.error(`Error loading candle data for ${symbol}:`, error);
+    return generatePriceHistory(100, '1d');
+  }
+};
+
 const mockStocks: Stock[] = [
   {
     id: '1',
@@ -135,11 +152,20 @@ class MockMarketService {
   }
 
   async getPriceHistory(stockId: string, period: string = '1d'): Promise<PriceHistory[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const stock = mockStocks.find((s) => s.id === stockId);
-        resolve(generatePriceHistory(stock?.currentPrice || 100, period));
-      }, 300);
+    return new Promise(async (resolve) => {
+      const stock = mockStocks.find((s) => s.id === stockId);
+      if (stock) {
+        try {
+          // Загружаем реальные данные из JSON файла
+          const history = await loadCandleData(stock.symbol);
+          resolve(history);
+        } catch (error) {
+          console.error('Failed to load candle data, using generated data:', error);
+          resolve(generatePriceHistory(stock?.currentPrice || 100, period));
+        }
+      } else {
+        resolve(generatePriceHistory(100, period));
+      }
     });
   }
 

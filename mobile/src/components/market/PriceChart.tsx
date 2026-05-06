@@ -1,40 +1,81 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
 import { marketService } from '../../services/marketService';
 import type { Stock } from '../../types/market';
+import type { PriceHistory } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = false;
+const USE_MOCK = false; // Используем реальные данные из API
 
 interface PriceChartProps {
   stock: Stock;
 }
 
 const PriceChart: React.FC<PriceChartProps> = ({ stock }) => {
-  const [priceHistory, setPriceHistory] = useState<number[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [period, setPeriod] = useState<'1d' | '1w' | '1m' | '1y'>('1d');
+  const [selectedPoint, setSelectedPoint] = useState<PriceHistory | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    loadPriceHistory();
-    const interval = setInterval(loadPriceHistory, 5000);
-    return () => clearInterval(interval);
-  }, [stock.id, period]);
+    loadInitialData();
+  }, [stock.id]);
 
-  const loadPriceHistory = async () => {
+  const loadInitialData = async () => {
     try {
+      setLoading(true);
       const service = !USE_MOCK ? marketService : null;
       if (service) {
-        const history = await service.getPriceHistory(stock.id);
-        setPriceHistory(history.map(h => h.price));
+        const history = await service.getPriceHistory(stock.symbol);
+        setPriceHistory(history);
         setError('');
       }
     } catch (err) {
-      setError('Не удалось загрузить историю цен');
+      console.error('Ошибка загрузки истории цен:', err);
+      setError(err instanceof Error ? `Не удалось загрузить историю цен: ${err.message}` : 'Не удалось загрузить историю цен');
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadMoreData = async () => {
+    if (loadingMore || priceHistory.length === 0) return;
+    
+    try {
+      setLoadingMore(true);
+      const service = !USE_MOCK ? marketService : null;
+      if (service) {
+        // Загружаем дополнительные данные
+        const additionalHistory = await service.getPriceHistory(stock.symbol);
+        // Объединяем все данные для большего диапазона
+        setPriceHistory(prev => [...prev, ...additionalHistory]);
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки дополнительных данных:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (loading) {
@@ -49,94 +90,215 @@ const PriceChart: React.FC<PriceChartProps> = ({ stock }) => {
     return <Text style={styles.error}>{error}</Text>;
   }
 
-  const minPrice = Math.min(...priceHistory);
-  const maxPrice = Math.max(...priceHistory);
-  const priceRange = maxPrice - minPrice;
+  if (priceHistory.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.noDataText}>Нет данных для отображения графика</Text>
+      </View>
+    );
+  }
 
   const renderChart = () => {
-    if (priceHistory.length === 0) return null;
+    const chartHeight = 320;
+    const chartWidth = Math.min(440, Dimensions.get('window').width - 40);
+    const yAxisWidth = 70;
+    const bottomPadding = 50;
+    const topPadding = 20;
+    const effectiveChartHeight = chartHeight - bottomPadding;
+    
+    // Рассчитываем цены с запасом для лучшего отображения
+    const prices = priceHistory.map(h => h.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice;
+    const pricePadding = priceRange * 0.1; // 10% запас
+    const adjustedMinPrice = minPrice - pricePadding;
+    const adjustedMaxPrice = maxPrice + pricePadding;
+    const adjustedPriceRange = adjustedMaxPrice - adjustedMinPrice;
+    const priceStep = adjustedPriceRange / 6;
 
-    const chartHeight = 100;
-    const chartWidth = 250;
-    const yAxisWidth = 35;
-    const pointWidth = chartWidth / priceHistory.length;
+    // Рассчитываем размеры свечей
+    const availableWidth = chartWidth - yAxisWidth;
+    const candleWidth = Math.max(6, Math.floor(availableWidth / priceHistory.length) - 2);
+    const candleSpacing = Math.floor(availableWidth / priceHistory.length);
 
-    // Создаем точки
-    const points = priceHistory.map((price, index) => {
-      const x = yAxisWidth + index * pointWidth + pointWidth / 2;
-      const y = chartHeight - (priceRange > 0 ? ((price - minPrice) / priceRange) * chartHeight : chartHeight / 2);
-      return { x, y, price };
+    // Конвертируем PriceHistory в свечи с правильными OHLC данными
+    const candles = priceHistory.map((point, index) => {
+      const open = index > 0 ? priceHistory[index - 1].price : point.price;
+      const close = point.price;
+      const high = Math.max(open, close);
+      const low = Math.min(open, close);
+      
+      const x = yAxisWidth + index * candleSpacing + candleSpacing / 2;
+      
+      return {
+        x,
+        open,
+        high,
+        low,
+        close,
+        volume: point.volume,
+        timestamp: point.timestamp,
+        isGreen: close >= open,
+        isRed: close < open,
+      };
     });
+
+    // Генерируем линии сетки и ценовые метки
+    const gridLines = [];
+    for (let i = 0; i <= 6; i++) {
+      const y = (effectiveChartHeight / 6) * i;
+      const price = adjustedMaxPrice - (priceStep * i);
+      gridLines.push({ y, price });
+    }
 
     return (
       <View style={styles.chartContainer}>
-        <View style={styles.chart}>
-          {/* Ось Y */}
-          <View style={styles.yAxis}>
-            <View style={[styles.yAxisLine, { height: chartHeight }]} />
-            <View style={[styles.yAxisLabel, { bottom: 0 }]}>
-              <Text style={styles.axisText}>{Math.round(minPrice)}</Text>
-            </View>
-            <View style={[styles.yAxisLabel, { top: 0 }]}>
-              <Text style={styles.axisText}>{Math.round(maxPrice)}</Text>
-            </View>
-          </View>
-
-          {/* Ось X */}
-          <View style={styles.xAxis}>
-            <View style={styles.xAxisLine} />
-            {points.map((point, index) => {
-              if (index % Math.ceil(points.length / 5) === 0) {
-                return (
-                  <View key={index} style={[styles.xAxisLabel, { left: point.x - yAxisWidth }]}>
-                    <Text style={styles.axisText}>{index + 1}</Text>
-                  </View>
-                );
-              }
-              return null;
-            })}
-          </View>
-
-          {/* Линия из сегментов */}
-          {points.map((point, index) => {
-            const nextPoint = points[index + 1];
-            if (!nextPoint) return null;
-            
-            const dx = nextPoint.x - point.x;
-            const dy = nextPoint.y - point.y;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-            
-            return (
+        <View style={[styles.chart, { height: chartHeight }]}>
+          {/* Фон графика */}
+          <View style={styles.chartBackground} />
+          
+          {/* Горизонтальные линии сетки */}
+          {gridLines.map((line, index) => (
+            <View key={`grid-${index}`}>
+              {/* Линия сетки */}
               <View
-                key={index}
                 style={[
-                  styles.lineSegment,
+                  styles.gridLine,
                   {
-                    left: point.x,
-                    top: point.y,
-                    width: length,
-                    transform: [{ rotate: `${angle}deg` }],
+                    left: yAxisWidth,
+                    top: line.y + topPadding,
+                    width: availableWidth,
+                    backgroundColor: index === 0 || index === 6 ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.05)',
                   },
                 ]}
               />
-            );
-          })}
-          
-          {/* Точки */}
-          {points.map((point, index) => (
-            <View
-              key={index}
-              style={[
-                styles.point,
-                {
-                  left: point.x - 4,
-                  top: point.y - 4,
-                },
-                index === priceHistory.length - 1 ? styles.lastPoint : {},
-              ]}
-            />
+              {/* Ценовая метка */}
+              <View
+                style={[
+                  styles.yAxisLabel,
+                  {
+                    top: line.y + topPadding - 10,
+                    right: 10,
+                  },
+                ]}
+              >
+                <Text style={styles.axisText}>{line.price.toFixed(2)}</Text>
+              </View>
+            </View>
           ))}
+          
+          {/* Ось Y */}
+          <View style={[styles.yAxis, { height: chartHeight - bottomPadding }]}>
+            <View style={[styles.yAxisLine, { height: chartHeight - bottomPadding }]} />
+          </View>
+
+          {/* Скроллящийся контейнер для свечей */}
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
+            onScroll={(e) => {
+              const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+              const isNearEnd = contentOffset.x + layoutMeasurement.width >= contentSize.width - 50;
+              if (isNearEnd && !loadingMore) {
+                loadMoreData();
+              }
+            }}
+            scrollEventThrottle={16}
+          >
+            <View style={[styles.candlesScrollContent, { width: Math.max(chartWidth, candles.length * (candleSpacing + 5)) }]}>
+              {candles.map((candle, index) => {
+                const isSelected = selectedPoint?.timestamp === candle.timestamp;
+                
+                // Рассчитываем Y координаты с учетом скорректированного диапазона
+                const highY = effectiveChartHeight - ((candle.high - adjustedMinPrice) / adjustedPriceRange) * effectiveChartHeight;
+                const lowY = effectiveChartHeight - ((candle.low - adjustedMinPrice) / adjustedPriceRange) * effectiveChartHeight;
+                const openY = effectiveChartHeight - ((candle.open - adjustedMinPrice) / adjustedPriceRange) * effectiveChartHeight;
+                const closeY = effectiveChartHeight - ((candle.close - adjustedMinPrice) / adjustedPriceRange) * effectiveChartHeight;
+                
+                // Рассчитываем размеры тела свечи
+                const bodyHeight = Math.abs(openY - closeY) || 2;
+                const bodyTop = Math.min(openY, closeY);
+                const bodyBottom = Math.max(openY, closeY);
+                
+                return (
+                  <TouchableOpacity
+                    key={`candle-${index}`}
+                    style={[
+                      styles.candleContainer,
+                      {
+                        left: candle.x - candleWidth / 2,
+                        top: topPadding + bodyBottom,
+                        width: candleWidth,
+                        height: bodyHeight + 2,
+                      },
+                      isSelected && styles.selectedCandle,
+                    ]}
+                    onPress={() => setSelectedPoint({
+                      timestamp: candle.timestamp,
+                      price: candle.close,
+                      volume: candle.volume,
+                    })}
+                    activeOpacity={0.7}
+                  >
+                    {/* Тень свечи (wick) */}
+                    <View
+                      style={[
+                        styles.candleWick,
+                        {
+                          left: candleWidth / 2 - 0.5,
+                          top: topPadding + bodyBottom - (highY - bodyBottom),
+                          height: Math.abs(highY - lowY),
+                          backgroundColor: candle.isGreen ? '#00D084' : '#FF3B30',
+                          width: 1,
+                        },
+                      ]}
+                    />
+                    
+                    {/* Тело свечи */}
+                    <View
+                      style={[
+                        styles.candleBody,
+                        {
+                          left: 0,
+                          top: topPadding + bodyBottom - (highY - bodyBottom),
+                          width: candleWidth,
+                          height: bodyHeight,
+                          backgroundColor: candle.isGreen ? '#00D084' : '#FF3B30',
+                          borderRadius: 1,
+                          borderWidth: candle.isRed ? 0 : 0,
+                          borderColor: candle.isRed ? '#FF3B30' : 'transparent',
+                        },
+                      ]}
+                    />
+                    
+                    {/* Выделение выбранной свечи */}
+                    {isSelected && (
+                      <View
+                        style={[
+                          styles.candleSelection,
+                          {
+                            left: candle.x - candleWidth / 2 - 2,
+                            top: topPadding + bodyBottom - (highY - bodyBottom) - 2,
+                            width: candleWidth + 4,
+                            height: bodyHeight + 4,
+                          },
+                        ]}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </ScrollView>
+          
+          {/* Ось X */}
+          <View style={[styles.xAxis, { bottom: bottomPadding - 20 }]}>
+            <View style={[styles.xAxisLine, { width: availableWidth }]} />
+          </View>
         </View>
       </View>
     );
@@ -144,20 +306,27 @@ const PriceChart: React.FC<PriceChartProps> = ({ stock }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>График цены: {stock.symbol}</Text>
-      <View style={styles.periodButtons}>
-        {(['1d', '1w', '1m', '1y'] as const).map((p) => (
-          <TouchableOpacity
-            key={p}
-            style={[styles.periodButton, period === p && styles.activePeriod]}
-            onPress={() => setPeriod(p)}
+      {/* Информация о выбранной точке */}
+      {selectedPoint && (
+        <View style={styles.tooltip}>
+          <Text style={styles.tooltipText}>
+            Цена: {selectedPoint.price.toFixed(2)}
+          </Text>
+          <Text style={styles.tooltipText}>
+            Объем: {selectedPoint.volume}
+          </Text>
+          <Text style={styles.tooltipText}>
+            Время: {formatDate(selectedPoint.timestamp)}
+          </Text>
+          <TouchableOpacity 
+            style={styles.closeTooltipButton}
+            onPress={() => setSelectedPoint(null)}
           >
-            <Text style={[styles.periodButtonText, period === p && styles.activePeriodText]}>
-              {p === '1d' ? 'День' : p === '1w' ? 'Неделя' : p === '1m' ? 'Месяц' : 'Год'}
-            </Text>
+            <Text style={styles.closeTooltipText}>✕</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
+      )}
+
       {renderChart()}
     </View>
   );
@@ -169,121 +338,165 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   center: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.lg,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
+  error: {
+    color: colors.danger,
+    textAlign: 'center',
     marginBottom: spacing.md,
+    fontSize: 16,
   },
-  periodButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  periodButton: {
-    flex: 1,
-    padding: spacing.sm,
-    borderRadius: 6,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  activePeriod: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  periodButtonText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  activePeriodText: {
-    color: colors.text,
+  noDataText: {
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontSize: 16,
   },
   chartContainer: {
     backgroundColor: colors.card,
-    borderRadius: 8,
-    padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   chart: {
-    height: 100,
+    height: 320,
     marginBottom: spacing.sm,
     position: 'relative',
-    paddingLeft: 30,
-    paddingBottom: 15,
+  },
+  chartBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    borderRadius: 8,
+  },
+  scrollContainer: {
+    position: 'absolute',
+    left: 80,
+    right: 0,
+    top: 20,
+    bottom: 40,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  candlesScrollContent: {
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  gridLine: {
+    position: 'absolute',
+    height: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   yAxis: {
     position: 'absolute',
     left: 0,
-    top: 0,
-    bottom: 15,
-    width: 30,
+    top: 20,
+    bottom: 40,
+    width: 70,
   },
   yAxisLine: {
     position: 'absolute',
-    left: 30,
-    top: 0,
-    bottom: 0,
+    right: 0,
+    top: 20,
+    bottom: 40,
     width: 1,
     backgroundColor: colors.border,
   },
   yAxisLabel: {
     position: 'absolute',
-    right: 2,
+    alignItems: 'flex-end',
+    right: 10,
   },
   xAxis: {
     position: 'absolute',
-    left: 30,
+    left: 70,
     right: 0,
-    bottom: 0,
-    height: 15,
+    bottom: 30,
+    height: 20,
   },
   xAxisLine: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    width: '100%',
+    left: 70,
+    bottom: 30,
     height: 1,
     backgroundColor: colors.border,
   },
-  xAxisLabel: {
-    position: 'absolute',
-    bottom: 2,
-  },
   axisText: {
-    fontSize: 9,
+    fontSize: 10,
     color: colors.textSecondary,
+    fontWeight: '500',
   },
-  lineSegment: {
+  candleContainer: {
     position: 'absolute',
-    backgroundColor: colors.primary,
-    height: 2,
-    transformOrigin: 'left top',
+    alignItems: 'center',
   },
-  point: {
+  candleWick: {
     position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
+    borderRadius: 1,
   },
-  lastPoint: {
-    backgroundColor: colors.success,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  candleBody: {
+    position: 'absolute',
+    borderRadius: 1,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  error: {
-    color: colors.danger,
-    textAlign: 'center',
-    fontSize: 16,
+  candleSelection: {
+    position: 'absolute',
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    borderRadius: 2,
+  },
+  selectedCandle: {
+    zIndex: 10,
+  },
+  tooltip: {
+    position: 'absolute',
+    top: spacing.md,
+    left: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    padding: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
+  },
+  tooltipText: {
+    fontSize: 12,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  closeTooltipButton: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeTooltipText: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
 });
 

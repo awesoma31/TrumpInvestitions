@@ -6,7 +6,7 @@ import StockList from '../components/market/StockList';
 import OrderForm from '../components/market/OrderForm';
 import PortfolioComponent from '../components/market/Portfolio';
 import TradeHistory from '../components/market/TradeHistory';
-import PriceChart from '../components/market/PriceChart';
+import ModalChart from '../components/market/ModalChart';
 import type { Stock } from '../types/market';
 import { colors, spacing } from '../theme';
 
@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [activeView, setActiveView] = useState<'market' | 'portfolio' | 'history'>('market');
-  const [showPriceChart, setShowPriceChart] = useState(false);
+  const [showModalChart, setShowModalChart] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
 
@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Trump Investitions</Text>
+        <Text style={styles.title}>Трамплин инвестиций</Text>
         <View style={styles.userSection}>
           {user && (
             <>
@@ -107,12 +107,15 @@ const Dashboard: React.FC = () => {
             style={styles.overlayBackground} 
             onPress={() => {
               setShowStockModal(false);
-              setShowPriceChart(false);
+              setShowModalChart(false);
             }}
           />
           <View style={styles.popupContainer}>
             <View style={styles.popupHeader}>
-              <TouchableOpacity onPress={() => setShowStockModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowStockModal(false);
+                setShowModalChart(false);
+              }}>
                 <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
               <Text style={styles.popupTitle}>{selectedStock?.symbol}</Text>
@@ -133,8 +136,8 @@ const Dashboard: React.FC = () => {
 
               <View style={styles.stockActions}>
                 <TouchableOpacity
-                  style={[styles.actionButton, showPriceChart && styles.activeAction]}
-                  onPress={() => setShowPriceChart(!showPriceChart)}
+                  style={[styles.actionButton, showModalChart && styles.activeAction]}
+                  onPress={() => setShowModalChart(true)}
                 >
                   <Text style={styles.actionButtonText}>График</Text>
                 </TouchableOpacity>
@@ -147,12 +150,6 @@ const Dashboard: React.FC = () => {
                   </TouchableOpacity>
                 )}
               </View>
-
-              {showPriceChart && (
-                <View style={styles.chartContainer}>
-                  <PriceChart stock={selectedStock!} />
-                </View>
-              )}
 
               {user && selectedStock && (
                 <OrderForm 
@@ -191,6 +188,15 @@ const Dashboard: React.FC = () => {
         <View style={styles.content}>
           <Text style={styles.authRequired}>Требуется авторизация</Text>
         </View>
+      )}
+      
+      {/* Модальное окно для полного графика */}
+      {showModalChart && selectedStock && (
+        <ModalChart
+          stock={selectedStock}
+          visible={showModalChart}
+          onClose={() => setShowModalChart(false)}
+        />
       )}
     </View>
   );

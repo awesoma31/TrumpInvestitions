@@ -18,7 +18,7 @@ export default function MarketScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Trump Investitions</Text>
+        <Text style={styles.title}>Трамплин инвестиций</Text>
         <TouchableOpacity 
           style={styles.loginButton} 
           onPress={() => router.push('/auth')}

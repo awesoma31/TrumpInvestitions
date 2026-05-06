@@ -22,12 +22,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem('access_token');
-        if (token) {
-          const userData = await AsyncStorage.getItem('user_data');
-          setUser(userData ? JSON.parse(userData) : null);
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        const userData = await AsyncStorage.getItem('user_data');
+        if (userData) {
+          const loadedUser: User = JSON.parse(userData);
+          setUser(loadedUser);
+        } else {
+          // No user data, clear tokens
+          await AsyncStorage.removeItem('access_token');
+          await AsyncStorage.removeItem('refresh_token');
+          setUser(null);
         }
       } catch (error) {
         console.error('Auth check error:', error);
+        await AsyncStorage.removeItem('user_data');
+        await AsyncStorage.removeItem('access_token');
+        await AsyncStorage.removeItem('refresh_token');
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -37,35 +52,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (login: string, password: string) => {
-    const response = await apiClient.login(login, password);
-    
-    const user: User = {
-      id: response.user.id.toString(),
-      email: response.user.email,
-      name: response.user.username,
-    };
-    
-    await AsyncStorage.setItem('user_data', JSON.stringify(user));
-    setUser(user);
+    try {
+      console.log('Attempting login with:', login);
+      const response = await apiClient.login(login, password);
+      console.log('Login response:', response);
+      
+      const user: User = {
+        id: response.user.id.toString(),
+        email: response.user.email,
+        name: response.user.username,
+      };
+      
+      await AsyncStorage.setItem('user_data', JSON.stringify(user));
+      await AsyncStorage.setItem('access_token', response.accessToken);
+      await AsyncStorage.setItem('refresh_token', response.refreshToken);
+      setUser(user);
+      console.log('Login successful, user stored:', user);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const register = async (username: string, email: string, password: string) => {
-    const response = await apiClient.register(username, email, password);
-    
-    const user: User = {
-      id: response.user.id.toString(),
-      email: response.user.email,
-      name: response.user.username,
-    };
-    
-    await AsyncStorage.setItem('user_data', JSON.stringify(user));
-    setUser(user);
+    try {
+      console.log('Attempting registration with:', username, email);
+      const response = await apiClient.register(username, email, password);
+      console.log('Registration response:', response);
+      
+      const user: User = {
+        id: response.user.id.toString(),
+        email: response.user.email,
+        name: response.user.username,
+      };
+      
+      await AsyncStorage.setItem('user_data', JSON.stringify(user));
+      await AsyncStorage.setItem('access_token', response.accessToken);
+      await AsyncStorage.setItem('refresh_token', response.refreshToken);
+      setUser(user);
+      console.log('Registration successful, user stored:', user);
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await apiClient.logout();
-    await AsyncStorage.removeItem('user_data');
-    setUser(null);
+    try {
+      console.log('Attempting logout...');
+      await apiClient.logout();
+      await AsyncStorage.removeItem('user_data');
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('refresh_token');
+      setUser(null);
+      console.log('Logout successful');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Даже если ошибка logout, все равно очищаем данные
+      await AsyncStorage.removeItem('user_data');
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('refresh_token');
+      setUser(null);
+    }
   };
 
   return (

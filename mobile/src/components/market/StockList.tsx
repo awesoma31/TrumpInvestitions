@@ -4,7 +4,7 @@ import { marketService } from '../../services/marketService';
 import type { Stock } from '../../types/market';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = false;
+const USE_MOCK = false; // Используем реальные данные из API
 
 interface StockListProps {
   onStockSelect?: (stock: Stock) => void;
@@ -30,7 +30,37 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
         setError('');
       }
     } catch (err) {
-      setError('Не удалось загрузить акции');
+      setError('Ошибка загрузки акций');
+      console.error('Error loading stocks:', err);
+
+      // Добавляем резервные данные при ошибке API
+      const fallbackStocks: Stock[] = [
+        {
+          id: '1',
+          symbol: 'BTCUSD',
+          name: 'Bitcoin',
+          currentPrice: 19500,
+          change24h: 2.5,
+          volume: 1000000,
+        },
+        {
+          id: '2',
+          symbol: 'ETHUSD',
+          name: 'Ethereum',
+          currentPrice: 1350,
+          change24h: -1.2,
+          volume: 500000,
+        },
+        {
+          id: '3',
+          symbol: 'AAPL',
+          name: 'Apple',
+          currentPrice: 175,
+          change24h: 0.8,
+          volume: 75000000,
+        },
+      ];
+      setStocks(fallbackStocks);
     } finally {
       setLoading(false);
     }

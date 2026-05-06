@@ -27,30 +27,71 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    baseUrl: string = API_BASE_URL
   ): Promise<T> {
     const token = await this.getAccessToken();
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = endpoint.startsWith('http://') || endpoint.startsWith('https://')
+      ? endpoint
+      : `${baseUrl}${endpoint}`;
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
+    if (options.method !== 'GET') {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // X-User-Id проставляет auth-gateway для внутренних сервисов
+    // Мобильное приложение отправляет только Authorization через gateway.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // Увеличили до 30 секунд
+
+    console.log('Making request to:', url);
+    console.log('Request options:', { ...options, headers });
+    console.log('Request body:', options.body);
+
     const response = await fetch(url, {
       ...options,
       headers,
+      signal: controller.signal,
     });
 
+    clearTimeout(timeoutId);
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+
+    const responseText = await response.text();
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Network error' }));
-      throw new Error((error as any).message || `HTTP ${response.status}`);
+      if (response.status === 401) {
+        await this.clearTokens();
+      }
+
+      let errorMessage = `HTTP ${response.status}`;
+      if (responseText) {
+        try {
+          const parsed = JSON.parse(responseText);
+          errorMessage = parsed?.message || parsed?.error || errorMessage;
+        } catch {
+          errorMessage = responseText;
+        }
+      }
+
+      throw new Error(errorMessage || 'Network error');
     }
 
-    return response.json() as Promise<T>;
+    if (response.status === 204 || responseText.length === 0) {
+      return {} as T;
+    }
+
+    try {
+      return JSON.parse(responseText) as T;
+    } catch (error) {
+      console.warn('Failed to parse JSON response:', error, responseText);
+      throw new Error('Invalid response from server');
+    }
   }
 
   async get<T>(endpoint: string): Promise<T> {
@@ -102,7 +143,11 @@ class ApiClient {
   async logout(): Promise<void> {
     try {
       const refreshToken = await this.getRefreshToken();
-      await this.post('/api/v1/auth/logout', { refreshToken });
+      if (refreshToken) {
+        await this.post('/api/v1/auth/logout', { refreshToken });
+      } else {
+        await this.post('/api/v1/auth/logout', {});
+      }
     } finally {
       await this.clearTokens();
     }
@@ -138,7 +183,10 @@ class ApiClient {
   }
 
   async getInstrumentBySymbol(symbol: string) {
-    return this.get(`/api/v1/market/instruments/${symbol}`);
+    const queryParams = new URLSearchParams();
+    queryParams.append('q', symbol);
+    queryParams.append('limit', '1');
+    return this.get(`/api/v1/market/instruments?${queryParams}`);
   }
 
   async getQuotes(symbols: string) {
@@ -146,14 +194,15 @@ class ApiClient {
   }
 
   async getQuoteBySymbol(symbol: string) {
-    return this.get(`/api/v1/market/quotes/${symbol}`);
+    return this.get(`/api/v1/market/quotes?symbols=${symbol}`);
   }
 
   async getOrderBook(symbol: string, depth?: number) {
     const queryParams = new URLSearchParams();
+    queryParams.append('symbol', symbol);
     if (depth) queryParams.append('depth', depth.toString());
     
-    const endpoint = `/api/v1/market/order-book/${symbol}${queryParams.toString() ? `?${queryParams}` : ''}`;
+    const endpoint = `/api/v1/market/order-book?${queryParams}`;
     return this.get(endpoint);
   }
 
@@ -221,6 +270,18 @@ class ApiClient {
 
   async getPnl() {
     return this.get('/api/v1/portfolio/pnl');
+  }
+
+  async depositBalance(amount: string) {
+    return this.post('/api/v1/portfolio/balance/deposit', { amount });
+  }
+
+  async withdrawBalance(amount: string) {
+    return this.post('/api/v1/portfolio/balance/withdraw', { amount });
+  }
+
+  async getCashBalance() {
+    return this.get('/api/v1/portfolio/balance/cash');
   }
 
   // WebSocket token

@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
 import { marketService } from '../../services/marketService';
 import type { Portfolio } from '../../types/market';
+import BalanceActionModal from './BalanceActionModal';
+import DepositForm from '../portfolio/DepositForm';
+import WithdrawForm from '../portfolio/WithdrawForm';
 import { colors, spacing } from '../../theme';
 
-const USE_MOCK = false;
+const USE_MOCK = false; // Используем реальные данные из API
 
 const PortfolioComponent: React.FC = () => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showBalanceAction, setShowBalanceAction] = useState(false);
+  const [showDepositAction, setShowDepositAction] = useState(false);
+  const [showWithdrawAction, setShowWithdrawAction] = useState(false);
 
   useEffect(() => {
     loadPortfolio();
@@ -26,7 +32,15 @@ const PortfolioComponent: React.FC = () => {
         setError('');
       }
     } catch (err) {
-      setError('Не удалось загрузить портфель');
+      console.error('Error loading portfolio:', err);
+      // Если ошибка сети, показываем информативное сообщение
+      if (err instanceof Error && (err.message.includes('Network request failed') || err.message.includes('Network error'))) {
+        setError('Ошибка сети. Проверьте доступность сервера.');
+      } else if (err instanceof Error && err.message.includes('401')) {
+        setError('Требуется авторизация. Пожалуйста, войдите в аккаунт.');
+      } else {
+        setError('Не удалось загрузить портфель');
+      }
     } finally {
       setLoading(false);
     }
@@ -52,50 +66,111 @@ const PortfolioComponent: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Инвестиционный портфель</Text>
+    <View style={styles.container}>
+      <ScrollView>
+        <Text style={styles.title}>Инвестиционный портфель</Text>
 
-      <View style={styles.summary}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Доступные средства</Text>
-          <Text style={styles.summaryValue}>{formatValue(portfolio.cash)}</Text>
-        </View>
+        <View style={styles.summary}>
+          <TouchableOpacity
+            style={styles.summaryCardTouchable}
+            activeOpacity={0.8}
+            onPress={() => setShowBalanceAction(true)}
+          >
+            <Text style={styles.summaryLabel}>Доступные средства</Text>
+            <Text style={styles.summaryValue}>{formatValue(portfolio.cash)}</Text>
+          </TouchableOpacity>
 
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Общая стоимость</Text>
-          <Text style={styles.summaryValue}>{formatValue(portfolio.totalValue)}</Text>
-        </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>P&L</Text>
-          <Text style={[styles.summaryValue, portfolio.pnl >= 0 ? styles.positive : styles.negative]}>
-            {formatPnL(portfolio.pnl)}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Активы в портфеле</Text>
-
-      {portfolio.holdings.length === 0 ? (
-        <Text style={styles.empty}>Портфель пуст</Text>
-      ) : (
-        portfolio.holdings.map((holding) => (
-          <View key={holding.stockId} style={styles.holdingItem}>
-            <View style={styles.holdingInfo}>
-              <Text style={styles.stockSymbol}>{holding.stockSymbol}</Text>
-              <Text style={styles.stockName}>{holding.stockName}</Text>
-            </View>
-            <View style={styles.holdingData}>
-              <Text style={styles.holdingAmount}>{holding.amount} шт</Text>
-              <Text style={styles.holdingPrice}>{formatValue(holding.currentPrice)}</Text>
-              <Text style={[styles.holdingPnl, holding.pnl >= 0 ? styles.positive : styles.negative]}>
-                {formatPnL(holding.pnl)}
-              </Text>
-            </View>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>Общая стоимость</Text>
+            <Text style={styles.summaryValue}>{formatValue(portfolio.totalValue)}</Text>
           </View>
-        ))
-      )}
-    </ScrollView>
+
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>P&L</Text>
+            <Text style={[styles.summaryValue, portfolio.pnl >= 0 ? styles.positive : styles.negative]}>
+              {formatPnL(portfolio.pnl)}
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Активы в портфеле</Text>
+
+        {portfolio.holdings.length === 0 ? (
+          <Text style={styles.empty}>Портфель пуст</Text>
+        ) : (
+          portfolio.holdings.map((holding) => (
+            <View key={holding.stockId} style={styles.holdingItem}>
+              <View style={styles.holdingInfo}>
+                <Text style={styles.stockSymbol}>{holding.stockSymbol}</Text>
+                <Text style={styles.stockName}>{holding.stockName}</Text>
+              </View>
+              <View style={styles.holdingData}>
+                <Text style={styles.holdingAmount}>{holding.amount} шт</Text>
+                <Text style={styles.holdingPrice}>{formatValue(holding.currentPrice)}</Text>
+                <Text style={[styles.holdingPnl, holding.pnl >= 0 ? styles.positive : styles.negative]}>
+                  {formatPnL(holding.pnl)}
+                </Text>
+              </View>
+            </View>
+          ))
+        )}
+      </ScrollView>
+
+      {/* Модальное окно действий с балансом */}
+      <BalanceActionModal
+        visible={showBalanceAction}
+        onClose={() => setShowBalanceAction(false)}
+        onDeposit={() => {
+          setShowBalanceAction(false);
+          setShowDepositAction(true);
+        }}
+        onWithdraw={() => {
+          setShowBalanceAction(false);
+          setShowWithdrawAction(true);
+        }}
+        cash={portfolio?.cash || 0}
+      />
+
+      <Modal
+        visible={showDepositAction}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDepositAction(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity style={styles.modalOverlayTouchable} onPress={() => setShowDepositAction(false)} />
+          <View style={styles.modalSheet}>
+            <DepositForm
+              onDepositSuccess={() => {
+                setShowDepositAction(false);
+                loadPortfolio();
+              }}
+              onClose={() => setShowDepositAction(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showWithdrawAction}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowWithdrawAction(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity style={styles.modalOverlayTouchable} onPress={() => setShowWithdrawAction(false)} />
+          <View style={styles.modalSheet}>
+            <WithdrawForm
+              onWithdrawSuccess={() => {
+                setShowWithdrawAction(false);
+                loadPortfolio();
+              }}
+              onClose={() => setShowWithdrawAction(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
@@ -130,6 +205,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  summaryCardTouchable: {
+    flex: 1,
+    backgroundColor: colors.card,
+    padding: spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
   summaryLabel: {
     fontSize: 12,
     color: colors.textSecondary,
@@ -151,6 +234,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: spacing.lg,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-end',
+    paddingBottom: 16,
+  },
+  modalOverlayTouchable: {
+    flex: 1,
+  },
+  modalSheet: {
+    backgroundColor: '#080808',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+    maxHeight: '88%',
+    marginHorizontal: 0,
+    marginBottom: 12,
+    paddingBottom: 12,
   },
   empty: {
     color: colors.textSecondary,

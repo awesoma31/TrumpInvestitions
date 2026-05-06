@@ -10,7 +10,7 @@ const convertInstrumentToStock = (instrument: Instrument): Stock => ({
   currentPrice: 0,
   highestBid: 0,
   lowestAsk: 0,
-  change24h: 0,
+  change24h: Math.random() * 10 - 5, // Случайное значение от -5% до +5%
   volume24h: 0,
 });
 
@@ -21,7 +21,7 @@ const convertQuoteToStock = (quote: Quote): Stock => ({
   currentPrice: parseFloat(quote.last),
   highestBid: parseFloat(quote.bid),
   lowestAsk: parseFloat(quote.ask),
-  change24h: 0,
+  change24h: Math.random() * 10 - 5, // Случайное значение от -5% до +5%
   volume24h: 0,
 });
 
@@ -77,16 +77,28 @@ const convertPortfolioToPortfolio = (portfolio: PortfolioResponse): Portfolio =>
 
 class MarketService {
   async getStocks(): Promise<Stock[]> {
-    const instruments = await apiClient.getInstruments({ limit: 50 }) as InstrumentListResponse;
-    const symbols = instruments.items.map((i: Instrument) => i.symbol).join(',');
-    const quotes = await apiClient.getQuotes(symbols) as QuoteListResponse;
-    
-    const quoteMap = new Map(quotes.items.map((q: Quote) => [q.symbol, q]));
-    
-    return instruments.items.map((instrument: Instrument) => {
-      const quote = quoteMap.get(instrument.symbol);
-      return quote ? convertQuoteToStock(quote) : convertInstrumentToStock(instrument);
-    });
+    try {
+      console.log('Loading stocks from API...');
+      const instruments = await apiClient.getInstruments({ limit: 50 }) as InstrumentListResponse;
+      console.log('Instruments loaded:', instruments.items.length);
+      
+      const symbols = instruments.items.map((i: Instrument) => i.symbol).join(',');
+      const quotes = await apiClient.getQuotes(symbols) as QuoteListResponse;
+      console.log('Quotes loaded:', quotes.items.length);
+      
+      const quoteMap = new Map(quotes.items.map((q: Quote) => [q.symbol, q]));
+      
+      const stocks = instruments.items.map((instrument: Instrument) => {
+        const quote = quoteMap.get(instrument.symbol);
+        return quote ? convertQuoteToStock(quote) : convertInstrumentToStock(instrument);
+      });
+      
+      console.log('Stocks converted:', stocks.length);
+      return stocks;
+    } catch (error) {
+      console.error('Error loading stocks from API:', error);
+      throw error;
+    }
   }
 
   async getStockById(symbol: string): Promise<Stock> {
@@ -95,10 +107,18 @@ class MarketService {
   }
 
   async getPriceHistory(symbol: string): Promise<PriceHistory[]> {
-    const to = new Date().toISOString();
-    const from = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const candles = await apiClient.getMarketHistory(symbol, from, to, '1m') as CandleListResponse;
-    return candles.items.map(convertCandleToPriceHistory);
+    const normalizedSymbol = symbol.trim().toUpperCase();
+    try {
+      console.log(`Loading price history for ${normalizedSymbol} from API...`);
+      const to = new Date().toISOString();
+      const from = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(); // 1ч 4ч 1д 1м
+      const candles = await apiClient.getMarketHistory(normalizedSymbol, from, to, '1m', 1000) as CandleListResponse;
+      console.log(`Price history loaded for ${normalizedSymbol}:`, candles.items.length, 'candles');
+      return candles.items.map(convertCandleToPriceHistory);
+    } catch (error) {
+      console.error(`Error loading price history for ${normalizedSymbol}:`, error);
+      throw error;
+    }
   }
 
   async getOrderBook(symbol: string): Promise<OrderBook> {
