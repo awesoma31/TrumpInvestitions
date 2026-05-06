@@ -2,6 +2,7 @@
 #include <linux/ktime.h>
 #include <linux/mutex.h>
 #include <linux/random.h>
+#include <linux/slab.h>
 
 #include "pricing_engine.h"
 
@@ -9,6 +10,11 @@ static DEFINE_MUTEX(generator_lock);
 
 static u64 sequence;
 static s64 mid_price_cents;
+
+/* Historical backfill state */
+static u64 *history_ts;    /* kmalloc'd array of pre-computed timestamps */
+static int  history_total; /* total entries pre-generated                */
+static int  history_idx;   /* next entry to serve; == history_total → live */
 
 static s64 random_signed_delta(unsigned long max_abs_value) {
   u32 rnd;
@@ -57,12 +63,63 @@ static void format_size(char *buffer, size_t size, unsigned long units) {
   scnprintf(buffer, size, "%lu.00", units);
 }
 
+void pe_generator_free(void) {
+  mutex_lock(&generator_lock);
+  kfree(history_ts);
+  history_ts    = NULL;
+  history_total = 0;
+  history_idx   = 0;
+  mutex_unlock(&generator_lock);
+}
+
 void pe_generator_init(void) {
+  u64 now_ns;
+  u64 ns_per_hour;
+  u64 step_ns;
+  unsigned long h, i;
+  int cap, idx;
+
   mutex_lock(&generator_lock);
 
   sequence = 0;
   mid_price_cents = (s64)start_price_cents;
 
+  /* Free previous allocation if re-initialised */
+  kfree(history_ts);
+  history_ts    = NULL;
+  history_total = 0;
+  history_idx   = 0;
+
+  if (history_hours == 0 || history_qph == 0)
+    goto unlock;
+
+  cap = (int)(history_hours * history_qph);
+  if (cap > PE_MAX_HISTORY)
+    cap = PE_MAX_HISTORY;
+
+  history_ts = kmalloc_array(cap, sizeof(u64), GFP_KERNEL);
+  if (!history_ts) {
+    pr_warn("pricing_engine: failed to allocate history buffer, skipping backfill\n");
+    goto unlock;
+  }
+
+  now_ns      = ktime_get_real_ns();
+  ns_per_hour = 3600ULL * NSEC_PER_SEC;
+  step_ns     = ns_per_hour / history_qph;
+  idx         = 0;
+
+  /* oldest hour first → newest, so ClickHouse receives rows in order */
+  for (h = history_hours; h >= 1 && idx < cap; h--) {
+    u64 hour_start = now_ns - h * ns_per_hour;
+    for (i = 0; i < history_qph && idx < cap; i++, idx++)
+      history_ts[idx] = hour_start + i * step_ns;
+  }
+
+  history_total = idx;
+  pr_info("pricing_engine: backfill ready — %d quotes (%lu h × %lu qph)\n",
+          history_total, history_hours, history_qph);
+
+unlock:
   mutex_unlock(&generator_lock);
 }
 
@@ -122,8 +179,22 @@ size_t pe_generator_write_quote(char *buffer, size_t buffer_size) {
   sequence++;
   event_sequence = sequence;
 
-  event_time_ns = ktime_get_real_ns();
-  engine_time_ns = ktime_get_real_ns();
+  if (history_idx < history_total) {
+    event_time_ns  = history_ts[history_idx];
+    engine_time_ns = history_ts[history_idx];
+    history_idx++;
+
+    /* Free buffer once all history has been served */
+    if (history_idx == history_total) {
+      kfree(history_ts);
+      history_ts    = NULL;
+      history_total = 0;
+      pr_info("pricing_engine: backfill complete, switching to live timestamps\n");
+    }
+  } else {
+    event_time_ns  = ktime_get_real_ns();
+    engine_time_ns = ktime_get_real_ns();
+  }
 
   mutex_unlock(&generator_lock);
 
