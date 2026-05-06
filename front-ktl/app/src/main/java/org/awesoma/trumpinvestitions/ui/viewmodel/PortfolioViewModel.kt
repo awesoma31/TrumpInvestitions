@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.awesoma.trumpinvestitions.TrumpApp
+import org.awesoma.trumpinvestitions.data.network.ApiError
 import org.awesoma.trumpinvestitions.data.network.dto.DepositRequestDto
 import org.awesoma.trumpinvestitions.data.repository.PortfolioRepository
 import org.awesoma.trumpinvestitions.data.repository.PortfolioState
@@ -38,11 +39,20 @@ class PortfolioViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             try {
                 val result = app.network.apiService.deposit(DepositRequestDto(String.format(java.util.Locale.US, "%.2f", amount)))
-                _state.value = _state.value?.copy(
-                    cashBalance = result.balance.toDoubleOrNull() ?: 0.0
-                )
+                _state.value = _state.value?.copy(cashBalance = result.balance.toDoubleOrNull() ?: 0.0)
             } catch (e: Exception) {
-                _depositError.value = e.message ?: "Ошибка пополнения"
+                _depositError.value = ApiError.parse(e)
+            }
+        }
+    }
+
+    fun withdraw(amount: Double) {
+        viewModelScope.launch {
+            try {
+                val result = app.network.apiService.withdraw(DepositRequestDto(String.format(java.util.Locale.US, "%.2f", amount)))
+                _state.value = _state.value?.copy(cashBalance = result.balance.toDoubleOrNull() ?: 0.0)
+            } catch (e: Exception) {
+                _depositError.value = ApiError.parse(e)
             }
         }
     }
