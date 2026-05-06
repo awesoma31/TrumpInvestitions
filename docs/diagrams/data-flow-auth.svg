@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420">
+  <defs>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .db { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .label { font: 700 24px Arial, sans-serif; fill: #111827; }
+      .small { font: 18px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect width="1400" height="420" fill="#ffffff" />
+  <text x="80" y="60" class="title">Authentication Flow</text>
+
+  <rect x="90" y="140" width="220" height="90" class="box" />
+  <text x="200" y="190" text-anchor="middle" class="label">Client</text>
+
+  <rect x="500" y="140" width="280" height="90" class="box" />
+  <text x="640" y="182" text-anchor="middle" class="label">auth-gateway</text>
+  <text x="640" y="210" text-anchor="middle" class="small">register / login / JWT</text>
+
+  <rect x="980" y="125" width="300" height="120" class="db" rx="22" ry="22" />
+  <text x="1130" y="178" text-anchor="middle" class="label">PostgreSQL auth DB</text>
+  <text x="1130" y="206" text-anchor="middle" class="small">users + refresh tokens</text>
+
+  <path d="M310 185 H500" class="arrow" />
+  <text x="405" y="165" text-anchor="middle" class="small">POST /auth/register</text>
+  <text x="405" y="188" text-anchor="middle" class="small">POST /auth/login</text>
+
+  <path d="M780 170 H980" class="arrow" />
+  <text x="880" y="148" text-anchor="middle" class="small">validate user</text>
+  <text x="880" y="171" text-anchor="middle" class="small">hash password</text>
+  <text x="880" y="194" text-anchor="middle" class="small">create or read user</text>
+
+  <path d="M1130 245 V275 H640 V230" class="arrow" />
+  <text x="930" y="302" text-anchor="middle" class="small">user data</text>
+
+  <path d="M640 230 V320 H200 V230" class="arrow" />
+  <text x="420" y="350" text-anchor="middle" class="small">access token + refresh token</text>
+</svg>

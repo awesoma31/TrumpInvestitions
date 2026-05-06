@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="420" viewBox="0 0 1500 420">
+  <defs>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .svc { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; rx: 18; ry: 18; }
+      .db { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 22; ry: 22; }
+      .label { font: 700 24px Arial, sans-serif; fill: #111827; }
+      .small { font: 18px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect width="1500" height="420" fill="#ffffff" />
+  <text x="80" y="60" class="title">Market Data Flow</text>
+
+  <rect x="70" y="145" width="220" height="90" class="box" />
+  <text x="180" y="195" text-anchor="middle" class="label">Client</text>
+
+  <rect x="400" y="145" width="260" height="90" class="box" />
+  <text x="530" y="188" text-anchor="middle" class="label">auth-gateway</text>
+  <text x="530" y="214" text-anchor="middle" class="small">public API entry</text>
+
+  <rect x="780" y="145" width="320" height="90" class="svc" />
+  <text x="940" y="188" text-anchor="middle" class="label">market-data-service</text>
+  <text x="940" y="214" text-anchor="middle" class="small">quotes / candles / order book</text>
+
+  <rect x="1210" y="130" width="220" height="120" class="db" />
+  <text x="1320" y="183" text-anchor="middle" class="label">ClickHouse</text>
+  <text x="1320" y="210" text-anchor="middle" class="small">quotes table</text>
+
+  <path d="M290 190 H400" class="arrow" />
+  <text x="345" y="170" text-anchor="middle" class="small">GET /market/...</text>
+
+  <path d="M660 190 H780" class="arrow" />
+  <text x="720" y="170" text-anchor="middle" class="small">proxy request</text>
+
+  <path d="M1100 175 H1210" class="arrow" />
+  <text x="1155" y="153" text-anchor="middle" class="small">query quotes</text>
+  <text x="1155" y="176" text-anchor="middle" class="small">and candles</text>
+
+  <path d="M1320 250 V285 H940 V235" class="arrow" />
+  <text x="1140" y="314" text-anchor="middle" class="small">aggregated market data</text>
+
+  <path d="M940 235 V320 H180 V235" class="arrow" />
+  <text x="560" y="350" text-anchor="middle" class="small">prepared JSON response</text>
+</svg>

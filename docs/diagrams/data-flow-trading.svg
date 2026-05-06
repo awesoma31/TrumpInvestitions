@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="620" viewBox="0 0 1600 620">
+  <defs>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .svc { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; rx: 18; ry: 18; }
+      .db { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 22; ry: 22; }
+      .bus { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 18; ry: 18; }
+      .label { font: 700 23px Arial, sans-serif; fill: #111827; }
+      .small { font: 17px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 10 8; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect width="1600" height="620" fill="#ffffff" />
+  <text x="70" y="60" class="title">Order Creation and Portfolio Update</text>
+
+  <rect x="60" y="120" width="200" height="90" class="box" />
+  <text x="160" y="170" text-anchor="middle" class="label">Client</text>
+
+  <rect x="340" y="120" width="250" height="90" class="box" />
+  <text x="465" y="165" text-anchor="middle" class="label">auth-gateway</text>
+  <text x="465" y="192" text-anchor="middle" class="small">proxy + user context</text>
+
+  <rect x="690" y="120" width="280" height="90" class="svc" />
+  <text x="830" y="165" text-anchor="middle" class="label">trading-service</text>
+  <text x="830" y="192" text-anchor="middle" class="small">validate and fill order</text>
+
+  <rect x="1080" y="120" width="280" height="90" class="svc" />
+  <text x="1220" y="165" text-anchor="middle" class="label">market-data-service</text>
+  <text x="1220" y="192" text-anchor="middle" class="small">current quote</text>
+
+  <rect x="1410" y="105" width="150" height="120" class="db" />
+  <text x="1485" y="160" text-anchor="middle" class="label">ClickHouse</text>
+  <text x="1485" y="188" text-anchor="middle" class="small">quotes</text>
+
+  <rect x="710" y="300" width="240" height="90" class="db" />
+  <text x="830" y="350" text-anchor="middle" class="label">PostgreSQL</text>
+  <text x="830" y="378" text-anchor="middle" class="small">trading DB</text>
+
+  <rect x="730" y="485" width="200" height="80" class="bus" />
+  <text x="830" y="532" text-anchor="middle" class="label">Kafka</text>
+
+  <rect x="1080" y="470" width="280" height="90" class="svc" />
+  <text x="1220" y="515" text-anchor="middle" class="label">portfolio-service</text>
+  <text x="1220" y="542" text-anchor="middle" class="small">async portfolio update</text>
+
+  <rect x="1410" y="455" width="150" height="120" class="db" />
+  <text x="1485" y="510" text-anchor="middle" class="label">PostgreSQL</text>
+  <text x="1485" y="538" text-anchor="middle" class="small">portfolio DB</text>
+
+  <path d="M260 165 H340" class="arrow" />
+  <text x="300" y="143" text-anchor="middle" class="small">POST /orders</text>
+
+  <path d="M590 165 H690" class="arrow" />
+  <text x="640" y="143" text-anchor="middle" class="small">proxy + X-User-Id</text>
+
+  <path d="M970 150 H1080" class="arrow" />
+  <text x="1025" y="128" text-anchor="middle" class="small">get current quote</text>
+
+  <path d="M1360 150 H1410" class="arrow" />
+  <text x="1385" y="128" text-anchor="middle" class="small">read last quote</text>
+
+  <path d="M1410 215 H1360" class="arrow" />
+  <text x="1385" y="244" text-anchor="middle" class="small">bid / ask</text>
+
+  <path d="M830 210 V300" class="arrow" />
+  <text x="850" y="260" class="small">save order and trade</text>
+
+  <path d="M830 210 V260 H160 V210" class="arrow" />
+  <text x="500" y="290" text-anchor="middle" class="small">return final order status</text>
+
+  <path d="M830 390 V485" class="arrow dashed" />
+  <text x="852" y="438" class="small">ORDER_FILLED / TRADE_EXECUTED</text>
+
+  <path d="M930 525 H1080" class="arrow dashed" />
+  <text x="1005" y="502" text-anchor="middle" class="small">consume event</text>
+
+  <path d="M1360 515 H1410" class="arrow" />
+  <text x="1385" y="493" text-anchor="middle" class="small">update cash</text>
+  <text x="1385" y="514" text-anchor="middle" class="small">and positions</text>
+</svg>

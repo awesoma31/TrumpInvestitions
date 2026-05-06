@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="460" viewBox="0 0 1500 460">
+  <defs>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .svc { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; rx: 18; ry: 18; }
+      .db { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 22; ry: 22; }
+      .label { font: 700 24px Arial, sans-serif; fill: #111827; }
+      .small { font: 18px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 10 8; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect width="1500" height="460" fill="#ffffff" />
+  <text x="80" y="60" class="title">Portfolio Read Flow</text>
+
+  <rect x="70" y="150" width="220" height="90" class="box" />
+  <text x="180" y="200" text-anchor="middle" class="label">Client</text>
+
+  <rect x="390" y="150" width="260" height="90" class="box" />
+  <text x="520" y="193" text-anchor="middle" class="label">auth-gateway</text>
+  <text x="520" y="218" text-anchor="middle" class="small">authorized proxy</text>
+
+  <rect x="760" y="150" width="280" height="90" class="svc" />
+  <text x="900" y="193" text-anchor="middle" class="label">portfolio-service</text>
+  <text x="900" y="218" text-anchor="middle" class="small">balance + positions + PnL</text>
+
+  <rect x="1140" y="135" width="280" height="120" class="db" />
+  <text x="1280" y="188" text-anchor="middle" class="label">PostgreSQL portfolio DB</text>
+  <text x="1280" y="216" text-anchor="middle" class="small">portfolios + positions</text>
+
+  <rect x="860" y="330" width="260" height="80" class="svc" />
+  <text x="990" y="378" text-anchor="middle" class="label">market-data-service</text>
+
+  <path d="M290 195 H390" class="arrow" />
+  <text x="340" y="173" text-anchor="middle" class="small">GET /portfolio</text>
+
+  <path d="M650 195 H760" class="arrow" />
+  <text x="705" y="173" text-anchor="middle" class="small">proxy request</text>
+
+  <path d="M1040 180 H1140" class="arrow" />
+  <text x="1090" y="156" text-anchor="middle" class="small">read balances</text>
+  <text x="1090" y="179" text-anchor="middle" class="small">and positions</text>
+
+  <path d="M1280 255 V285 H1020 V240" class="arrow" />
+  <text x="1130" y="315" text-anchor="middle" class="small">portfolio state</text>
+
+  <path d="M900 240 V330" class="arrow dashed" />
+  <text x="1010" y="292" class="small">optional quote refresh</text>
+
+  <path d="M980 330 V285 H930 V240" class="arrow dashed" />
+  <text x="850" y="352" text-anchor="middle" class="small">current prices</text>
+
+  <path d="M900 240 V280 H520 V240" class="arrow" />
+  <text x="710" y="310" text-anchor="middle" class="small">enriched portfolio snapshot</text>
+
+  <path d="M520 240 V320 H180 V240" class="arrow" />
+  <text x="350" y="350" text-anchor="middle" class="small">JSON response</text>
+</svg>
