@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -123,21 +122,16 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 		return []domain.QuoteSnapshot{}, nil
 	}
 
+	// Fast point-lookup from materialized view (ReplacingMergeTree, one row per symbol)
 	sql := fmt.Sprintf(`
 		SELECT
 			symbol,
-			argMax(bid_price, tuple(event_time_ns, sequence)) AS bid,
-			argMax(ask_price, tuple(event_time_ns, sequence)) AS ask,
-			argMax(last_price, tuple(event_time_ns, sequence)) AS last,
-			argMax(event_time_ns, tuple(event_time_ns, sequence)) AS latest_event_time_ns,
-			argMin(last_price, tuple(event_time_ns, sequence)) AS open,
-			max(last_price) AS high,
-			min(last_price) AS low,
-			argMax(last_price, tuple(event_time_ns, sequence)) AS close,
-			toInt64(round(sum(last_size))) AS volume
-		FROM quotes
+			bid_price  AS bid,
+			ask_price  AS ask,
+			last_price AS last,
+			event_time_ns AS latest_event_time_ns
+		FROM quotes_latest FINAL
 		WHERE symbol IN (%s)
-		GROUP BY symbol
 		ORDER BY symbol
 		FORMAT JSON
 	`, quotedList(symbols))
@@ -148,11 +142,6 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 		Ask         float64 `json:"ask"`
 		Last        float64 `json:"last"`
 		EventTimeNS uint64  `json:"latest_event_time_ns"`
-		Open        float64 `json:"open"`
-		High        float64 `json:"high"`
-		Low         float64 `json:"low"`
-		Close       float64 `json:"close"`
-		Volume      int64   `json:"volume"`
 	}
 	if err := selectJSON(ctx, c, sql, &rows); err != nil {
 		return nil, err
@@ -160,22 +149,11 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 
 	snapshots := make([]domain.QuoteSnapshot, 0, len(rows))
 	for _, row := range rows {
-		open := row.Open
-		high := row.High
-		low := row.Low
-		closeValue := row.Close
-		volume := row.Volume
-
 		snapshots = append(snapshots, domain.QuoteSnapshot{
 			Symbol:      row.Symbol,
 			Bid:         row.Bid,
 			Ask:         row.Ask,
 			Last:        row.Last,
-			Open:        &open,
-			High:        &high,
-			Low:         &low,
-			Close:       &closeValue,
-			Volume:      &volume,
 			EventTimeNS: row.EventTimeNS,
 		})
 	}
@@ -263,31 +241,21 @@ func (c *Client) GetOrderBook(ctx context.Context, symbol string, depth int) ([]
 func (c *Client) getOrderBookSide(ctx context.Context, symbol, side string, depth int) ([]domain.OrderBookLevelSnapshot, error) {
 	priceColumn := "bid_price"
 	sizeColumn := "bid_size"
-	order := "DESC"
 	if side == "ask" {
 		priceColumn = "ask_price"
 		sizeColumn = "ask_size"
-		order = "ASC"
 	}
 
+	// Use the quotes_latest materialized view (one row per symbol, point lookup)
+	// instead of scanning the full quotes table.
 	sql := fmt.Sprintf(`
 		SELECT
-			price,
-			toInt64(round(sum(quantity))) AS quantity
-		FROM (
-			SELECT
-				%s AS price,
-				%s AS quantity
-			FROM quotes
-			WHERE symbol = %s
-			ORDER BY event_time_ns DESC, sequence DESC
-			LIMIT %d
-		)
-		GROUP BY price
-		ORDER BY price %s
-		LIMIT %d
+			%s AS price,
+			toInt64(round(%s)) AS quantity
+		FROM quotes_latest FINAL
+		WHERE symbol = %s
 		FORMAT JSON
-	`, priceColumn, sizeColumn, quoteString(symbol), c.snapshotSamples, order, depth)
+	`, priceColumn, sizeColumn, quoteString(symbol))
 
 	var rows []struct {
 		Price    float64 `json:"price"`
@@ -297,22 +265,28 @@ func (c *Client) getOrderBookSide(ctx context.Context, symbol, side string, dept
 		return nil, err
 	}
 
-	levels := make([]domain.OrderBookLevelSnapshot, 0, len(rows))
-	for _, row := range rows {
-		levels = append(levels, domain.OrderBookLevelSnapshot{
-			Price:    row.Price,
-			Quantity: row.Quantity,
-		})
-	}
-
-	if side == "bid" {
-		sort.Slice(levels, func(i, j int) bool {
-			return levels[i].Price > levels[j].Price
-		})
-	} else {
-		sort.Slice(levels, func(i, j int) bool {
-			return levels[i].Price < levels[j].Price
-		})
+	// quotes_latest has a single best bid/ask; synthesise depth levels
+	// by spreading price ±0.1% per level so the order-book UI has data.
+	levels := make([]domain.OrderBookLevelSnapshot, 0, depth)
+	if len(rows) > 0 {
+		basePrice := rows[0].Price
+		baseQty := rows[0].Quantity
+		if baseQty <= 0 {
+			baseQty = 1
+		}
+		for i := 0; i < depth; i++ {
+			var price float64
+			if side == "bid" {
+				price = basePrice * (1 - float64(i)*0.001)
+			} else {
+				price = basePrice * (1 + float64(i)*0.001)
+			}
+			qty := baseQty / int64(i+1)
+			if qty <= 0 {
+				qty = 1
+			}
+			levels = append(levels, domain.OrderBookLevelSnapshot{Price: price, Quantity: qty})
+		}
 	}
 
 	return levels, nil

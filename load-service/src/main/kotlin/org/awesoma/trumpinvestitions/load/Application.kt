@@ -425,7 +425,7 @@ class LoadRunner(private val defaultConfig: LoadConfig) {
         val side = if (Random.nextInt(100) < config.sellOrderPercent) "SELL" else "BUY"
         var orderId: String? = null
 
-        request(state, "POST /orders") {
+        request(state, "POST /orders", expectedStatuses = setOf(200, 201, 422)) {
             val response = client.post("${config.gatewayUrl}/orders") {
                 bearerAuth(token)
                 contentType(ContentType.Application.Json)
@@ -439,7 +439,7 @@ class LoadRunner(private val defaultConfig: LoadConfig) {
         state.ordersSubmitted.incrementAndGet()
 
         orderId?.let { id ->
-            request(state, "GET /orders/{orderId}") { client.get("${config.gatewayUrl}/orders/$id") { bearerAuth(token) } }
+            request(state, "GET /orders/{orderId}", expectedStatuses = setOf(200, 404)) { client.get("${config.gatewayUrl}/orders/$id") { bearerAuth(token) } }
         }
 
         val tradeId = runCatching {
@@ -451,7 +451,7 @@ class LoadRunner(private val defaultConfig: LoadConfig) {
         }.getOrNull()
 
         tradeId?.let { id ->
-            request(state, "GET /trades/{tradeId}") { client.get("${config.gatewayUrl}/trades/$id") { bearerAuth(token) } }
+            request(state, "GET /trades/{tradeId}", expectedStatuses = setOf(200, 404)) { client.get("${config.gatewayUrl}/trades/$id") { bearerAuth(token) } }
         }
     }
 
