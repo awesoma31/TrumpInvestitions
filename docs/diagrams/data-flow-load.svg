@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500">
+  <defs>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .svc { fill: #f0fdf4; stroke: #16a34a; stroke-width: 2; rx: 18; ry: 18; }
+      .dash { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 18; ry: 18; }
+      .label { font: 700 24px Arial, sans-serif; fill: #111827; }
+      .small { font: 18px Arial, sans-serif; fill: #334155; }
+      .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect width="1500" height="500" fill="#ffffff" />
+  <text x="80" y="60" class="title">Load Testing Flow</text>
+
+  <rect x="80" y="150" width="240" height="90" class="dash" />
+  <text x="200" y="193" text-anchor="middle" class="label">load-service</text>
+  <text x="200" y="218" text-anchor="middle" class="small">virtual users</text>
+
+  <rect x="430" y="150" width="250" height="90" class="box" />
+  <text x="555" y="193" text-anchor="middle" class="label">auth-gateway</text>
+  <text x="555" y="218" text-anchor="middle" class="small">single public entry</text>
+
+  <rect x="830" y="95" width="260" height="85" class="svc" />
+  <text x="960" y="145" text-anchor="middle" class="label">market-data-service</text>
+
+  <rect x="830" y="205" width="260" height="85" class="svc" />
+  <text x="960" y="255" text-anchor="middle" class="label">portfolio-service</text>
+
+  <rect x="830" y="315" width="260" height="85" class="svc" />
+  <text x="960" y="365" text-anchor="middle" class="label">trading-service</text>
+
+  <rect x="1180" y="205" width="240" height="90" class="dash" />
+  <text x="1300" y="248" text-anchor="middle" class="label">status dashboard</text>
+  <text x="1300" y="273" text-anchor="middle" class="small">metrics + latency + RPS</text>
+
+  <path d="M320 195 H430" class="arrow" />
+  <text x="375" y="171" text-anchor="middle" class="small">register / login / API traffic</text>
+
+  <path d="M680 175 H830" class="arrow" />
+  <text x="755" y="155" text-anchor="middle" class="small">market requests</text>
+
+  <path d="M680 245 H830" class="arrow" />
+  <text x="755" y="225" text-anchor="middle" class="small">portfolio requests</text>
+
+  <path d="M680 315 H830" class="arrow" />
+  <text x="755" y="295" text-anchor="middle" class="small">orders and trades</text>
+
+  <path d="M1180 250 V395 H200 V240" class="arrow" />
+  <text x="690" y="425" text-anchor="middle" class="small">dashboard polls /api/v1/load/status and renders metrics</text>
+</svg>
