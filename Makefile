@@ -101,7 +101,7 @@ reset-data:
 ## Build and load kernel module, then stream live quotes for all symbols into ClickHouse (blocking)
 live-data:
 	make -C pricing_engine
-	cd pricing_engine && sudo bash scripts/install.sh
+	cd pricing_engine && sudo -E bash scripts/install.sh
 	CLICKHOUSE_USER=market_data CLICKHOUSE_PASSWORD=market_data_password \
 		bash pricing_engine/scripts/ingest_to_clickhouse.sh
 

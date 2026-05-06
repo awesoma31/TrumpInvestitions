@@ -4,8 +4,10 @@
 #include <linux/fs.h>
 #include <linux/types.h>
 
-#define PE_DEVICE_NAME "pricing_engine"
+#define PE_DEVICE_NAME  "pricing_engine"
 #define PE_BUFFER_LIMIT 4096
+/* max bytes a single JSON quote line can occupy (measured + margin) */
+#define PE_MAX_LINE_SIZE 512
 
 #define PE_NUM_SYMBOLS 5
 #define PE_VENUE       "KERNEL_SIM"
