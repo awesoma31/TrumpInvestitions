@@ -86,23 +86,12 @@ org.awesoma.trumpinvestitions/
 
 ## Экраны и ViewModels
 
-| ViewModel | Что делает |
-|---|---|
-| `AuthViewModel` | Login, register, logout |
-| `StocksViewModel` | Список инструментов, котировки, поиск. Polling **5 сек** |
+| ViewModel              | Что делает                                                            |
+| ---------------------- | --------------------------------------------------------------------- |
+| `AuthViewModel`        | Login, register, logout                                               |
+| `StocksViewModel`      | Список инструментов, котировки, поиск.                                |
 | `StockDetailViewModel` | Свечи (1H/4H/1D/1W/1M → `1m/5m/15m/1h/1d`), стакан, размещение ордера |
-| `PortfolioViewModel` | Баланс, позиции, история ордеров, депозит/вывод. Polling **10 сек** |
-
-## Polling (без WebSocket)
-
-```kotlin
-fun getStocksFlow(): Flow<List<Stock>> = flow {
-    while (true) {
-        emit(mapToStocks(apiService.getQuotes(SYMBOLS)))
-        delay(5_000)
-    }
-}
-```
+| `PortfolioViewModel`   | Баланс, позиции, история ордеров, депозит/вывод. Polling **10 сек**   |
 
 ## Подключение к бэкенду
 
@@ -112,11 +101,11 @@ var serverHost: String = "10.0.2.2:8080"   // дефолт для Android-эму
 val baseUrl: String = "http://$serverHost/api/v1/"
 ```
 
-| Окружение | Хост |
-|---|---|
-| Android-эмулятор | `10.0.2.2:8080` |
-| Реальное устройство | `192.168.x.x:8080` |
-| Linux VM (bridge) | IP виртуалки`:8080` |
+| Окружение           | Хост                |
+| ------------------- | ------------------- |
+| Android-эмулятор    | `10.0.2.2:8080`     |
+| Реальное устройство | `your_ip:8080`      |
+| Linux VM (bridge)   | IP виртуалки`:8080` |
 
 Хост меняется в настройках приложения → сохраняется в SharedPreferences → `TrumpApp.rebuildNetwork()` пересоздаёт клиент без перезапуска.
 

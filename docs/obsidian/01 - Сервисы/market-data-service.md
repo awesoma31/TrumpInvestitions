@@ -66,13 +66,13 @@ graph LR
 
 ## ClickHouse-таблицы
 
-| Таблица | Engine | Для чего |
-|---|---|---|
-| `quotes` | MergeTree, TTL 24h | raw тики от pricing_engine |
-| `quotes_latest` | ReplacingMergeTree(event_time_ns) | последняя котировка на символ (O(1) lookup) |
-| `quotes_latest_mv` | MaterializedView | auto-fill quotes_latest |
-| `candles_1m` | **AggregatingMergeTree** | pre-aggregated 1m OHLCV |
-| `candles_1m_mv` | MaterializedView | auto-fill candles_1m |
+| Таблица            | Engine                            | Для чего                                    |
+| ------------------ | --------------------------------- | ------------------------------------------- |
+| `quotes`           | MergeTree, TTL 24h                | raw тики от pricing_engine                  |
+| `quotes_latest`    | ReplacingMergeTree(event_time_ns) | последняя котировка на символ (O(1) lookup) |
+| `quotes_latest_mv` | MaterializedView                  | auto-fill quotes_latest                     |
+| `candles_1m`       | **AggregatingMergeTree**          | pre-aggregated 1m OHLCV                     |
+| `candles_1m_mv`    | MaterializedView                  | auto-fill candles_1m                        |
 
 > [!warning]
 > `candles_1m` **обязана** быть `AggregatingMergeTree` — колонки типа `AggregateFunction(argMin, ...)`.  

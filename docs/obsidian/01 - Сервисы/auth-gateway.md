@@ -61,9 +61,6 @@ graph LR
 - В БД хранится **SHA-256 хэш** refresh токена (не сам токен)
 - Downstream-сервисы **не валидируют** токен сами — доверяют заголовку `X-User-Id`
 
-> [!warning] Безопасность
-> Downstream-сервисы доступны напрямую внутри Docker-сети без аутентификации. В продакшене их следует изолировать на уровне сети.
-
 ## БД (PostgreSQL, auto-create при старте)
 
 ```sql
@@ -72,16 +69,6 @@ auth_refresh_tokens (id, user_id, token_hash, expires_at, revoked_at, created_at
 ```
 
 Миграций нет — `CREATE TABLE IF NOT EXISTS` при старте с retry (30 попыток).
-
-## BCrypt и производительность
-
-| `BCRYPT_COST` | Время хэширования | Когда использовать |
-|---|---|---|
-| 6 | ~20 мс | Нагрузочные тесты (`docker-compose.yml`) |
-| 10 | ~300 мс | Продакшен |
-
-> [!important]
-> `BCRYPT_COST=6` в `docker-compose.yml` задан намеренно. При cost=10 login/register занимают ~300ms и быстро насыщают thread pool под нагрузкой (9%+ ошибок аутентификации).
 
 ## Переменные окружения
 

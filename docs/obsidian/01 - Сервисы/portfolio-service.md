@@ -40,17 +40,6 @@
 | GET | `/api/v1/system/health` | — | 200 |
 | GET | `/api/v1/system/ready` | Проверяет PostgreSQL | 200/503 |
 
-## Зависимости
-
-```mermaid
-graph LR
-    AG["auth-gateway"] -->|proxy| PS["portfolio-service :8083"]
-    PS -->|GET /quotes/{symbol}| MDS["market-data-service"]
-    KAFKA["Kafka\ntrading-events"] -->|consume| PS
-    PS --> PG[("PostgreSQL\nportfolio DB")]
-    PS -.->|traces| J["Jaeger"]
-```
-
 ## Kafka-консьюмер
 
 - **Топик:** `trading-events`
