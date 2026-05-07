@@ -122,19 +122,33 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 		return []domain.QuoteSnapshot{}, nil
 	}
 
-	// Fast point-lookup from materialized view (ReplacingMergeTree, one row per symbol)
+	// Single query: latest quote joined with today's day-open from candles_1m.
+	// One round-trip to ClickHouse instead of two serial requests.
+	// Note: ClickHouse does not allow aliases on FINAL tables; wrap in a subquery.
+	quoted := quotedList(symbols)
 	sql := fmt.Sprintf(`
 		SELECT
-			symbol,
-			bid_price  AS bid,
-			ask_price  AS ask,
-			last_price AS last,
-			event_time_ns AS latest_event_time_ns
-		FROM quotes_latest FINAL
-		WHERE symbol IN (%s)
-		ORDER BY symbol
+			ql.symbol                AS symbol,
+			ql.bid_price             AS bid,
+			ql.ask_price             AS ask,
+			ql.last_price            AS last,
+			ql.event_time_ns         AS latest_event_time_ns,
+			c.day_open               AS day_open
+		FROM (
+			SELECT symbol, bid_price, ask_price, last_price, event_time_ns
+			FROM quotes_latest FINAL
+			WHERE symbol IN (%s)
+		) AS ql
+		LEFT JOIN (
+			SELECT symbol, argMinMerge(open) AS day_open
+			FROM candles_1m
+			WHERE symbol IN (%s)
+			  AND bucket_ns >= toUInt64(toUnixTimestamp(toStartOfDay(now(), 'UTC'))) * 1000000000
+			GROUP BY symbol
+		) AS c ON c.symbol = ql.symbol
+		ORDER BY ql.symbol
 		FORMAT JSON
-	`, quotedList(symbols))
+	`, quoted, quoted)
 
 	var rows []struct {
 		Symbol      string  `json:"symbol"`
@@ -142,6 +156,7 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 		Ask         float64 `json:"ask"`
 		Last        float64 `json:"last"`
 		EventTimeNS uint64  `json:"latest_event_time_ns"`
+		DayOpen     float64 `json:"day_open"`
 	}
 	if err := selectJSON(ctx, c, sql, &rows); err != nil {
 		return nil, err
@@ -149,13 +164,17 @@ func (c *Client) GetLatestQuotes(ctx context.Context, symbols []string) ([]domai
 
 	snapshots := make([]domain.QuoteSnapshot, 0, len(rows))
 	for _, row := range rows {
-		snapshots = append(snapshots, domain.QuoteSnapshot{
+		snap := domain.QuoteSnapshot{
 			Symbol:      row.Symbol,
 			Bid:         row.Bid,
 			Ask:         row.Ask,
 			Last:        row.Last,
 			EventTimeNS: row.EventTimeNS,
-		})
+		}
+		if row.DayOpen > 0 {
+			snap.Open = &row.DayOpen
+		}
+		snapshots = append(snapshots, snap)
 	}
 
 	return snapshots, nil
