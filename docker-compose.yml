@@ -32,6 +32,7 @@ services:
       DATABASE_USER: auth
       DATABASE_PASSWORD: auth
       JWT_SECRET: change-me-in-production
+      BCRYPT_COST: 6
       MARKET_SERVICE_URL: http://market-data-service:8081/api/v1
       ORDER_SERVICE_URL: http://trading-service:8083/api/v1
       PORTFOLIO_SERVICE_URL: http://portfolio-service:8082/api/v1

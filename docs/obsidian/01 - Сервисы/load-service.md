@@ -4,8 +4,9 @@
 
 | Параметр | Значение |
 |---|---|
-| Язык | Kotlin / Ktor 2.3 |
-| Порт | **8095** |
+| Язык | Kotlin / Ktor 2.3.12 |
+| Порт сервиса | **8095** (env: `PORT`) |
+| Порт дашборда | **8096** (отдельный `load-dashboard`, nginx) |
 | Docker profile | `load` (не стартует при обычном `docker compose up`) |
 | Зависит от | [[auth-gateway]], [[market-data-service]], [[portfolio-service]], [[trading-service]] |
 
@@ -40,6 +41,16 @@ graph TD
    - 20% — история ордеров и сделок
    - 10% — health/ready эндпоинты
    - каждые `ORDER_EVERY_N_ITERATIONS` итераций — выставить ордер и прочитать его детали
+
+## Ожидаемые статусы (не считаются ошибкой)
+
+| Эндпоинт | Допустимые статусы | Причина |
+|---|---|---|
+| `POST /orders` | 200, 201, **422** | Нехватка средств — норма |
+| `GET /orders/{orderId}` | 200, **404** | Race condition (polling до записи в БД) |
+| `GET /trades/{tradeId}` | 200, **404** | Race condition |
+| `GET /portfolio/positions/{symbol}` | 200, **404** | Позиция ещё не создана |
+| Всё остальное | 200–399 | — |
 
 ### Параллелизм
 
@@ -123,9 +134,18 @@ make load-status
 | `THINK_TIME_MS` | `10000` | Пауза между итерациями |
 | `INITIAL_DEPOSIT` | `1000000.00` | Начальный депозит каждого пользователя |
 | `SELL_ORDER_PERCENT` | `0` | % SELL-ордеров среди всех |
+| `MAX_ORDER_QUANTITY` | `5` | Макс количество в ордере |
+| `WITHDRAW_AMOUNT` | `10.00` | Сумма вывода |
+| `WITHDRAW_REQUEST_PERCENT` | `5` | % запросов на вывод |
+| `SYSTEM_REQUEST_PERCENT` | `10` | % запросов к system health |
+| `CANDLE_INTERVALS` | `1m,5m,15m,1h` | Таймфреймы свечей |
 | `SYMBOLS` | `AAPL,MSFT,TSLA,BTCUSDT,ETHUSDT` | Инструменты |
 | `RUN_ON_START` | `true` | Автозапуск теста при старте контейнера |
 | `START_DELAY_SECONDS` | `10` | Задержка перед автозапуском |
+| `HISTORY_WINDOW_SECONDS` | `86400` | Окно истории (24h) |
+| `HISTORY_LIMIT` | `100` | Лимит записей истории |
+| `MAX_VIRTUAL_USERS` | `10000` | Максимум пользователей |
+| `REQUEST_TIMEOUT_MS` | `30000` | Таймаут одного запроса |
 
 ## Связанные страницы
 

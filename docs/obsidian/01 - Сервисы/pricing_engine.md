@@ -6,10 +6,10 @@ tags: [service, c, kernel-module, data-generator]
 
 | Параметр | Значение |
 | --- | --- |
-| Язык | C |
+| Язык | C (kernel module) + Python (userspace fallback) |
 | Тип | Linux kernel module (character device driver) |
 | Устройство | `/dev/pricing_engine` |
-| Вывод | JSON → [[ClickHouse]] |
+| Вывод | NDJSON → [[ClickHouse]] |
 
 ## Роль в системе
 
@@ -100,13 +100,57 @@ sudo rmmod pricing_engine
 sudo insmod pricing_engine.ko spread_cents=100 max_move_cents=50
 ```
 
+## Механизм backfill (исторические данные)
+
+При загрузке модуля предварительно генерируются исторические записи:
+
+| Параметр | Дефолт | |
+|---|---|---|
+| `history_hours` | 24 | Глубина истории |
+| `history_qph` | 20 | Котировок на символ в час |
+| `PE_MAX_HISTORY` | 8760 | Макс записей (365×24) |
+
+Итого при дефолтах: `24 × 20 × 5 = 2400 строк` с историческими timestamp.  
+При чтении сначала отдаются исторические записи, затем live-генерация. После исчерпания буфер освобождается.
+
+## Python userspace (`userspace_generator.py`)
+
+Drop-in замена без ядра — пишет напрямую в ClickHouse HTTP API батчами. Используется на Windows/macOS или когда нет возможности собрать модуль.
+
+```bash
+python3 pricing_engine/userspace_generator.py
+```
+
+| Переменная | Дефолт | |
+|---|---|---|
+| `CLICKHOUSE_URL` | `http://localhost:8123` | |
+| `CLICKHOUSE_USER` | — | |
+| `CLICKHOUSE_PASSWORD` | — | |
+| `TABLE` | `quotes` | |
+| `BATCH_SIZE` | 100 | Строк в одной вставке |
+| `SLEEP_SECONDS` | 0.1 | Пауза между батчами |
+| `HISTORY_HOURS` | 24 | |
+| `HISTORY_QUOTES_PER_HOUR` | 20 | |
+
+Scenario ID: `"userspace_random_walk"`, Venue: `"USERSPACE_SIM"`.
+
 ## Связь с другими компонентами
 
 ```mermaid
 graph LR
-    PE["pricing_engine\n(kernel module)"] -->|"/dev/pricing_engine\n→ ingest_to_clickhouse.sh"| CH[("ClickHouse\nquotes")]
+    PE["pricing_engine\n(kernel module)"] -->|"/dev/pricing_engine\n→ ingest script"| CH[("ClickHouse\nquotes")]
+    PY["userspace_generator.py"] -->|"HTTP POST batch"| CH
     CH --> MDS["market-data-service"]
 ```
+
+> [!warning] Важно: схема ClickHouse
+> Таблица `candles_1m` **обязана** быть `AggregatingMergeTree`.  
+> Если была создана как `ReplacingMergeTree` — пересоздать:
+> ```sql
+> DROP TABLE IF EXISTS candles_1m_mv;
+> DROP TABLE IF EXISTS candles_1m;
+> -- затем выполнить db/clickhouse/init.sql
+> ```
 
 ## Связанные страницы
 

@@ -1,6 +1,6 @@
 package org.awesoma.trumpinvestitions
 
-import android.app.Application
+import  android.app.Application
 import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
